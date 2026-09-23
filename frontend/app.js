@@ -1,6 +1,12 @@
 (() => {
   "use strict";
 
+  Chart.defaults.font.family = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
+  Chart.defaults.font.size = 13;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.plugins.tooltip.boxPadding = 4;
+
   const FUEL_ORDER = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"];
   const PRICE_ROW_LABEL = {
     petrol95: "Gauteng pump price",
@@ -275,7 +281,7 @@
           display: true,
           position: "top",
           align: "start",
-          labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 12 } },
+          labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 13 } },
         },
         tooltip: {
           callbacks: {
