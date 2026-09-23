@@ -16,10 +16,17 @@
       <p class="subtitle">A preview of CEF's daily Basic Fuel Price, built the same way CEF does it — plus your own under/over-recovery projection for the next pump-price change.</p>
     </div>
     <div class="topbar-actions">
-      <span id="last-updated" class="muted small"></span>
       <button id="refresh-btn" class="btn btn-primary">Refresh data</button>
     </div>
   </header>
+
+  <div class="status-bar">
+    <span class="status-pill" id="last-updated-pill">
+      <span class="status-dot"></span>
+      <span id="last-updated">—</span>
+    </span>
+    <span class="status-pill countdown-pill" id="countdown-pill">—</span>
+  </div>
 
   <nav class="fuel-tabs" id="fuel-tabs" role="tablist" aria-label="Fuel type"></nav>
 
@@ -78,6 +85,7 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Daily Basic Fuel Price vs. price built into the current pump price</h2>
+          <p class="muted small">The blue line is each day's real import cost. The flat orange line is the cost that's already priced into what you're paying right now — it was fixed when the current month's price was set, and only changes on the next price change. The gap between them is the daily over/under-recovery below.</p>
           <p class="muted small">Review period: <span id="period-range">—</span>. Solid = CEF official. Dashed / hollow marker = this tool's estimate for a day CEF hasn't published yet.</p>
         </div>
         <div class="chart-wrap"><canvas id="chart-bfp" height="110"></canvas></div>

@@ -341,8 +341,29 @@
     });
   }
 
+  function renderStatusBar() {
+    const generated = new Date(state.data.generated_at);
+    $("#last-updated").textContent =
+      `Live — loaded ${generated.toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })} at ${generated.toLocaleTimeString("en-ZA")}`;
+
+    const days = state.data.days_until_next_price_change;
+    const changeDate = fmtDate(state.data.next_price_change_date);
+    const pill = $("#countdown-pill");
+    if (days === null || days === undefined) {
+      pill.textContent = "—";
+      pill.className = "status-pill countdown-pill";
+      return;
+    }
+    const dayWord = days === 1 ? "day" : "days";
+    pill.textContent = days <= 0
+      ? `⏳ Price change day — ${changeDate}`
+      : `⏳ ${days} ${dayWord} until the next price change (${changeDate})`;
+    pill.className = "status-pill countdown-pill" + (days <= 3 ? " urgent" : "");
+  }
+
   function render() {
     buildTabs();
+    renderStatusBar();
     renderHero();
     renderAccuracy();
     renderFx();
@@ -358,7 +379,6 @@
     $("#content").hidden = true;
     try {
       state.data = await api("/api/status");
-      $("#last-updated").textContent = "Updated " + new Date(state.data.generated_at).toLocaleTimeString("en-ZA");
       $("#loading").hidden = true;
       $("#content").hidden = false;
       render();

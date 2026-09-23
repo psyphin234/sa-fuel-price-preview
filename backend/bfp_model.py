@@ -42,6 +42,25 @@ def business_days_between(start: dt.date, end: dt.date) -> int:
     return n
 
 
+def first_wednesday(year: int, month: int) -> dt.date:
+    d = dt.date(year, month, 1)
+    return d + dt.timedelta(days=(2 - d.weekday()) % 7)  # Wednesday = weekday 2
+
+
+def next_price_change_date(pump_price_effective: dt.date) -> dt.date:
+    """SA fuel prices change on the first Wednesday of each month (verified
+    against every 2026 DMRE announcement so far - Jan 7, Mar 4, Apr 1, May 6,
+    Jun 3, Jul 1, Aug 5). The *exact* day the underlying review data stops
+    being updated isn't a fixed calendar date (it shifts a little with the
+    Mediterranean trading calendar), so we count down to this known,
+    government-set date instead of guessing that one."""
+    year, month = pump_price_effective.year, pump_price_effective.month + 1
+    if month > 12:
+        month = 1
+        year += 1
+    return first_wednesday(year, month)
+
+
 def business_days_after(after: dt.date, through: dt.date) -> list:
     """List of business days strictly after `after`, up to and including `through`."""
     days = []

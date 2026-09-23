@@ -152,6 +152,8 @@ def build_status_data():
     accuracy.reconcile(period_reports)
     accuracy_summary = accuracy.get_accuracy_summary()
 
+    next_change = bm.next_price_change_date(latest.pump_price_effective)
+
     return {
         "latest_official_report": latest,
         "benchmarks": benchmarks,
@@ -161,6 +163,8 @@ def build_status_data():
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
+        "next_price_change_date": next_change,
+        "days_until_next_price_change": (next_change - today).days,
         "generated_at": dt.datetime.now(),
     }
 
