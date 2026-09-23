@@ -1,0 +1,795 @@
+{
+  "latest_official_report": {
+    "report_date": "2026-09-22",
+    "period_start": "2026-08-28",
+    "period_end": "2026-09-22",
+    "reference_valid_from": "2026-09-02",
+    "pump_price_effective": "2026-09-02",
+    "reference_price": {
+      "petrol95": 1414.89,
+      "petrol93": 1398.89,
+      "diesel005": 1933.63,
+      "diesel0005": 1978.03,
+      "illpar": 1815.128
+    },
+    "bfp": {
+      "petrol95": 1787.732,
+      "petrol93": 1744.223,
+      "diesel005": 2178.896,
+      "diesel0005": 2261.871,
+      "illpar": 2137.64
+    },
+    "unit_over_under": {
+      "petrol95": -372.842,
+      "petrol93": -345.333,
+      "diesel005": -245.266,
+      "diesel0005": -283.841,
+      "illpar": -322.512
+    },
+    "avg_bfp": {
+      "petrol95": 1685.388,
+      "petrol93": 1651.813,
+      "diesel005": 2148.252,
+      "diesel0005": 2229.598,
+      "illpar": 2094.691
+    },
+    "avg_over_under": {
+      "petrol95": -288.365,
+      "petrol93": -270.789,
+      "diesel005": -259.955,
+      "diesel0005": -300.402,
+      "illpar": -315.063
+    },
+    "current_price": {
+      "petrol95": 2692.0,
+      "petrol93": 2676.0,
+      "diesel005": 2911.11,
+      "diesel0005": 2955.51,
+      "illpar": 2705.0
+    },
+    "exchange_rate": 16.2623,
+    "source": "cef_official"
+  },
+  "fuels": {
+    "petrol95": "Petrol 95 ULP",
+    "petrol93": "Petrol 93 ULP & LRP",
+    "diesel005": "Diesel 0.05% S",
+    "diesel0005": "Diesel 0.005% S",
+    "illpar": "Illuminating Paraffin"
+  },
+  "predictions": {
+    "petrol95": {
+      "fuel": "petrol95",
+      "label": "Petrol 95 ULP",
+      "official_avg_over_under": -288.365,
+      "official_days_count": 18,
+      "blended_avg_over_under": -295.615,
+      "blended_days_count": 19,
+      "estimated_days": [
+        {
+          "date": "2026-09-23",
+          "source": "estimated",
+          "bfp": {
+            "petrol95": 1841.005,
+            "petrol93": 1796.199,
+            "diesel005": 2193.136,
+            "diesel0005": 2276.654,
+            "illpar": 2151.611
+          },
+          "unit_over_under": {
+            "petrol95": -426.115,
+            "petrol93": -397.309,
+            "diesel005": -259.506,
+            "diesel0005": -298.624,
+            "illpar": -336.483
+          },
+          "exchange_rate": 16.3462,
+          "note": "Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), not the real Platts Mediterranean assessment. Replace with a manual entry if you have an actual Platts-based figure for this day."
+        }
+      ],
+      "manual_days": [],
+      "predicted_pump_price_change_c_per_l": 295.61,
+      "current_price_c_per_l": 2692.0,
+      "predicted_new_price_c_per_l": 2987.61,
+      "direction": "increase",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+    },
+    "petrol93": {
+      "fuel": "petrol93",
+      "label": "Petrol 93 ULP & LRP",
+      "official_avg_over_under": -270.789,
+      "official_days_count": 18,
+      "blended_avg_over_under": -277.448,
+      "blended_days_count": 19,
+      "estimated_days": [
+        {
+          "date": "2026-09-23",
+          "source": "estimated",
+          "bfp": {
+            "petrol95": 1841.005,
+            "petrol93": 1796.199,
+            "diesel005": 2193.136,
+            "diesel0005": 2276.654,
+            "illpar": 2151.611
+          },
+          "unit_over_under": {
+            "petrol95": -426.115,
+            "petrol93": -397.309,
+            "diesel005": -259.506,
+            "diesel0005": -298.624,
+            "illpar": -336.483
+          },
+          "exchange_rate": 16.3462,
+          "note": "Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), not the real Platts Mediterranean assessment. Replace with a manual entry if you have an actual Platts-based figure for this day."
+        }
+      ],
+      "manual_days": [],
+      "predicted_pump_price_change_c_per_l": 277.45,
+      "current_price_c_per_l": 2676.0,
+      "predicted_new_price_c_per_l": 2953.45,
+      "direction": "increase",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+    },
+    "diesel005": {
+      "fuel": "diesel005",
+      "label": "Diesel 0.05% S",
+      "official_avg_over_under": -259.955,
+      "official_days_count": 18,
+      "blended_avg_over_under": -259.931,
+      "blended_days_count": 19,
+      "estimated_days": [
+        {
+          "date": "2026-09-23",
+          "source": "estimated",
+          "bfp": {
+            "petrol95": 1841.005,
+            "petrol93": 1796.199,
+            "diesel005": 2193.136,
+            "diesel0005": 2276.654,
+            "illpar": 2151.611
+          },
+          "unit_over_under": {
+            "petrol95": -426.115,
+            "petrol93": -397.309,
+            "diesel005": -259.506,
+            "diesel0005": -298.624,
+            "illpar": -336.483
+          },
+          "exchange_rate": 16.3462,
+          "note": "Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), not the real Platts Mediterranean assessment. Replace with a manual entry if you have an actual Platts-based figure for this day."
+        }
+      ],
+      "manual_days": [],
+      "predicted_pump_price_change_c_per_l": 259.93,
+      "current_price_c_per_l": 2911.11,
+      "predicted_new_price_c_per_l": 3171.04,
+      "direction": "increase",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+    },
+    "diesel0005": {
+      "fuel": "diesel0005",
+      "label": "Diesel 0.005% S",
+      "official_avg_over_under": -300.402,
+      "official_days_count": 18,
+      "blended_avg_over_under": -300.308,
+      "blended_days_count": 19,
+      "estimated_days": [
+        {
+          "date": "2026-09-23",
+          "source": "estimated",
+          "bfp": {
+            "petrol95": 1841.005,
+            "petrol93": 1796.199,
+            "diesel005": 2193.136,
+            "diesel0005": 2276.654,
+            "illpar": 2151.611
+          },
+          "unit_over_under": {
+            "petrol95": -426.115,
+            "petrol93": -397.309,
+            "diesel005": -259.506,
+            "diesel0005": -298.624,
+            "illpar": -336.483
+          },
+          "exchange_rate": 16.3462,
+          "note": "Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), not the real Platts Mediterranean assessment. Replace with a manual entry if you have an actual Platts-based figure for this day."
+        }
+      ],
+      "manual_days": [],
+      "predicted_pump_price_change_c_per_l": 300.31,
+      "current_price_c_per_l": 2955.51,
+      "predicted_new_price_c_per_l": 3255.82,
+      "direction": "increase",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+    },
+    "illpar": {
+      "fuel": "illpar",
+      "label": "Illuminating Paraffin",
+      "official_avg_over_under": -315.063,
+      "official_days_count": 18,
+      "blended_avg_over_under": -316.19,
+      "blended_days_count": 19,
+      "estimated_days": [
+        {
+          "date": "2026-09-23",
+          "source": "estimated",
+          "bfp": {
+            "petrol95": 1841.005,
+            "petrol93": 1796.199,
+            "diesel005": 2193.136,
+            "diesel0005": 2276.654,
+            "illpar": 2151.611
+          },
+          "unit_over_under": {
+            "petrol95": -426.115,
+            "petrol93": -397.309,
+            "diesel005": -259.506,
+            "diesel0005": -298.624,
+            "illpar": -336.483
+          },
+          "exchange_rate": 16.3462,
+          "note": "Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), not the real Platts Mediterranean assessment. Replace with a manual entry if you have an actual Platts-based figure for this day."
+        }
+      ],
+      "manual_days": [],
+      "predicted_pump_price_change_c_per_l": 316.19,
+      "current_price_c_per_l": 2705.0,
+      "predicted_new_price_c_per_l": 3021.19,
+      "direction": "increase",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+    }
+  },
+  "daily_series": {
+    "petrol95": [
+      {
+        "date": "2026-08-28",
+        "bfp": 1502.636,
+        "unit_over_under": -194.946,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-01",
+        "bfp": 1542.332,
+        "unit_over_under": -234.642,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-02",
+        "bfp": 1582.057,
+        "unit_over_under": -167.167,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-03",
+        "bfp": 1576.347,
+        "unit_over_under": -161.457,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-04",
+        "bfp": 1565.382,
+        "unit_over_under": -150.492,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-07",
+        "bfp": 1618.77,
+        "unit_over_under": -203.88,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-08",
+        "bfp": 1670.903,
+        "unit_over_under": -256.013,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-09",
+        "bfp": 1659.038,
+        "unit_over_under": -244.148,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-10",
+        "bfp": 1708.687,
+        "unit_over_under": -293.797,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-11",
+        "bfp": 1792.977,
+        "unit_over_under": -378.087,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-14",
+        "bfp": 1787.616,
+        "unit_over_under": -372.726,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-15",
+        "bfp": 1797.114,
+        "unit_over_under": -382.224,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-16",
+        "bfp": 1807.056,
+        "unit_over_under": -392.166,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-17",
+        "bfp": 1803.987,
+        "unit_over_under": -389.097,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-18",
+        "bfp": 1806.672,
+        "unit_over_under": -391.782,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-21",
+        "bfp": 1784.304,
+        "unit_over_under": -369.414,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-22",
+        "bfp": 1787.732,
+        "unit_over_under": -372.842,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-23",
+        "bfp": 1841.005,
+        "unit_over_under": -426.115,
+        "source": "estimated"
+      }
+    ],
+    "petrol93": [
+      {
+        "date": "2026-08-28",
+        "bfp": 1476.217,
+        "unit_over_under": -184.527,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-01",
+        "bfp": 1515.592,
+        "unit_over_under": -223.902,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-02",
+        "bfp": 1552.929,
+        "unit_over_under": -154.039,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-03",
+        "bfp": 1547.375,
+        "unit_over_under": -148.485,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-04",
+        "bfp": 1536.568,
+        "unit_over_under": -137.678,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-07",
+        "bfp": 1589.943,
+        "unit_over_under": -191.053,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-08",
+        "bfp": 1641.935,
+        "unit_over_under": -243.045,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-09",
+        "bfp": 1630.135,
+        "unit_over_under": -231.245,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-10",
+        "bfp": 1679.707,
+        "unit_over_under": -280.817,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-11",
+        "bfp": 1763.838,
+        "unit_over_under": -364.948,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-14",
+        "bfp": 1758.296,
+        "unit_over_under": -359.406,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-15",
+        "bfp": 1752.698,
+        "unit_over_under": -353.808,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-16",
+        "bfp": 1762.823,
+        "unit_over_under": -363.933,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-17",
+        "bfp": 1759.679,
+        "unit_over_under": -360.789,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-18",
+        "bfp": 1763.153,
+        "unit_over_under": -364.263,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-21",
+        "bfp": 1740.779,
+        "unit_over_under": -341.889,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-22",
+        "bfp": 1744.223,
+        "unit_over_under": -345.333,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-23",
+        "bfp": 1796.199,
+        "unit_over_under": -397.309,
+        "source": "estimated"
+      }
+    ],
+    "diesel005": [
+      {
+        "date": "2026-08-28",
+        "bfp": 1869.074,
+        "unit_over_under": -207.444,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-01",
+        "bfp": 2047.699,
+        "unit_over_under": -386.069,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-02",
+        "bfp": 2072.855,
+        "unit_over_under": -139.225,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-03",
+        "bfp": 2024.399,
+        "unit_over_under": -90.769,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-04",
+        "bfp": 1973.212,
+        "unit_over_under": -39.582,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-07",
+        "bfp": 2028.712,
+        "unit_over_under": -95.082,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-08",
+        "bfp": 2049.349,
+        "unit_over_under": -115.719,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-09",
+        "bfp": 2089.527,
+        "unit_over_under": -155.897,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-10",
+        "bfp": 2158.285,
+        "unit_over_under": -224.655,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-11",
+        "bfp": 2282.138,
+        "unit_over_under": -348.508,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-14",
+        "bfp": 2326.054,
+        "unit_over_under": -392.424,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-15",
+        "bfp": 2395.209,
+        "unit_over_under": -461.579,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-16",
+        "bfp": 2407.768,
+        "unit_over_under": -474.138,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-17",
+        "bfp": 2336.019,
+        "unit_over_under": -402.389,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-18",
+        "bfp": 2298.039,
+        "unit_over_under": -364.409,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-21",
+        "bfp": 2213.46,
+        "unit_over_under": -279.83,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-22",
+        "bfp": 2178.896,
+        "unit_over_under": -245.266,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-23",
+        "bfp": 2193.136,
+        "unit_over_under": -259.506,
+        "source": "estimated"
+      }
+    ],
+    "diesel0005": [
+      {
+        "date": "2026-08-28",
+        "bfp": 1918.875,
+        "unit_over_under": -233.845,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-01",
+        "bfp": 2103.713,
+        "unit_over_under": -418.683,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-02",
+        "bfp": 2121.746,
+        "unit_over_under": -143.716,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-03",
+        "bfp": 2103.688,
+        "unit_over_under": -125.658,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-04",
+        "bfp": 2058.768,
+        "unit_over_under": -80.738,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-07",
+        "bfp": 2116.451,
+        "unit_over_under": -138.421,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-08",
+        "bfp": 2139.545,
+        "unit_over_under": -161.515,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-09",
+        "bfp": 2175.185,
+        "unit_over_under": -197.155,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-10",
+        "bfp": 2241.748,
+        "unit_over_under": -263.718,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-11",
+        "bfp": 2375.489,
+        "unit_over_under": -397.459,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-14",
+        "bfp": 2423.508,
+        "unit_over_under": -445.478,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-15",
+        "bfp": 2493.284,
+        "unit_over_under": -515.254,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-16",
+        "bfp": 2502.499,
+        "unit_over_under": -524.469,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-17",
+        "bfp": 2430.682,
+        "unit_over_under": -452.652,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-18",
+        "bfp": 2391.587,
+        "unit_over_under": -413.557,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-21",
+        "bfp": 2307.494,
+        "unit_over_under": -329.464,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-22",
+        "bfp": 2261.871,
+        "unit_over_under": -283.841,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-23",
+        "bfp": 2276.654,
+        "unit_over_under": -298.624,
+        "source": "estimated"
+      }
+    ],
+    "illpar": [
+      {
+        "date": "2026-08-28",
+        "bfp": 1813.487,
+        "unit_over_under": -211.359,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-01",
+        "bfp": 1958.142,
+        "unit_over_under": -356.014,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-02",
+        "bfp": 1993.743,
+        "unit_over_under": -178.615,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-03",
+        "bfp": 1977.442,
+        "unit_over_under": -162.314,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-04",
+        "bfp": 1942.366,
+        "unit_over_under": -127.238,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-07",
+        "bfp": 1987.732,
+        "unit_over_under": -172.604,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-08",
+        "bfp": 2005.678,
+        "unit_over_under": -190.55,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-09",
+        "bfp": 2040.727,
+        "unit_over_under": -225.599,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-10",
+        "bfp": 2116.995,
+        "unit_over_under": -301.867,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-11",
+        "bfp": 2264.027,
+        "unit_over_under": -448.899,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-14",
+        "bfp": 2264.417,
+        "unit_over_under": -449.289,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-15",
+        "bfp": 2326.815,
+        "unit_over_under": -511.687,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-16",
+        "bfp": 2344.9,
+        "unit_over_under": -529.772,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-17",
+        "bfp": 2273.782,
+        "unit_over_under": -458.654,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-18",
+        "bfp": 2248.894,
+        "unit_over_under": -433.766,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-21",
+        "bfp": 2154.623,
+        "unit_over_under": -339.495,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-22",
+        "bfp": 2137.64,
+        "unit_over_under": -322.512,
+        "source": "cef_official"
+      },
+      {
+        "date": "2026-09-23",
+        "bfp": 2151.611,
+        "unit_over_under": -336.483,
+        "source": "estimated"
+      }
+    ]
+  },
+  "generated_at": "2026-09-23T14:14:03.244162"
+}

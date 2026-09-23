@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SA Basic Fuel Price Preview</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="page">
+
+  <header class="topbar">
+    <div class="topbar-title">
+      <h1>SA Basic Fuel Price Preview</h1>
+      <p class="subtitle">A preview of CEF's daily Basic Fuel Price, built the same way CEF does it — plus an under/over-recovery projection for the next pump-price change.</p>
+    </div>
+    <div class="topbar-actions">
+      <span id="last-updated" class="muted small"></span>
+      <button id="refresh-btn" class="btn btn-primary">Check for update</button>
+    </div>
+  </header>
+
+  <nav class="fuel-tabs" id="fuel-tabs" role="tablist" aria-label="Fuel type"></nav>
+
+  <main id="app-root">
+    <div id="loading" class="loading-state">Loading CEF review-period data…</div>
+    <div id="error-state" class="error-state" hidden></div>
+
+    <section id="content" hidden>
+
+      <section class="hero" aria-live="polite">
+        <div class="hero-card">
+          <div class="hero-label">Current price</div>
+          <div class="hero-value" id="hero-current">—</div>
+          <div class="hero-sub" id="hero-current-label">—</div>
+        </div>
+        <div class="hero-card hero-card--predicted">
+          <div class="hero-label">Predicted next-cycle move</div>
+          <div class="hero-value" id="hero-change">—</div>
+          <div class="hero-badge" id="hero-direction-badge">—</div>
+        </div>
+        <div class="hero-card">
+          <div class="hero-label">Estimated new price</div>
+          <div class="hero-value" id="hero-newprice">—</div>
+          <div class="hero-sub" id="hero-confidence">—</div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Daily Basic Fuel Price vs. price built into the current pump price</h2>
+          <p class="muted small">Review period: <span id="period-range">—</span>. Solid = CEF official. Dashed / hollow marker = estimated for a day CEF hasn't published yet.</p>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-bfp" height="110"></canvas></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Daily unit over/(under) recovery</h2>
+          <p class="muted small">Below zero = under-recovery (pushes the next price up). Above zero = over-recovery (pushes the next price down).</p>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-recovery" height="110"></canvas></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>Daily breakdown</h2>
+        </div>
+        <div class="table-wrap">
+          <table id="daily-table">
+            <thead>
+              <tr><th>Date</th><th>Source</th><th>Basic Fuel Price (c/l)</th><th>Unit over/(under) recovery (c/l)</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <footer class="disclaimer panel">
+        <h2>How this works, and what to trust</h2>
+        <p>Every day already published by CEF (<a href="https://cefgroup.co.za/daily-basic-fuel-price/" target="_blank" rel="noopener">cefgroup.co.za</a>) is read directly from their own daily report — that part matches CEF exactly. The one or two most recent days CEF hasn't published yet are <strong>estimated</strong> from free market benchmarks (ICE Brent, NYMEX RBOB gasoline, NY Harbor ULSD futures, USD/ZAR spot), scaled onto the last official Platts-based figure — a same-direction proxy, not the real Mediterranean Platts assessment. The predicted price move is the review-period average over/under recovery so far; the actual government announcement (effective the first Wednesday of the month) can differ because it also folds in separate slate-levy and fuel-levy decisions.</p>
+          <p class="muted small">This data is generated on a private machine and pushed here on a schedule — it is not live. See the timestamp above for how fresh it is.</p>
+      </footer>
+
+    </section>
+  </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

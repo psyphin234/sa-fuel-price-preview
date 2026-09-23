@@ -1,0 +1,236 @@
+(() => {
+  "use strict";
+
+  // Public, read-only build: data comes from a static JSON snapshot that a
+  // private backend pushes to this repo on a schedule (see backend/publish.py).
+  // There is no live API here - "Check for update" just re-fetches that file.
+  const DATA_URL = "data/status.json";
+
+  const FUEL_ORDER = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"];
+  const PRICE_ROW_LABEL = {
+    petrol95: "Gauteng pump price",
+    petrol93: "Gauteng pump price",
+    diesel005: "Wholesale price",
+    diesel0005: "Wholesale price",
+    illpar: "Single national max retail price",
+  };
+
+  let state = { fuel: "petrol95", data: null };
+  let chartBfp = null, chartRecovery = null;
+
+  const $ = (sel) => document.querySelector(sel);
+  const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const centsToRand = (c) => (c === null || c === undefined) ? null : c / 100;
+  const fmtRand = (c) => c === null || c === undefined ? "—" : `R${centsToRand(c).toFixed(2)}/l`;
+  const fmtRandDelta = (c) => {
+    if (c === null || c === undefined) return "—";
+    const sign = c > 0 ? "+" : "";
+    return `${sign}R${centsToRand(c).toFixed(2)}/l`;
+  };
+  const fmtCents = (c) => c === null || c === undefined ? "—" : c.toFixed(2);
+  const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
+
+  function buildTabs() {
+    const nav = $("#fuel-tabs");
+    nav.innerHTML = "";
+    FUEL_ORDER.forEach((fuel) => {
+      const btn = document.createElement("button");
+      btn.className = "fuel-tab";
+      btn.type = "button";
+      btn.role = "tab";
+      btn.setAttribute("aria-selected", fuel === state.fuel ? "true" : "false");
+      btn.textContent = state.data.fuels[fuel] || fuel;
+      btn.addEventListener("click", () => {
+        state.fuel = fuel;
+        render();
+      });
+      nav.appendChild(btn);
+    });
+  }
+
+  function renderHero() {
+    const pred = state.data.predictions[state.fuel];
+    const dir = pred.direction; // "increase" | "decrease" | "no change"
+
+    $("#hero-current").textContent = fmtRand(pred.current_price_c_per_l);
+    $("#hero-current-label").textContent = PRICE_ROW_LABEL[state.fuel] + " (current cycle)";
+
+    const changeEl = $("#hero-change");
+    changeEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
+    changeEl.className = "hero-value " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "");
+
+    const badge = $("#hero-direction-badge");
+    const icon = dir === "increase" ? "▲" : dir === "decrease" ? "▼" : "■";
+    const label = dir === "increase" ? "Price expected to rise" : dir === "decrease" ? "Price expected to fall" : "Little change expected";
+    badge.className = "hero-badge " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "flat");
+    badge.textContent = `${icon} ${label}`;
+
+    $("#hero-newprice").textContent = fmtRand(pred.predicted_new_price_c_per_l);
+    const officialDays = pred.official_days_count;
+    const estDays = pred.estimated_days.length;
+    const manDays = pred.manual_days.length;
+    let conf = `${officialDays} official day${officialDays === 1 ? "" : "s"}`;
+    if (estDays) conf += ` + ${estDays} estimated`;
+    if (manDays) conf += ` + ${manDays} manual`;
+    $("#hero-confidence").textContent = conf + " in this review period so far";
+
+    $("#period-range").textContent =
+      `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;
+  }
+
+  function renderCharts() {
+    const series = [...state.data.daily_series[state.fuel]].sort((a, b) => a.date.localeCompare(b.date));
+    const referenceValue = state.data.latest_official_report.reference_price[state.fuel];
+
+    const labels = series.map((d) => fmtDate(d.date));
+    const bfpValues = series.map((d) => d.bfp);
+    const refValues = series.map(() => referenceValue);
+    const isEstimated = series.map((d) => d.source !== "cef_official");
+
+    const blue = cssVar("--series-blue");
+    const orange = cssVar("--series-orange");
+    const red = cssVar("--series-red");
+    const grid = cssVar("--gridline");
+    const textSec = cssVar("--text-secondary");
+
+    if (chartBfp) chartBfp.destroy();
+    chartBfp = new Chart($("#chart-bfp"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Basic Fuel Price",
+            data: bfpValues,
+            borderColor: blue,
+            backgroundColor: blue,
+            borderWidth: 2,
+            pointRadius: (ctx) => isEstimated[ctx.dataIndex] ? 4 : 2,
+            pointBackgroundColor: (ctx) => isEstimated[ctx.dataIndex] ? cssVar("--surface-1") : blue,
+            pointBorderColor: blue,
+            pointBorderWidth: (ctx) => isEstimated[ctx.dataIndex] ? 2 : 0,
+            segment: {
+              borderDash: (ctx) => (isEstimated[ctx.p0DataIndex] || isEstimated[ctx.p1DataIndex]) ? [5, 4] : undefined,
+            },
+            tension: 0,
+            fill: false,
+          },
+          {
+            label: "Built into current pump price",
+            data: refValues,
+            borderColor: orange,
+            backgroundColor: orange,
+            borderWidth: 2,
+            borderDash: [2, 3],
+            pointRadius: 0,
+            tension: 0,
+            fill: false,
+          },
+        ],
+      },
+      options: chartOptions(grid, textSec, "c/l"),
+    });
+
+    const overUnder = series.map((d) => d.unit_over_under);
+    if (chartRecovery) chartRecovery.destroy();
+    chartRecovery = new Chart($("#chart-recovery"), {
+      type: "bar",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Unit over/(under) recovery",
+            data: overUnder,
+            backgroundColor: (ctx) => {
+              const v = ctx.raw;
+              const base = v >= 0 ? blue : red;
+              return isEstimated[ctx.dataIndex] ? base + "88" : base;
+            },
+            borderRadius: 4,
+            borderSkipped: false,
+          },
+        ],
+      },
+      options: chartOptions(grid, textSec, "c/l"),
+    });
+  }
+
+  function chartOptions(grid, textSec, unit) {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: {
+          display: true,
+          position: "top",
+          align: "start",
+          labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 12 } },
+        },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y === null ? "—" : ctx.parsed.y.toFixed(2)} ${unit}`,
+          },
+        },
+      },
+      scales: {
+        x: { grid: { color: grid, display: false }, ticks: { color: textSec, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
+        y: { grid: { color: grid }, ticks: { color: textSec }, title: { display: true, text: unit, color: textSec } },
+      },
+    };
+  }
+
+  function renderTable() {
+    const series = [...state.data.daily_series[state.fuel]].sort((a, b) => b.date.localeCompare(a.date));
+    const tbody = $("#daily-table tbody");
+    tbody.innerHTML = "";
+    series.forEach((d) => {
+      const tr = document.createElement("tr");
+      const srcLabel = d.source === "cef_official" ? "CEF official" : d.source === "estimated" ? "Estimated" : "Manual";
+      tr.innerHTML = `
+        <td>${fmtDate(d.date)}</td>
+        <td><span class="src-badge ${d.source}">${srcLabel}</span></td>
+        <td class="num">${fmtCents(d.bfp)}</td>
+        <td class="num">${fmtCents(d.unit_over_under)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function render() {
+    buildTabs();
+    renderHero();
+    renderCharts();
+    renderTable();
+  }
+
+  async function loadData() {
+    $("#loading").hidden = false;
+    $("#error-state").hidden = true;
+    $("#content").hidden = true;
+    try {
+      const resp = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
+      if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
+      state.data = await resp.json();
+      $("#last-updated").textContent = "Data generated " + new Date(state.data.generated_at).toLocaleString("en-ZA");
+      $("#loading").hidden = true;
+      $("#content").hidden = false;
+      render();
+    } catch (err) {
+      $("#loading").hidden = true;
+      $("#error-state").hidden = false;
+      $("#error-state").textContent = "Couldn't load data: " + err.message;
+    }
+  }
+
+  $("#refresh-btn").addEventListener("click", async () => {
+    const btn = $("#refresh-btn");
+    btn.disabled = true;
+    btn.textContent = "Checking…";
+    await loadData();
+    btn.disabled = false;
+    btn.textContent = "Check for update";
+  });
+
+  loadData();
+})();
