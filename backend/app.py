@@ -8,6 +8,7 @@ import cef_scraper as cef
 import market_data as md
 import bfp_model as bm
 import db
+import accuracy
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -89,11 +90,12 @@ def manual_overrides_dict():
     return raw  # already {date: {"bfp": {...}, "exchange_rate": ...}}
 
 
-@app.route("/api/status")
-def api_status():
+def build_status_data():
+    """Builds the full payload the dashboard needs. Shared by the local Flask
+    API and publish.py (the static-site publisher) so both stay identical."""
     latest = get_latest_report()
     if latest is None:
-        return JSONResponse.make({"error": "Could not reach CEF's site or parse any recent report."}, 502)
+        return None
 
     benchmarks = get_benchmarks()
     overrides = manual_overrides_dict()
@@ -129,14 +131,46 @@ def api_status():
                 "source": day["source"],
             })
 
-    return JSONResponse.make({
+    # USD/ZAR is the same across fuels, so build its own series once rather
+    # than repeating it inside each fuel's daily_series.
+    exchange_rate_series = [
+        {"date": r.report_date, "rate": r.exchange_rate, "source": "cef_official"}
+        for r in period_reports
+    ]
+    first_fuel = cef.FUELS[0]
+    for day in predictions[first_fuel].estimated_days + predictions[first_fuel].manual_days:
+        exchange_rate_series.append({
+            "date": day["date"],
+            "rate": day.get("exchange_rate"),
+            "source": day["source"],
+        })
+    exchange_rate_series.sort(key=lambda d: d["date"])
+
+    # Accuracy tracking: remember today's guesses, check yesterday's guesses
+    # against whatever CEF has now officially published, summarize the track record.
+    accuracy.log_estimates(predictions)
+    accuracy.reconcile(period_reports)
+    accuracy_summary = accuracy.get_accuracy_summary()
+
+    return {
         "latest_official_report": latest,
         "benchmarks": benchmarks,
         "fuels": cef.FUEL_LABELS,
         "predictions": predictions,
         "daily_series": daily_series,
+        "exchange_rate_series": exchange_rate_series,
+        "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
+        "accuracy": accuracy_summary,
         "generated_at": dt.datetime.now(),
-    })
+    }
+
+
+@app.route("/api/status")
+def api_status():
+    data = build_status_data()
+    if data is None:
+        return JSONResponse.make({"error": "Could not reach CEF's site or parse any recent report."}, 502)
+    return JSONResponse.make(data)
 
 
 @app.route("/api/refresh", methods=["POST"])

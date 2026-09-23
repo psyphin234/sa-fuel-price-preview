@@ -32,6 +32,25 @@ CREATE TABLE IF NOT EXISTS prediction_log (
     blended_avg_over_under REAL NOT NULL,
     predicted_change_c_per_l REAL NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS estimate_log (
+    date TEXT NOT NULL,
+    fuel TEXT NOT NULL,
+    estimated_bfp REAL NOT NULL,
+    logged_at TEXT NOT NULL,
+    PRIMARY KEY (date, fuel)
+);
+
+CREATE TABLE IF NOT EXISTS accuracy_log (
+    date TEXT NOT NULL,
+    fuel TEXT NOT NULL,
+    estimated_bfp REAL NOT NULL,
+    official_bfp REAL NOT NULL,
+    error_c_per_l REAL NOT NULL,
+    pct_error REAL,
+    reconciled_at TEXT NOT NULL,
+    PRIMARY KEY (date, fuel)
+);
 """
 
 
@@ -122,4 +141,46 @@ def get_prediction_history(fuel: str = None, limit: int = 200) -> list:
             rows = conn.execute(
                 "SELECT * FROM prediction_log ORDER BY recorded_at DESC LIMIT ?", (limit,)
             ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def upsert_estimate(date: dt.date, fuel: str, estimated_bfp: float):
+    """Remembers today's estimated BFP for (date, fuel) so its accuracy can be
+    checked once CEF publishes the real figure for that date."""
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO estimate_log (date, fuel, estimated_bfp, logged_at) VALUES (?, ?, ?, ?) "
+            "ON CONFLICT(date, fuel) DO UPDATE SET estimated_bfp=excluded.estimated_bfp, logged_at=excluded.logged_at",
+            (date.isoformat(), fuel, estimated_bfp, dt.datetime.now().isoformat()),
+        )
+
+
+def pop_estimate(date: dt.date, fuel: str):
+    """Returns and removes the logged estimate for (date, fuel), or None if none was logged."""
+    with get_conn() as conn:
+        row = conn.execute(
+            "SELECT estimated_bfp FROM estimate_log WHERE date = ? AND fuel = ?", (date.isoformat(), fuel)
+        ).fetchone()
+        if row is None:
+            return None
+        conn.execute("DELETE FROM estimate_log WHERE date = ? AND fuel = ?", (date.isoformat(), fuel))
+        return row["estimated_bfp"]
+
+
+def log_accuracy(date: dt.date, fuel: str, estimated_bfp: float, official_bfp: float):
+    error = official_bfp - estimated_bfp
+    pct_error = (error / official_bfp) if official_bfp else None
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO accuracy_log (date, fuel, estimated_bfp, official_bfp, error_c_per_l, pct_error, reconciled_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT(date, fuel) DO NOTHING",
+            (date.isoformat(), fuel, estimated_bfp, official_bfp, error, pct_error, dt.datetime.now().isoformat()),
+        )
+
+
+def get_accuracy_records(limit: int = 90) -> list:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM accuracy_log ORDER BY date DESC LIMIT ?", (limit,)
+        ).fetchall()
     return [dict(r) for r in rows]

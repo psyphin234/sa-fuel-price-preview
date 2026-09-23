@@ -16,7 +16,7 @@
   };
 
   let state = { fuel: "petrol95", data: null };
-  let chartBfp = null, chartRecovery = null;
+  let chartBfp = null, chartRecovery = null, chartFx = null;
 
   const $ = (sel) => document.querySelector(sel);
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -155,6 +155,85 @@
     });
   }
 
+  function renderFx() {
+    const series = [...state.data.exchange_rate_series].sort((a, b) => a.date.localeCompare(b.date));
+    const current = state.data.current_exchange_rate;
+    $("#fx-current").textContent = current ? `R${current.toFixed(4)} / $1` : "—";
+
+    const changeEl = $("#fx-change");
+    const validRates = series.filter((d) => d.rate !== null && d.rate !== undefined);
+    if (validRates.length >= 2) {
+      const last = validRates[validRates.length - 1].rate;
+      const prev = validRates[validRates.length - 2].rate;
+      const changePct = ((last - prev) / prev) * 100;
+      const dir = changePct > 0.01 ? "up" : changePct < -0.01 ? "down" : "flat";
+      const arrow = dir === "up" ? "▲" : dir === "down" ? "▼" : "■";
+      changeEl.textContent = `${arrow} ${changePct > 0 ? "+" : ""}${changePct.toFixed(2)}% vs prior day`;
+      changeEl.className = "fx-change " + dir;
+    } else {
+      changeEl.textContent = "";
+      changeEl.className = "fx-change";
+    }
+
+    const labels = series.map((d) => fmtDate(d.date));
+    const rates = series.map((d) => d.rate);
+    const isEstimated = series.map((d) => d.source !== "cef_official");
+    const blue = cssVar("--series-blue");
+    const grid = cssVar("--gridline");
+    const textSec = cssVar("--text-secondary");
+
+    if (chartFx) chartFx.destroy();
+    chartFx = new Chart($("#chart-fx"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [{
+          label: "USD/ZAR",
+          data: rates,
+          borderColor: blue,
+          backgroundColor: blue,
+          borderWidth: 2,
+          pointRadius: (ctx) => isEstimated[ctx.dataIndex] ? 4 : 2,
+          pointBackgroundColor: (ctx) => isEstimated[ctx.dataIndex] ? cssVar("--surface-1") : blue,
+          pointBorderColor: blue,
+          pointBorderWidth: (ctx) => isEstimated[ctx.dataIndex] ? 2 : 0,
+          segment: {
+            borderDash: (ctx) => (isEstimated[ctx.p0DataIndex] || isEstimated[ctx.p1DataIndex]) ? [5, 4] : undefined,
+          },
+          tension: 0,
+          fill: false,
+        }],
+      },
+      options: (() => {
+        const opts = chartOptions(grid, textSec, "R/$");
+        opts.plugins.legend.display = false;
+        return opts;
+      })(),
+    });
+  }
+
+  function renderAccuracy() {
+    const acc = state.data.accuracy;
+    const fill = $("#accuracy-fill");
+    const headline = $("#accuracy-headline");
+    const sub = $("#accuracy-sub");
+
+    if (!acc || acc.status === "collecting") {
+      fill.style.width = "0%";
+      fill.className = "accuracy-meter-fill unknown";
+      headline.textContent = "Not enough data yet";
+      sub.textContent = "Estimate tracking just started — the first comparison lands once CEF publishes the next official day.";
+      return;
+    }
+
+    const pct = acc.accuracy_pct;
+    fill.style.width = `${pct}%`;
+    fill.className = "accuracy-meter-fill " + (pct >= 97 ? "" : pct >= 90 ? "warning" : "critical");
+    headline.textContent = `${pct}% accurate on average`;
+    const warmup = acc.status === "warming_up" ? " — still an early sample, so treat this loosely" : "";
+    sub.textContent = `Based on ${acc.n} estimated day${acc.n === 1 ? "" : "s"} checked against CEF's real figures so far: typically about ${acc.mean_abs_error_c_per_l} c/l (${acc.mean_abs_pct_error}%) off${warmup}.`;
+  }
+
   function chartOptions(grid, textSec, unit) {
     return {
       responsive: true,
@@ -200,6 +279,8 @@
   function render() {
     buildTabs();
     renderHero();
+    renderAccuracy();
+    renderFx();
     renderCharts();
     renderTable();
   }

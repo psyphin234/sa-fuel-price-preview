@@ -16,55 +16,20 @@ import sys
 from pathlib import Path
 
 import app as backend
-import cef_scraper as cef
-import bfp_model as bm
 
 REPO_ROOT = Path(__file__).parent.parent
 OUTPUT_PATH = REPO_ROOT / "docs" / "data" / "status.json"
 
 
 def build_status() -> dict:
-    latest = backend.get_latest_report()
-    if latest is None:
+    """Reuses the exact same payload builder the local Flask API uses, so the
+    public static site and the local dashboard never drift apart."""
+    data = backend.build_status_data()
+    if data is None:
         raise RuntimeError("Could not reach CEF's site or parse any recent report.")
-
-    benchmarks = backend.get_benchmarks(force=True)
-    overrides = backend.manual_overrides_dict()
-    today = dt.date.today()
-
-    predictions = {}
-    for fuel in cef.FUELS:
-        predictions[fuel] = bm.build_prediction(fuel, latest, benchmarks, manual_overrides=overrides, today=today)
-
-    period_reports = backend.get_period_reports(latest.period_start, latest.period_end)
-    daily_series = {
-        fuel: [
-            {
-                "date": r.report_date,
-                "bfp": r.bfp.get(fuel),
-                "unit_over_under": r.unit_over_under.get(fuel),
-                "source": "cef_official",
-            }
-            for r in period_reports
-        ]
-        for fuel in cef.FUELS
-    }
-    for fuel in cef.FUELS:
-        for day in predictions[fuel].estimated_days + predictions[fuel].manual_days:
-            daily_series[fuel].append({
-                "date": day["date"],
-                "bfp": day["bfp"].get(fuel),
-                "unit_over_under": day["unit_over_under"].get(fuel),
-                "source": day["source"],
-            })
-
-    return {
-        "latest_official_report": latest,
-        "fuels": cef.FUEL_LABELS,
-        "predictions": predictions,
-        "daily_series": daily_series,
-        "generated_at": dt.datetime.now(),
-    }
+    # benchmarks aren't needed by the public site and just bloat the JSON
+    data.pop("benchmarks", None)
+    return data
 
 
 def write_json(data: dict):
