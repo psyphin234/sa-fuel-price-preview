@@ -47,6 +47,34 @@
         </div>
       </section>
 
+      <section class="panel accuracy-panel">
+        <div class="panel-head">
+          <h2>How reliable are the estimated days?</h2>
+          <p class="muted small">Every estimated day gets checked against CEF's real figure once they publish it, so this improves on its own over time.</p>
+        </div>
+        <div class="accuracy-body">
+          <div class="accuracy-meter">
+            <div class="accuracy-meter-track"><div class="accuracy-meter-fill" id="accuracy-fill"></div></div>
+          </div>
+          <div class="accuracy-text">
+            <div class="accuracy-headline" id="accuracy-headline">—</div>
+            <div class="muted small" id="accuracy-sub">—</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>USD/ZAR exchange rate</h2>
+          <p class="muted small">The rand's strength against the dollar is one of the two big drivers of the fuel price — a weaker rand (higher number) pushes fuel prices up, a stronger rand pulls them down.</p>
+        </div>
+        <div class="fx-current">
+          <span class="fx-value" id="fx-current">—</span>
+          <span class="fx-change" id="fx-change"></span>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-fx" height="90"></canvas></div>
+      </section>
+
       <section class="panel">
         <div class="panel-head">
           <h2>Daily Basic Fuel Price vs. price built into the current pump price</h2>
@@ -57,8 +85,8 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Daily unit over/(under) recovery</h2>
-          <p class="muted small">Below zero = under-recovery (pushes the next price up). Above zero = over-recovery (pushes the next price down).</p>
+          <h2>Is fuel getting more or less expensive to bring in, day by day?</h2>
+          <p class="muted small">Each bar compares that day's real import cost to what's already priced in at the pump. Bars below zero mean it cost <strong>more</strong> that day than you're currently paying — pressure builds toward a price <strong>increase</strong>. Bars above zero mean it cost <strong>less</strong> — pressure toward a <strong>decrease</strong>. (The industry calls this the daily "over/under-recovery".)</p>
         </div>
         <div class="chart-wrap"><canvas id="chart-recovery" height="110"></canvas></div>
       </section>
