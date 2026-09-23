@@ -58,12 +58,72 @@ backend/
   market_data.py    - free Yahoo Finance benchmarks (Brent, RBOB, ULSD, USD/ZAR)
   bfp_model.py       - nowcast + blended-average prediction logic
   db.py               - SQLite: manual overrides, report cache, prediction history
-  app.py                - Flask app / API
+  app.py                - Flask app / API (private, local only)
+  publish.py             - standalone script: builds a status snapshot and
+                           pushes it to docs/data/status.json on GitHub
+  run_publish.ps1          - Task Scheduler wrapper around publish.py, with logging
 frontend/
-  index.html, style.css, app.js  - the dashboard (vanilla JS + Chart.js via CDN)
+  index.html, style.css, app.js  - the full local dashboard (talks to the Flask
+                                   API, has the manual-override form)
+docs/
+  index.html, style.css, app.js  - the PUBLIC, read-only GitHub Pages build
+                                   (fetches docs/data/status.json, no backend calls)
+  data/status.json                 - the published snapshot (overwritten each run)
 data/
-  bfp.db  - local SQLite database (created on first run)
+  bfp.db      - local SQLite database (created on first run, gitignored)
+  publish.log - log of each scheduled publish run (gitignored)
 ```
+
+## Public site + hourly auto-publish
+
+The dashboard is published as a static, **read-only** site at:
+
+**https://psyphin234.github.io/sa-fuel-price-preview/**
+
+Source: https://github.com/psyphin234/sa-fuel-price-preview (public repo)
+
+This works without exposing your PC to the internet at all: your PC only ever
+makes *outbound* connections (to CEF, Yahoo Finance, and GitHub) to push a
+fresh JSON snapshot - it never opens a port, runs a public server, or appears
+as an address anywhere. There is nothing for anyone to "find" from the GitHub
+repo or the published site; the repo's commit history just shows automated
+commits from your GitHub account, same as any scheduled bot would.
+
+A Windows Scheduled Task named **"BFP Preview Publish"** runs
+`backend/run_publish.ps1` every hour (only while you're logged in - that's
+Task Scheduler's default and needs no stored password). Each run:
+
+1. Re-scrapes CEF's latest PDFs + free market benchmarks
+2. Rebuilds `docs/data/status.json`
+3. Commits and pushes it, if anything changed
+
+To manage the task: open **Task Scheduler** → look under the root
+`\` folder for "BFP Preview Publish". You can change the interval, pause it,
+or run it on demand from there. Its log is at `data/publish.log`.
+
+Manual overrides you enter in the **local** dashboard (http://127.0.0.1:5057)
+get baked into the next hourly push automatically - the public site has no
+form of its own, since a static site can't accept writes (and a public write
+endpoint is exactly the kind of exposure this design avoids).
+
+### Adding a custom domain (optional)
+
+GitHub Pages supports a custom domain for free, and it doesn't expose your PC
+either - it only points at GitHub's servers, never your machine:
+
+1. In `docs/`, add a file named `CNAME` (no extension) containing just your
+   domain, e.g. `fuel.example.co.za`.
+2. At your domain registrar's DNS settings:
+   - For a subdomain (`fuel.example.co.za`): add a `CNAME` record pointing to
+     `psyphin234.github.io`.
+   - For an apex/root domain (`example.co.za`): add `A` records pointing to
+     GitHub Pages' IPs: `185.199.108.153`, `185.199.109.153`,
+     `185.199.110.153`, `185.199.111.153`.
+3. Commit and push the `CNAME` file (or set it in the repo's Settings → Pages
+   → Custom domain, which creates the file for you).
+4. Wait for DNS to propagate (can take a few minutes to a few hours), then
+   tick "Enforce HTTPS" in Settings → Pages once GitHub shows the domain as
+   verified.
 
 ## Limits and honesty notes
 
