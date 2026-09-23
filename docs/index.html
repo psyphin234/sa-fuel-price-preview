@@ -6,24 +6,30 @@
 <title>SA Basic Fuel Price Preview</title>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="description" content="Daily preview of South Africa's Basic Fuel Price and a projection of the next pump-price change.">
+<meta name="theme-color" content="#000000">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
 </head>
 <body>
-<div class="page">
-
-  <header class="topbar">
-    <div class="topbar-title">
-      <img src="assets/logo.png" alt="PsyPhin" class="brand-logo">
-      <div>
-        <h1>SA Basic Fuel Price Preview</h1>
-        <p class="subtitle">A preview of CEF's daily Basic Fuel Price, built the same way CEF does it — plus an under/over-recovery projection for the next pump-price change.</p>
-      </div>
+<header class="brand-bar">
+  <div class="brand-inner">
+    <img src="assets/logo.jpg" alt="PsyPhin" class="brand-logo" width="560" height="501">
+    <div class="brand-text">
+      <p class="brand-eyebrow">South Africa &middot; Daily fuel price tracker</p>
+      <h1>SA Basic Fuel Price Preview</h1>
+      <p class="subtitle">A preview of CEF's daily Basic Fuel Price, built the same way CEF does it — plus an under/over-recovery projection for the next pump-price change.</p>
     </div>
     <div class="topbar-actions">
       <button id="refresh-btn" class="btn btn-primary">Check for update</button>
     </div>
-  </header>
+  </div>
+</header>
+
+<div class="page">
 
   <div class="status-bar">
     <span class="status-pill" id="last-updated-pill">
@@ -101,7 +107,7 @@
           <span class="fx-value" id="fx-current">—</span>
           <span class="fx-change" id="fx-change"></span>
         </div>
-        <div class="chart-wrap"><canvas id="chart-fx" height="90"></canvas></div>
+        <div class="chart-wrap chart-wrap--short"><canvas id="chart-fx" height="90"></canvas></div>
       </section>
 
       <section class="panel">
@@ -127,6 +133,8 @@
     </section>
   </main>
 </div>
+
+<footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports</footer>
 
 <script src="app.js"></script>
 </body>

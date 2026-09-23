@@ -1,6 +1,12 @@
 (() => {
   "use strict";
 
+  Chart.defaults.font.family = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
+  Chart.defaults.font.size = 13;
+  Chart.defaults.plugins.tooltip.padding = 10;
+  Chart.defaults.plugins.tooltip.cornerRadius = 8;
+  Chart.defaults.plugins.tooltip.boxPadding = 4;
+
   // Public, read-only build: data comes from a static JSON snapshot that a
   // private backend pushes to this repo on a schedule (see backend/publish.py).
   // There is no live API here - "Check for update" just re-fetches that file.
@@ -270,7 +276,7 @@
           display: true,
           position: "top",
           align: "start",
-          labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 12 } },
+          labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 13 } },
         },
         tooltip: {
           callbacks: {
