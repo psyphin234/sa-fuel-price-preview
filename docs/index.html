@@ -77,18 +77,6 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>USD/ZAR exchange rate</h2>
-          <p class="muted small">The rand's strength against the dollar is one of the two big drivers of the fuel price — a weaker rand (higher number) pushes fuel prices up, a stronger rand pulls them down.</p>
-        </div>
-        <div class="fx-current">
-          <span class="fx-value" id="fx-current">—</span>
-          <span class="fx-change" id="fx-change"></span>
-        </div>
-        <div class="chart-wrap"><canvas id="chart-fx" height="90"></canvas></div>
-      </section>
-
-      <section class="panel">
-        <div class="panel-head">
           <h2>Daily Basic Fuel Price vs. price built into the current pump price</h2>
           <p class="muted small">The blue line is each day's real import cost. The flat orange line is the cost that's already priced into what you're paying right now — it was fixed when the current month's price was set, and only changes on the next price change. The gap between them is the daily over/under-recovery below.</p>
           <p class="muted small">Review period: <span id="period-range">—</span>. Solid = CEF official. Dashed / hollow marker = estimated for a day CEF hasn't published yet.</p>
@@ -102,6 +90,18 @@
           <p class="muted small">Below the zero line = under-recovery (fuel cost more that day than what's priced in — pushes the next price up). Above zero = over-recovery (pushes it down).</p>
         </div>
         <div class="chart-wrap"><canvas id="chart-recovery" height="110"></canvas></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>USD/ZAR exchange rate</h2>
+          <p class="muted small">The rand's strength against the dollar is one of the two big drivers of the fuel price — a weaker rand (higher number) pushes fuel prices up, a stronger rand pulls them down.</p>
+        </div>
+        <div class="fx-current">
+          <span class="fx-value" id="fx-current">—</span>
+          <span class="fx-change" id="fx-change"></span>
+        </div>
+        <div class="chart-wrap"><canvas id="chart-fx" height="90"></canvas></div>
       </section>
 
       <section class="panel">
