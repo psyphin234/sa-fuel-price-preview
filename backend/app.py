@@ -1,0 +1,217 @@
+import datetime as dt
+import json
+from pathlib import Path
+
+from flask import Flask, jsonify, request, send_from_directory
+
+import cef_scraper as cef
+import market_data as md
+import bfp_model as bm
+import db
+
+FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
+
+app = Flask(__name__, static_folder=None)
+db.init_db()
+
+_benchmark_cache = {"data": None, "fetched_at": None}
+BENCHMARK_TTL_SECONDS = 120
+
+
+def json_default(o):
+    if isinstance(o, dt.date):
+        return o.isoformat()
+    if hasattr(o, "__dict__"):
+        return o.__dict__
+    raise TypeError(f"Not serializable: {o!r}")
+
+
+def dumps(obj, **kw):
+    return json.dumps(obj, default=json_default, **kw)
+
+
+class JSONResponse:
+    """Small helper so we can return dataclasses / date-containing dicts straight from Flask."""
+    @staticmethod
+    def make(obj, status=200):
+        return app.response_class(dumps(obj), status=status, mimetype="application/json")
+
+
+def get_report_cached(date: dt.date):
+    cached = db.get_cached_report(date)
+    if cached:
+        cached["report_date"] = dt.date.fromisoformat(cached["report_date"])
+        cached["period_start"] = dt.date.fromisoformat(cached["period_start"])
+        cached["period_end"] = dt.date.fromisoformat(cached["period_end"])
+        cached["reference_valid_from"] = dt.date.fromisoformat(cached["reference_valid_from"])
+        cached["pump_price_effective"] = dt.date.fromisoformat(cached["pump_price_effective"])
+        return cef.DailyReport(**cached)
+    rep = cef.fetch_and_parse(date)
+    if rep:
+        db.cache_report(date, rep.__dict__)
+    return rep
+
+
+def get_latest_report():
+    d = dt.date.today()
+    for _ in range(10):
+        rep = get_report_cached(d)
+        if rep is not None:
+            return rep
+        d -= dt.timedelta(days=1)
+    return None
+
+
+def get_period_reports(period_start: dt.date, period_end: dt.date):
+    reports = []
+    d = period_start
+    while d <= period_end:
+        rep = get_report_cached(d)
+        if rep is not None:
+            reports.append(rep)
+        d += dt.timedelta(days=1)
+    return reports
+
+
+def get_benchmarks(force=False):
+    now = dt.datetime.now()
+    if (not force and _benchmark_cache["data"] and _benchmark_cache["fetched_at"]
+            and (now - _benchmark_cache["fetched_at"]).total_seconds() < BENCHMARK_TTL_SECONDS):
+        return _benchmark_cache["data"]
+    data = md.fetch_all_benchmarks()
+    _benchmark_cache["data"] = data
+    _benchmark_cache["fetched_at"] = now
+    return data
+
+
+def manual_overrides_dict():
+    raw = db.get_manual_overrides()
+    return raw  # already {date: {"bfp": {...}, "exchange_rate": ...}}
+
+
+@app.route("/api/status")
+def api_status():
+    latest = get_latest_report()
+    if latest is None:
+        return JSONResponse.make({"error": "Could not reach CEF's site or parse any recent report."}, 502)
+
+    benchmarks = get_benchmarks()
+    overrides = manual_overrides_dict()
+    today = dt.date.today()
+
+    predictions = {}
+    for fuel in cef.FUELS:
+        pred = bm.build_prediction(fuel, latest, benchmarks, manual_overrides=overrides, today=today)
+        predictions[fuel] = pred
+        db.log_prediction(latest.period_start, latest.period_end, fuel,
+                           pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
+
+    period_reports = get_period_reports(latest.period_start, latest.period_end)
+    daily_series = {
+        fuel: [
+            {
+                "date": r.report_date,
+                "bfp": r.bfp.get(fuel),
+                "unit_over_under": r.unit_over_under.get(fuel),
+                "source": "cef_official",
+            }
+            for r in period_reports
+        ]
+        for fuel in cef.FUELS
+    }
+    # append estimated/manual gap days from each fuel's prediction onto the series
+    for fuel in cef.FUELS:
+        for day in predictions[fuel].estimated_days + predictions[fuel].manual_days:
+            daily_series[fuel].append({
+                "date": day["date"],
+                "bfp": day["bfp"].get(fuel),
+                "unit_over_under": day["unit_over_under"].get(fuel),
+                "source": day["source"],
+            })
+
+    return JSONResponse.make({
+        "latest_official_report": latest,
+        "benchmarks": benchmarks,
+        "fuels": cef.FUEL_LABELS,
+        "predictions": predictions,
+        "daily_series": daily_series,
+        "generated_at": dt.datetime.now(),
+    })
+
+
+@app.route("/api/refresh", methods=["POST"])
+def api_refresh():
+    get_benchmarks(force=True)
+    latest = None
+    d = dt.date.today()
+    for _ in range(10):
+        rep = cef.fetch_and_parse(d)
+        if rep is not None:
+            db.cache_report(d, rep.__dict__)
+            latest = rep
+            break
+        d -= dt.timedelta(days=1)
+    if latest is None:
+        return JSONResponse.make({"error": "No new report found"}, 502)
+    dd = latest.period_start
+    while dd <= latest.period_end:
+        if db.get_cached_report(dd) is None:
+            rep = cef.fetch_and_parse(dd)
+            if rep is not None:
+                db.cache_report(dd, rep.__dict__)
+        dd += dt.timedelta(days=1)
+    return JSONResponse.make({"ok": True, "latest_report_date": latest.report_date})
+
+
+@app.route("/api/manual-override", methods=["POST"])
+def api_manual_override():
+    body = request.get_json(force=True)
+    try:
+        date = dt.date.fromisoformat(body["date"])
+        bfp = {k: float(v) for k, v in body.get("bfp", {}).items() if v not in (None, "")}
+        exchange_rate = body.get("exchange_rate")
+        exchange_rate = float(exchange_rate) if exchange_rate not in (None, "") else None
+    except (KeyError, ValueError, TypeError) as e:
+        return JSONResponse.make({"error": f"Invalid payload: {e}"}, 400)
+    if not bfp:
+        return JSONResponse.make({"error": "Provide at least one fuel BFP value"}, 400)
+    db.set_manual_override(date, bfp, exchange_rate)
+    return JSONResponse.make({"ok": True})
+
+
+@app.route("/api/manual-override/<date_str>", methods=["DELETE"])
+def api_delete_manual_override(date_str):
+    try:
+        date = dt.date.fromisoformat(date_str)
+    except ValueError:
+        return JSONResponse.make({"error": "Invalid date"}, 400)
+    db.delete_manual_override(date)
+    return JSONResponse.make({"ok": True})
+
+
+@app.route("/api/manual-overrides")
+def api_get_manual_overrides():
+    overrides = manual_overrides_dict()
+    return JSONResponse.make({d.isoformat(): v for d, v in overrides.items()})
+
+
+@app.route("/api/history")
+def api_history():
+    fuel = request.args.get("fuel")
+    return JSONResponse.make(db.get_prediction_history(fuel=fuel))
+
+
+@app.route("/")
+def index():
+    return send_from_directory(FRONTEND_DIR, "index.html")
+
+
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory(FRONTEND_DIR, path)
+
+
+if __name__ == "__main__":
+    # debug=True gives auto-reload + tracebacks while you're editing; set False for
+    # quieter day-to-day use. Bound to localhost only either way.
+    app.run(debug=True, port=5057)

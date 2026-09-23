@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/bfp.db
+data/*.log
+.venv/
+venv/
