@@ -131,6 +131,41 @@ body {
   font-size: 12px;
 }
 
+/* ---- status bar ---- */
+.status-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--status-good);
+  flex-shrink: 0;
+}
+.countdown-pill.urgent {
+  border-color: var(--status-warning);
+  color: #8a5a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .countdown-pill.urgent { color: #ffce6b; }
+}
+:root[data-theme="dark"] .countdown-pill.urgent { color: #ffce6b; }
+
 /* ---- fuel tabs ---- */
 .fuel-tabs {
   display: flex;

@@ -302,8 +302,29 @@
     });
   }
 
+  function renderStatusBar() {
+    const generated = new Date(state.data.generated_at);
+    $("#last-updated").textContent =
+      `Data updated ${generated.toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })} at ${generated.toLocaleTimeString("en-ZA")} — refreshes every hour`;
+
+    const days = state.data.days_until_next_price_change;
+    const changeDate = fmtDate(state.data.next_price_change_date);
+    const pill = $("#countdown-pill");
+    if (days === null || days === undefined) {
+      pill.textContent = "—";
+      pill.className = "status-pill countdown-pill";
+      return;
+    }
+    const dayWord = days === 1 ? "day" : "days";
+    pill.textContent = days <= 0
+      ? `⏳ Price change day — ${changeDate}`
+      : `⏳ ${days} ${dayWord} until the next price change (${changeDate})`;
+    pill.className = "status-pill countdown-pill" + (days <= 3 ? " urgent" : "");
+  }
+
   function render() {
     buildTabs();
+    renderStatusBar();
     renderHero();
     renderAccuracy();
     renderFx();
@@ -319,7 +340,6 @@
       const resp = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
       if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
       state.data = await resp.json();
-      $("#last-updated").textContent = "Data generated " + new Date(state.data.generated_at).toLocaleString("en-ZA");
       $("#loading").hidden = true;
       $("#content").hidden = false;
       render();
