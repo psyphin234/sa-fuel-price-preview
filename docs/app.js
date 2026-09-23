@@ -132,22 +132,48 @@
     });
 
     const overUnder = series.map((d) => d.unit_over_under);
+    const zeroLine = series.map(() => 0);
+    const segColor = (ctx) => {
+      const avg = ((ctx.p0.parsed.y ?? 0) + (ctx.p1.parsed.y ?? 0)) / 2;
+      return avg >= 0 ? blue : red;
+    };
+
     if (chartRecovery) chartRecovery.destroy();
     chartRecovery = new Chart($("#chart-recovery"), {
-      type: "bar",
+      type: "line",
       data: {
         labels,
         datasets: [
           {
             label: "Unit over/(under) recovery",
             data: overUnder,
-            backgroundColor: (ctx) => {
-              const v = ctx.raw;
+            borderWidth: 2,
+            borderColor: blue,
+            pointRadius: (ctx) => isEstimated[ctx.dataIndex] ? 4 : 2,
+            pointBackgroundColor: (ctx) => {
+              const v = ctx.raw ?? 0;
               const base = v >= 0 ? blue : red;
-              return isEstimated[ctx.dataIndex] ? base + "88" : base;
+              return isEstimated[ctx.dataIndex] ? cssVar("--surface-1") : base;
             },
-            borderRadius: 4,
-            borderSkipped: false,
+            pointBorderColor: (ctx) => (ctx.raw ?? 0) >= 0 ? blue : red,
+            pointBorderWidth: (ctx) => isEstimated[ctx.dataIndex] ? 2 : 0,
+            segment: {
+              borderColor: segColor,
+              backgroundColor: (ctx) => segColor(ctx) + "2e",
+              borderDash: (ctx) => (isEstimated[ctx.p0DataIndex] || isEstimated[ctx.p1DataIndex]) ? [5, 4] : undefined,
+            },
+            fill: "origin",
+            tension: 0,
+          },
+          {
+            label: "Break-even",
+            data: zeroLine,
+            borderColor: cssVar("--baseline"),
+            borderWidth: 1,
+            borderDash: [3, 3],
+            pointRadius: 0,
+            fill: false,
+            tension: 0,
           },
         ],
       },
@@ -254,7 +280,7 @@
       },
       scales: {
         x: { grid: { color: grid, display: false }, ticks: { color: textSec, maxRotation: 0, autoSkip: true, maxTicksLimit: 10 } },
-        y: { grid: { color: grid }, ticks: { color: textSec }, title: { display: true, text: unit, color: textSec } },
+        y: { grid: { color: grid }, ticks: { color: textSec }, title: { display: true, text: unit, color: textSec }, grace: "10%" },
       },
     };
   }
