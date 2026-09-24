@@ -50,6 +50,9 @@ def get_report_cached(date: dt.date):
     rep = cef.fetch_and_parse(date)
     if rep:
         db.cache_report(date, rep.__dict__)
+        db.note_report_found(date)
+    else:
+        db.note_report_missing(date)
     return rep
 
 
@@ -234,8 +237,10 @@ def api_refresh():
         rep = cef.fetch_and_parse(d)
         if rep is not None:
             db.cache_report(d, rep.__dict__)
+            db.note_report_found(d)
             latest = rep
             break
+        db.note_report_missing(d)
         d -= dt.timedelta(days=1)
     if latest is None:
         return JSONResponse.make({"error": "No new report found"}, 502)
