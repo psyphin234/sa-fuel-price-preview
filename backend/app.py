@@ -172,6 +172,24 @@ def build_status_data():
                     "pct_error": round(rec["pct_error"] * 100, 2) if rec["pct_error"] is not None else None,
                 }
 
+    # Days CEF never publishes (weekends, public holidays, skipped days) get an
+    # indicative estimate for the table only: kept out of the prediction average,
+    # the charts and accuracy tracking, since no official figure will ever exist.
+    indicative_days = {fuel: [] for fuel in cef.FUELS}
+    d = latest.period_start
+    while d <= today:
+        base = next((r for r in reversed(period_reports) if r.report_date < d), None)
+        if base is not None:
+            est = bm.nowcast_single_day(base, d, moves)
+            for fuel in cef.FUELS:
+                if d not in {e["date"] for e in daily_series[fuel]} and fuel in est.bfp:
+                    indicative_days[fuel].append({
+                        "date": d,
+                        "bfp": est.bfp[fuel],
+                        "unit_over_under": est.unit_over_under.get(fuel),
+                    })
+        d += dt.timedelta(days=1)
+
     next_change = bm.next_price_change_date(latest.pump_price_effective)
 
     return {
@@ -180,6 +198,7 @@ def build_status_data():
         "fuels": cef.FUEL_LABELS,
         "predictions": predictions,
         "daily_series": daily_series,
+        "indicative_days": indicative_days,
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,

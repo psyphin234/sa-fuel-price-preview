@@ -711,6 +711,268 @@
       }
     ]
   },
+  "indicative_days": {
+    "petrol95": [
+      {
+        "date": "2026-08-29",
+        "bfp": 1502.636,
+        "unit_over_under": -194.946
+      },
+      {
+        "date": "2026-08-30",
+        "bfp": 1502.636,
+        "unit_over_under": -194.946
+      },
+      {
+        "date": "2026-08-31",
+        "bfp": 1496.26,
+        "unit_over_under": -188.57
+      },
+      {
+        "date": "2026-09-05",
+        "bfp": 1565.382,
+        "unit_over_under": -150.492
+      },
+      {
+        "date": "2026-09-06",
+        "bfp": 1565.382,
+        "unit_over_under": -150.492
+      },
+      {
+        "date": "2026-09-12",
+        "bfp": 1792.977,
+        "unit_over_under": -378.087
+      },
+      {
+        "date": "2026-09-13",
+        "bfp": 1792.977,
+        "unit_over_under": -378.087
+      },
+      {
+        "date": "2026-09-19",
+        "bfp": 1806.672,
+        "unit_over_under": -391.782
+      },
+      {
+        "date": "2026-09-20",
+        "bfp": 1806.672,
+        "unit_over_under": -391.782
+      },
+      {
+        "date": "2026-09-24",
+        "bfp": 1787.92,
+        "unit_over_under": -373.03
+      }
+    ],
+    "petrol93": [
+      {
+        "date": "2026-08-29",
+        "bfp": 1476.217,
+        "unit_over_under": -184.527
+      },
+      {
+        "date": "2026-08-30",
+        "bfp": 1476.217,
+        "unit_over_under": -184.527
+      },
+      {
+        "date": "2026-08-31",
+        "bfp": 1469.953,
+        "unit_over_under": -178.263
+      },
+      {
+        "date": "2026-09-05",
+        "bfp": 1536.568,
+        "unit_over_under": -137.678
+      },
+      {
+        "date": "2026-09-06",
+        "bfp": 1536.568,
+        "unit_over_under": -137.678
+      },
+      {
+        "date": "2026-09-12",
+        "bfp": 1763.838,
+        "unit_over_under": -364.948
+      },
+      {
+        "date": "2026-09-13",
+        "bfp": 1763.838,
+        "unit_over_under": -364.948
+      },
+      {
+        "date": "2026-09-19",
+        "bfp": 1763.153,
+        "unit_over_under": -364.263
+      },
+      {
+        "date": "2026-09-20",
+        "bfp": 1763.153,
+        "unit_over_under": -364.263
+      },
+      {
+        "date": "2026-09-24",
+        "bfp": 1744.661,
+        "unit_over_under": -345.771
+      }
+    ],
+    "diesel005": [
+      {
+        "date": "2026-08-29",
+        "bfp": 1869.074,
+        "unit_over_under": -207.444
+      },
+      {
+        "date": "2026-08-30",
+        "bfp": 1869.074,
+        "unit_over_under": -207.444
+      },
+      {
+        "date": "2026-08-31",
+        "bfp": 1949.908,
+        "unit_over_under": -288.278
+      },
+      {
+        "date": "2026-09-05",
+        "bfp": 1973.212,
+        "unit_over_under": -39.582
+      },
+      {
+        "date": "2026-09-06",
+        "bfp": 1973.212,
+        "unit_over_under": -39.582
+      },
+      {
+        "date": "2026-09-12",
+        "bfp": 2282.138,
+        "unit_over_under": -348.508
+      },
+      {
+        "date": "2026-09-13",
+        "bfp": 2282.138,
+        "unit_over_under": -348.508
+      },
+      {
+        "date": "2026-09-19",
+        "bfp": 2298.039,
+        "unit_over_under": -364.409
+      },
+      {
+        "date": "2026-09-20",
+        "bfp": 2298.039,
+        "unit_over_under": -364.409
+      },
+      {
+        "date": "2026-09-24",
+        "bfp": 2240.376,
+        "unit_over_under": -306.746
+      }
+    ],
+    "diesel0005": [
+      {
+        "date": "2026-08-29",
+        "bfp": 1918.875,
+        "unit_over_under": -233.845
+      },
+      {
+        "date": "2026-08-30",
+        "bfp": 1918.875,
+        "unit_over_under": -233.845
+      },
+      {
+        "date": "2026-08-31",
+        "bfp": 2001.863,
+        "unit_over_under": -316.833
+      },
+      {
+        "date": "2026-09-05",
+        "bfp": 2058.768,
+        "unit_over_under": -80.738
+      },
+      {
+        "date": "2026-09-06",
+        "bfp": 2058.768,
+        "unit_over_under": -80.738
+      },
+      {
+        "date": "2026-09-12",
+        "bfp": 2375.489,
+        "unit_over_under": -397.459
+      },
+      {
+        "date": "2026-09-13",
+        "bfp": 2375.489,
+        "unit_over_under": -397.459
+      },
+      {
+        "date": "2026-09-19",
+        "bfp": 2391.587,
+        "unit_over_under": -413.557
+      },
+      {
+        "date": "2026-09-20",
+        "bfp": 2391.587,
+        "unit_over_under": -413.557
+      },
+      {
+        "date": "2026-09-24",
+        "bfp": 2324.739,
+        "unit_over_under": -346.709
+      }
+    ],
+    "illpar": [
+      {
+        "date": "2026-08-29",
+        "bfp": 1813.487,
+        "unit_over_under": -211.359
+      },
+      {
+        "date": "2026-08-30",
+        "bfp": 1813.487,
+        "unit_over_under": -211.359
+      },
+      {
+        "date": "2026-08-31",
+        "bfp": 1891.917,
+        "unit_over_under": -289.789
+      },
+      {
+        "date": "2026-09-05",
+        "bfp": 1942.366,
+        "unit_over_under": -127.238
+      },
+      {
+        "date": "2026-09-06",
+        "bfp": 1942.366,
+        "unit_over_under": -127.238
+      },
+      {
+        "date": "2026-09-12",
+        "bfp": 2264.027,
+        "unit_over_under": -448.899
+      },
+      {
+        "date": "2026-09-13",
+        "bfp": 2264.027,
+        "unit_over_under": -448.899
+      },
+      {
+        "date": "2026-09-19",
+        "bfp": 2248.894,
+        "unit_over_under": -433.766
+      },
+      {
+        "date": "2026-09-20",
+        "bfp": 2248.894,
+        "unit_over_under": -433.766
+      },
+      {
+        "date": "2026-09-24",
+        "bfp": 2204.908,
+        "unit_over_under": -389.78
+      }
+    ]
+  },
   "exchange_rate_series": [
     {
       "date": "2026-08-28",
@@ -803,7 +1065,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.3563,
+  "current_exchange_rate": 16.3518,
   "accuracy": {
     "n": 5,
     "mean_abs_pct_error": 1.76,
@@ -816,5 +1078,5 @@
   },
   "next_price_change_date": "2026-10-07",
   "days_until_next_price_change": 13,
-  "generated_at": "2026-09-24T09:31:22.255098"
+  "generated_at": "2026-09-24T09:34:07.878910"
 }

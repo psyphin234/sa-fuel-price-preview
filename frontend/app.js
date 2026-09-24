@@ -332,14 +332,15 @@
 
   function noDataReason(iso) {
     const holiday = (state.data.public_holidays || {})[iso];
-    if (holiday) return { badge: "Public holiday", note: `No figures — ${holiday}, CEF doesn't publish on public holidays` };
+    if (holiday) return { badge: "Public holiday", why: `${holiday} — CEF doesn't publish on public holidays` };
     const weekday = new Date(iso + "T00:00:00Z").getUTCDay();
-    if (weekday === 0 || weekday === 6) return { badge: "Weekend", note: "No figures — CEF doesn't publish on weekends" };
-    return { badge: "No report", note: "No figures — CEF didn't publish a report for this day (usually an international market holiday)" };
+    if (weekday === 0 || weekday === 6) return { badge: "Weekend", why: "CEF doesn't publish on weekends" };
+    return { badge: "No report", why: "CEF didn't publish a report for this day (usually an international market holiday)" };
   }
 
   function renderTable() {
     const byDate = new Map(state.data.daily_series[state.fuel].map((d) => [d.date, d]));
+    const indicative = new Map(((state.data.indicative_days || {})[state.fuel] || []).map((d) => [d.date, d]));
     const start = state.data.latest_official_report.period_start;
     const lastSeries = [...byDate.keys()].sort().pop() || start;
     const generated = state.data.generated_at.slice(0, 10);
@@ -350,13 +351,22 @@
       const d = byDate.get(iso);
       if (!d) {
         const reason = noDataReason(iso);
+        const est = indicative.get(iso);
         const tr = document.createElement("tr");
         tr.className = "no-data-row";
-        tr.innerHTML = `
+        tr.innerHTML = est
+          ? `
+          <td>${fmtDate(iso)}</td>
+          <td>
+            <span class="src-badge none">${reason.badge} · estimate</span>
+            <div class="no-data-note">Estimate only — no official CEF figures for this day (${reason.why})</div>
+          </td>
+          <td class="num">${fmtCents(est.bfp)}</td>
+          <td class="num">${fmtCents(est.unit_over_under)}</td>`
+          : `
           <td>${fmtDate(iso)}</td>
           <td><span class="src-badge none">${reason.badge}</span></td>
-          <td colspan="2" class="no-data-note">${reason.note}</td>
-        `;
+          <td colspan="2" class="no-data-note">No figures — ${reason.why}</td>`;
         tbody.appendChild(tr);
         continue;
       }
