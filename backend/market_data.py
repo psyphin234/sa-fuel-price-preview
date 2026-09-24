@@ -13,6 +13,8 @@ We only use the % change of each series day-over-day, applied on top of the last
 Mediterranean level, only its short-term drift, which correlates strongly with
 these US benchmarks even though the price basis differs.
 """
+import datetime as dt
+
 import requests
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BFP-preview-tool/1.0"}
@@ -35,7 +37,7 @@ FUEL_PROXY = {
 }
 
 
-def _fetch_symbol(symbol: str, range_: str = "10d", interval: str = "1d") -> dict:
+def _fetch_symbol(symbol: str, range_: str = "3mo", interval: str = "1d") -> dict:
     url = YF_CHART_URL.format(symbol=symbol)
     resp = requests.get(url, headers=HEADERS, params={"range": range_, "interval": interval}, timeout=15)
     resp.raise_for_status()
@@ -62,6 +64,10 @@ def _fetch_symbol(symbol: str, range_: str = "10d", interval: str = "1d") -> dic
         pct_change = (latest_close - prev_close) / prev_close
         prev_price = prev_close
 
+    offset = meta.get("gmtoffset", 0) or 0
+    to_local_date = lambda ts: dt.datetime.fromtimestamp(ts + offset, dt.timezone.utc).date()
+    market_time = meta.get("regularMarketTime") or valid[-1][0]
+
     return {
         "symbol": symbol,
         "price": market_price,
@@ -69,6 +75,10 @@ def _fetch_symbol(symbol: str, range_: str = "10d", interval: str = "1d") -> dic
         "pct_change": pct_change,
         "regular_market_price": market_price,
         "regular_market_change_pct": market_change_pct,
+        "market_date": to_local_date(market_time),
+        # exchange-local trading date -> close; raw continuous-contract closes can
+        # jump on a futures roll, so these are only a fallback for daily moves
+        "history": {to_local_date(t): c for t, c in valid},
     }
 
 
@@ -86,4 +96,4 @@ def fetch_all_benchmarks() -> dict:
 
 if __name__ == "__main__":
     import json
-    print(json.dumps(fetch_all_benchmarks(), indent=2))
+    print(json.dumps(fetch_all_benchmarks(), indent=2, default=str))

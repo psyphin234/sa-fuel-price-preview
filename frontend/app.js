@@ -325,11 +325,41 @@
     };
   }
 
+  const shiftIsoDate = (iso, days) => {
+    const [y, m, d] = iso.split("-").map(Number);
+    return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
+  };
+
+  function noDataReason(iso) {
+    const holiday = (state.data.public_holidays || {})[iso];
+    if (holiday) return { badge: "Public holiday", note: `No figures — ${holiday}, CEF doesn't publish on public holidays` };
+    const weekday = new Date(iso + "T00:00:00Z").getUTCDay();
+    if (weekday === 0 || weekday === 6) return { badge: "Weekend", note: "No figures — CEF doesn't publish on weekends" };
+    return { badge: "No report", note: "No figures — CEF didn't publish a report for this day (usually an international market holiday)" };
+  }
+
   function renderTable() {
-    const series = [...state.data.daily_series[state.fuel]].sort((a, b) => b.date.localeCompare(a.date));
+    const byDate = new Map(state.data.daily_series[state.fuel].map((d) => [d.date, d]));
+    const start = state.data.latest_official_report.period_start;
+    const lastSeries = [...byDate.keys()].sort().pop() || start;
+    const generated = state.data.generated_at.slice(0, 10);
+    const end = generated > lastSeries ? generated : lastSeries;
     const tbody = $("#daily-table tbody");
     tbody.innerHTML = "";
-    series.forEach((d) => {
+    for (let iso = end; iso >= start; iso = shiftIsoDate(iso, -1)) {
+      const d = byDate.get(iso);
+      if (!d) {
+        const reason = noDataReason(iso);
+        const tr = document.createElement("tr");
+        tr.className = "no-data-row";
+        tr.innerHTML = `
+          <td>${fmtDate(iso)}</td>
+          <td><span class="src-badge none">${reason.badge}</span></td>
+          <td colspan="2" class="no-data-note">${reason.note}</td>
+        `;
+        tbody.appendChild(tr);
+        continue;
+      }
       const tr = document.createElement("tr");
       const srcLabel = d.source === "cef_official" ? "CEF official" : d.source === "estimated" ? "Estimated" : "Manual";
       tr.innerHTML = `
@@ -341,7 +371,7 @@
         <td class="num">${fmtCents(d.unit_over_under)}</td>
       `;
       tbody.appendChild(tr);
-    });
+    }
   }
 
   function renderManualForm() {

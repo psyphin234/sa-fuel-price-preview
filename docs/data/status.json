@@ -803,7 +803,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.3615,
+  "current_exchange_rate": 16.3563,
   "accuracy": {
     "n": 5,
     "mean_abs_pct_error": 1.76,
@@ -811,7 +811,10 @@
     "accuracy_pct": 98.2,
     "status": "ready"
   },
+  "public_holidays": {
+    "2026-09-24": "Heritage Day"
+  },
   "next_price_change_date": "2026-10-07",
   "days_until_next_price_change": 13,
-  "generated_at": "2026-09-24T09:22:32.013887"
+  "generated_at": "2026-09-24T09:31:22.255098"
 }
