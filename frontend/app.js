@@ -330,12 +330,18 @@
     return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
   };
 
+  const NO_DATA_NOTES = {
+    "*": "Weekend — CEF doesn't publish on weekends, and the markets its figures follow are closed.",
+    "**": "Public holiday — CEF doesn't publish on South African public holidays. Where international markets still traded, the figure shown is an estimate for reference only and isn't counted in the prediction.",
+    "***": "No CEF report for this day (usually an international market holiday). Any figure shown is an estimate for reference only and isn't counted in the prediction.",
+  };
+
   function noDataReason(iso) {
     const holiday = (state.data.public_holidays || {})[iso];
-    if (holiday) return { badge: "Public holiday", why: `${holiday} — CEF doesn't publish on public holidays` };
+    if (holiday) return { badge: holiday, mark: "**" };
     const weekday = new Date(iso + "T00:00:00Z").getUTCDay();
-    if (weekday === 0 || weekday === 6) return { badge: "Weekend", why: "CEF doesn't publish on weekends" };
-    return { badge: "No report", why: "CEF didn't publish a report for this day (usually an international market holiday)" };
+    if (weekday === 0 || weekday === 6) return { badge: "Weekend", mark: "*" };
+    return { badge: "No report", mark: "***" };
   }
 
   function renderTable() {
@@ -347,26 +353,22 @@
     const end = generated > lastSeries ? generated : lastSeries;
     const tbody = $("#daily-table tbody");
     tbody.innerHTML = "";
+    const usedMarks = new Set();
     for (let iso = end; iso >= start; iso = shiftIsoDate(iso, -1)) {
       const d = byDate.get(iso);
       if (!d) {
         const reason = noDataReason(iso);
         const est = indicative.get(iso);
+        usedMarks.add(reason.mark);
+        const mark = `<sup class="fn-mark">${reason.mark}</sup>`;
         const tr = document.createElement("tr");
         tr.className = "no-data-row";
-        tr.innerHTML = est
-          ? `
-          <td>${fmtDate(iso)}</td>
-          <td>
-            <span class="src-badge none">${reason.badge} · estimate</span>
-            <div class="no-data-note">Estimate only — no official CEF figures for this day (${reason.why})</div>
-          </td>
-          <td class="num">${fmtCents(est.bfp)}</td>
-          <td class="num">${fmtCents(est.unit_over_under)}</td>`
-          : `
+        tr.innerHTML = `
           <td>${fmtDate(iso)}</td>
           <td><span class="src-badge none">${reason.badge}</span></td>
-          <td colspan="2" class="no-data-note">No figures — ${reason.why}</td>`;
+          ${est
+            ? `<td class="num est-value">${fmtCents(est.bfp)}${mark}</td><td class="num est-value">${fmtCents(est.unit_over_under)}${mark}</td>`
+            : `<td class="num">No figures${mark}</td><td class="num">—</td>`}`;
         tbody.appendChild(tr);
         continue;
       }
@@ -382,6 +384,10 @@
       `;
       tbody.appendChild(tr);
     }
+    $("#table-notes").innerHTML = ["*", "**", "***"]
+      .filter((m) => usedMarks.has(m))
+      .map((m) => `<p><sup class="fn-mark">${m}</sup> ${NO_DATA_NOTES[m]}</p>`)
+      .join("");
   }
 
   function renderManualForm() {
