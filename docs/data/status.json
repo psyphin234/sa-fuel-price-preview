@@ -720,8 +720,8 @@
       },
       {
         "date": "2026-09-24",
-        "bfp": 1832.117,
-        "unit_over_under": -417.227
+        "bfp": 1842.526,
+        "unit_over_under": -427.636
       }
     ],
     "petrol93": [
@@ -732,8 +732,8 @@
       },
       {
         "date": "2026-09-24",
-        "bfp": 1787.788,
-        "unit_over_under": -388.898
+        "bfp": 1797.946,
+        "unit_over_under": -399.056
       }
     ],
     "diesel005": [
@@ -744,8 +744,8 @@
       },
       {
         "date": "2026-09-24",
-        "bfp": 2339.949,
-        "unit_over_under": -406.319
+        "bfp": 2322.792,
+        "unit_over_under": -389.162
       }
     ],
     "diesel0005": [
@@ -756,8 +756,8 @@
       },
       {
         "date": "2026-09-24",
-        "bfp": 2428.061,
-        "unit_over_under": -450.031
+        "bfp": 2410.258,
+        "unit_over_under": -432.228
       }
     ],
     "illpar": [
@@ -768,8 +768,8 @@
       },
       {
         "date": "2026-09-24",
-        "bfp": 2302.904,
-        "unit_over_under": -487.776
+        "bfp": 2286.019,
+        "unit_over_under": -470.891
       }
     ]
   },
@@ -865,7 +865,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.4601,
+  "current_exchange_rate": 16.4018,
   "accuracy": {
     "n": 5,
     "mean_abs_pct_error": 1.76,
@@ -878,5 +878,5 @@
   },
   "next_price_change_date": "2026-10-07",
   "days_until_next_price_change": 13,
-  "generated_at": "2026-09-24T17:18:50.204159"
+  "generated_at": "2026-09-24T18:18:51.438346"
 }
