@@ -172,14 +172,17 @@ def build_status_data():
                     "pct_error": round(rec["pct_error"] * 100, 2) if rec["pct_error"] is not None else None,
                 }
 
-    # Days CEF never publishes (weekends, public holidays, skipped days) get an
-    # indicative estimate for the table only: kept out of the prediction average,
-    # the charts and accuracy tracking, since no official figure will ever exist.
+    # Days CEF never publishes (public holidays, skipped days) get an indicative
+    # estimate for the table only: kept out of the prediction average, the charts
+    # and accuracy tracking, since no official figure will ever exist. Days the
+    # markets didn't trade (weekends, Christmas...) are skipped - they'd just repeat
+    # the previous day.
     indicative_days = {fuel: [] for fuel in cef.FUELS}
     d = latest.period_start
     while d <= today:
         base = next((r for r in reversed(period_reports) if r.report_date < d), None)
-        if base is not None:
+        markets_traded = any(d in day_moves for day_moves in moves.values())
+        if base is not None and markets_traded:
             est = bm.nowcast_single_day(base, d, moves)
             for fuel in cef.FUELS:
                 if d not in {e["date"] for e in daily_series[fuel]} and fuel in est.bfp:
