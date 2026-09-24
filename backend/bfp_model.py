@@ -13,22 +13,63 @@ as distinct from source="cef_official" or source="manual".
 """
 import datetime as dt
 from dataclasses import dataclass, field, asdict
+from functools import lru_cache
 from typing import Optional
 
 import cef_scraper as cef
 import market_data as md
 
-SA_HOLIDAYS_2026 = {
-    dt.date(2026, 1, 1), dt.date(2026, 3, 21), dt.date(2026, 4, 3),
-    dt.date(2026, 4, 6), dt.date(2026, 4, 27), dt.date(2026, 5, 1),
-    dt.date(2026, 6, 16), dt.date(2026, 8, 9), dt.date(2026, 8, 10),
-    dt.date(2026, 9, 24), dt.date(2026, 12, 16), dt.date(2026, 12, 25),
-    dt.date(2026, 12, 26),
+SA_FIXED_HOLIDAYS = {
+    (1, 1): "New Year's Day",
+    (3, 21): "Human Rights Day",
+    (4, 27): "Freedom Day",
+    (5, 1): "Workers' Day",
+    (6, 16): "Youth Day",
+    (8, 9): "National Women's Day",
+    (9, 24): "Heritage Day",
+    (12, 16): "Day of Reconciliation",
+    (12, 25): "Christmas Day",
+    (12, 26): "Day of Goodwill",
 }
 
 
+def easter_sunday(year: int) -> dt.date:
+    """Anonymous Gregorian computus."""
+    a = year % 19
+    b, c = divmod(year, 100)
+    d, e = divmod(b, 4)
+    f = (b + 8) // 25
+    g = (b - f + 1) // 3
+    h = (19 * a + b - d - g + 15) % 30
+    i, k = divmod(c, 4)
+    l = (32 + 2 * e + 2 * i - h - k) % 7
+    m = (a + 11 * h + 22 * l) // 451
+    month, day = divmod(h + l - 7 * m + 114, 31)
+    return dt.date(year, month, day + 1)
+
+
+@lru_cache(maxsize=None)
+def sa_public_holidays(year: int) -> dict:
+    """{date: name} of South African public holidays for `year`. Under the Public
+    Holidays Act a holiday falling on a Sunday moves to the Monday. One-off
+    holidays the President declares (e.g. election days) aren't included."""
+    holidays = {dt.date(year, m, d): name for (m, d), name in SA_FIXED_HOLIDAYS.items()}
+    easter = easter_sunday(year)
+    holidays[easter - dt.timedelta(days=2)] = "Good Friday"
+    holidays[easter + dt.timedelta(days=1)] = "Family Day"
+    for d, name in list(holidays.items()):
+        if d.weekday() == 6:
+            monday = d + dt.timedelta(days=1)
+            holidays.setdefault(monday, f"{name} (observed)")
+    return holidays
+
+
+def holiday_name(d: dt.date) -> Optional[str]:
+    return sa_public_holidays(d.year).get(d)
+
+
 def is_business_day(d: dt.date) -> bool:
-    return d.weekday() < 5 and d not in SA_HOLIDAYS_2026
+    return d.weekday() < 5 and holiday_name(d) is None
 
 
 def business_days_between(start: dt.date, end: dt.date) -> int:
@@ -82,24 +123,46 @@ class DayEstimate:
     note: Optional[str] = None
 
 
-def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, benchmarks: dict) -> DayEstimate:
-    """Estimate one day's BFP by applying the % move in free benchmarks (vs the
-    previous close) to the last official BFP for each fuel, and today's live
-    USD/ZAR rate vs the last official exchange rate."""
-    fx = benchmarks.get("usdzar", {})
-    fx_price = fx.get("price")
-    fx_pct = fx.get("pct_change", 0.0) or 0.0
+def build_daily_moves(benchmarks: dict, recorded: dict) -> dict:
+    """{benchmark name: {trading date: day-over-day % move}}. Moves recorded live
+    from Yahoo's own change figure (see db.upsert_benchmark_day) are roll-safe and
+    win; raw close-to-close from the price history only fills days we never saw."""
+    moves = {}
+    for name, bench in benchmarks.items():
+        history = sorted((bench.get("history") or {}).items())
+        day_moves = {
+            d: (close / prev - 1)
+            for (_, prev), (d, close) in zip(history, history[1:])
+            if prev
+        }
+        day_moves.update(recorded.get(name, {}))
+        moves[name] = day_moves
+    return moves
+
+
+def _move_factor(day_moves: dict, after: dt.date, through: dt.date) -> float:
+    factor = 1.0
+    for d, pct in day_moves.items():
+        if after < d <= through:
+            factor *= 1 + pct
+    return factor
+
+
+def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, moves: dict) -> DayEstimate:
+    """Estimate one day's BFP from the last official report by compounding each
+    benchmark's daily moves from the day after that report up to and including
+    `target_date`. A finished day's moves are final, so its estimate stops
+    changing; only today's keeps tracking live prices."""
+    fx_factor = _move_factor(moves.get("usdzar", {}), base.report_date, target_date)
 
     bfp_est, unit_est = {}, {}
     for fuel in cef.FUELS:
-        proxy_name = md.FUEL_PROXY[fuel]
-        proxy = benchmarks.get(proxy_name, {})
-        prod_pct = proxy.get("pct_change", 0.0) or 0.0
         base_bfp = base.bfp.get(fuel)
         ref = base.reference_price.get(fuel)
         if base_bfp is None:
             continue
-        est_bfp = base_bfp * (1 + prod_pct) * (1 + fx_pct)
+        prod_factor = _move_factor(moves.get(md.FUEL_PROXY[fuel], {}), base.report_date, target_date)
+        est_bfp = base_bfp * prod_factor * fx_factor
         bfp_est[fuel] = round(est_bfp, 3)
         if ref is not None:
             unit_est[fuel] = round(ref - est_bfp, 3)
@@ -109,7 +172,7 @@ def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, benchmarks: 
         source="estimated",
         bfp=bfp_est,
         unit_over_under=unit_est,
-        exchange_rate=round(fx_price, 4) if fx_price else None,
+        exchange_rate=round(base.exchange_rate * fx_factor, 4) if base.exchange_rate else None,
         note="Estimated from free market benchmarks (Brent/RBOB/ULSD futures + USD/ZAR), "
              "not the real Platts Mediterranean assessment. Replace with a manual entry if you "
              "have an actual Platts-based figure for this day.",
@@ -133,7 +196,7 @@ class Prediction:
     note: str
 
 
-def build_prediction(fuel: str, latest: cef.DailyReport, benchmarks: dict,
+def build_prediction(fuel: str, latest: cef.DailyReport, moves: dict,
                       manual_overrides: dict = None, today: dt.date = None) -> Prediction:
     """manual_overrides: {date: {"bfp": {...}, "exchange_rate": ...}} - real numbers the user typed in,
     which take priority over the estimated nowcast for that date."""
@@ -146,7 +209,6 @@ def build_prediction(fuel: str, latest: cef.DailyReport, benchmarks: dict,
     gap_days = business_days_after(latest.report_date, today)
 
     day_values = []
-    running_base = latest
     for d in gap_days:
         if d in manual_overrides and "bfp" in manual_overrides[d] and fuel in manual_overrides[d]["bfp"]:
             mo = manual_overrides[d]
@@ -159,18 +221,7 @@ def build_prediction(fuel: str, latest: cef.DailyReport, benchmarks: dict,
                 note="Manually entered value.",
             ))
         else:
-            est = nowcast_single_day(running_base, d, benchmarks)
-            day_values.append(est)
-            # chain subsequent estimated days off this one so a multi-day gap compounds sensibly
-            if est.bfp.get(fuel) is not None:
-                chained = cef.DailyReport(
-                    report_date=d, period_start=latest.period_start, period_end=latest.period_end,
-                    reference_valid_from=latest.reference_valid_from,
-                    pump_price_effective=latest.pump_price_effective,
-                    reference_price=latest.reference_price, bfp=est.bfp,
-                    unit_over_under=est.unit_over_under, exchange_rate=est.exchange_rate,
-                )
-                running_base = chained
+            day_values.append(nowcast_single_day(latest, d, moves))
 
     n_new = len(day_values)
     new_sum = sum(dv.unit_over_under.get(fuel, 0) for dv in day_values if fuel in dv.unit_over_under)

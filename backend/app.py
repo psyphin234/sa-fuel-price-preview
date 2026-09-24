@@ -80,6 +80,9 @@ def get_benchmarks(force=False):
             and (now - _benchmark_cache["fetched_at"]).total_seconds() < BENCHMARK_TTL_SECONDS):
         return _benchmark_cache["data"]
     data = md.fetch_all_benchmarks()
+    for name, bench in data.items():
+        if bench.get("market_date") and bench.get("pct_change") is not None:
+            db.upsert_benchmark_day(bench["market_date"], name, bench["pct_change"], bench.get("price"))
     _benchmark_cache["data"] = data
     _benchmark_cache["fetched_at"] = now
     return data
@@ -101,9 +104,11 @@ def build_status_data():
     overrides = manual_overrides_dict()
     today = dt.date.today()
 
+    moves = bm.build_daily_moves(benchmarks, db.get_benchmark_days(latest.period_start))
+
     predictions = {}
     for fuel in cef.FUELS:
-        pred = bm.build_prediction(fuel, latest, benchmarks, manual_overrides=overrides, today=today)
+        pred = bm.build_prediction(fuel, latest, moves, manual_overrides=overrides, today=today)
         predictions[fuel] = pred
         db.log_prediction(latest.period_start, latest.period_end, fuel,
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
@@ -178,6 +183,12 @@ def build_status_data():
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
+        "public_holidays": {
+            d.isoformat(): name
+            for year in range(latest.period_start.year, today.year + 1)
+            for d, name in bm.sa_public_holidays(year).items()
+            if latest.period_start <= d <= today
+        },
         "next_price_change_date": next_change,
         "days_until_next_price_change": (next_change - today).days,
         "generated_at": dt.datetime.now(),
