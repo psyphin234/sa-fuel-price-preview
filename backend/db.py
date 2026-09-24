@@ -178,6 +178,15 @@ def log_accuracy(date: dt.date, fuel: str, estimated_bfp: float, official_bfp: f
         )
 
 
+def get_accuracy_by_date(start: dt.date, end: dt.date) -> dict:
+    """Returns {(date_iso, fuel): row} for reconciled estimates within [start, end]."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM accuracy_log WHERE date BETWEEN ? AND ?", (start.isoformat(), end.isoformat())
+        ).fetchall()
+    return {(r["date"], r["fuel"]): dict(r) for r in rows}
+
+
 def get_accuracy_records(limit: int = 90) -> list:
     with get_conn() as conn:
         rows = conn.execute(

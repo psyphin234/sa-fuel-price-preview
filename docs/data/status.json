@@ -242,7 +242,12 @@
         "date": "2026-09-23",
         "bfp": 1796.84,
         "unit_over_under": -381.95,
-        "source": "cef_official"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 1783.271,
+          "error_c_per_l": 13.569,
+          "pct_error": 0.76
+        }
       }
     ],
     "petrol93": [
@@ -352,7 +357,12 @@
         "date": "2026-09-23",
         "bfp": 1753.365,
         "unit_over_under": -354.475,
-        "source": "cef_official"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 1739.871,
+          "error_c_per_l": 13.494,
+          "pct_error": 0.77
+        }
       }
     ],
     "diesel005": [
@@ -462,7 +472,12 @@
         "date": "2026-09-23",
         "bfp": 2248.841,
         "unit_over_under": -315.211,
-        "source": "cef_official"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 2196.295,
+          "error_c_per_l": 52.546,
+          "pct_error": 2.34
+        }
       }
     ],
     "diesel0005": [
@@ -572,7 +587,12 @@
         "date": "2026-09-23",
         "bfp": 2333.523,
         "unit_over_under": -355.493,
-        "source": "cef_official"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 2279.932,
+          "error_c_per_l": 53.591,
+          "pct_error": 2.3
+        }
       }
     ],
     "illpar": [
@@ -682,7 +702,12 @@
         "date": "2026-09-23",
         "bfp": 2213.239,
         "unit_over_under": -398.111,
-        "source": "cef_official"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 2154.709,
+          "error_c_per_l": 58.53,
+          "pct_error": 2.64
+        }
       }
     ]
   },
@@ -778,7 +803,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.3567,
+  "current_exchange_rate": 16.3615,
   "accuracy": {
     "n": 5,
     "mean_abs_pct_error": 1.76,
@@ -788,5 +813,5 @@
   },
   "next_price_change_date": "2026-10-07",
   "days_until_next_price_change": 13,
-  "generated_at": "2026-09-24T09:18:53.739830"
+  "generated_at": "2026-09-24T09:22:32.013887"
 }

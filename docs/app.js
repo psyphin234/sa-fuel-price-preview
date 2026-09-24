@@ -34,6 +34,13 @@
     return `${sign}R${centsToRand(c).toFixed(2)}/l`;
   };
   const fmtCents = (c) => c === null || c === undefined ? "—" : c.toFixed(2);
+  const describeEstimate = (est, official) => {
+    const diff = est.error_c_per_l;
+    const off = Math.abs(diff).toFixed(2);
+    const pct = est.pct_error === null ? "" : ` (${Math.abs(est.pct_error).toFixed(2)}%)`;
+    const verdict = Math.abs(diff) < 0.005 ? "spot on" : `${off} c/l too ${diff > 0 ? "low" : "high"}${pct}`;
+    return { estimate: fmtCents(est.bfp), official: fmtCents(official), verdict };
+  };
   const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
 
   function buildTabs() {
@@ -92,6 +99,8 @@
     const bfpValues = series.map((d) => d.bfp);
     const refValues = series.map(() => referenceValue);
     const isEstimated = series.map((d) => d.source !== "cef_official");
+    const priorEstimates = series.map((d) => d.estimate ? d.estimate.bfp : null);
+    const hasPriorEstimates = priorEstimates.some((v) => v !== null);
 
     const blue = cssVar("--series-blue");
     const orange = cssVar("--series-orange");
@@ -132,6 +141,18 @@
             tension: 0,
             fill: false,
           },
+          ...(hasPriorEstimates ? [{
+            label: "Our estimate before CEF published",
+            data: priorEstimates,
+            showLine: false,
+            borderColor: textSec,
+            backgroundColor: cssVar("--surface-1"),
+            pointStyle: "rectRot",
+            pointRadius: 5,
+            pointHoverRadius: 6,
+            pointBorderWidth: 2,
+            estimateFor: series,
+          }] : []),
         ],
       },
       options: chartOptions(grid, textSec, "c/l"),
@@ -279,8 +300,16 @@
           labels: { color: textSec, boxWidth: 16, boxHeight: 2, usePointStyle: false, font: { size: 13 } },
         },
         tooltip: {
+          filter: (item) => item.parsed.y !== null && item.parsed.y !== undefined,
           callbacks: {
-            label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y === null ? "—" : ctx.parsed.y.toFixed(2)} ${unit}`,
+            label: (ctx) => {
+              const day = ctx.dataset.estimateFor && ctx.dataset.estimateFor[ctx.dataIndex];
+              if (day && day.estimate) {
+                const e = describeEstimate(day.estimate, day.bfp);
+                return `Our estimate was ${e.estimate} ${unit} — ${e.verdict}`;
+              }
+              return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ${unit}`;
+            },
           },
         },
       },
@@ -299,7 +328,9 @@
       const tr = document.createElement("tr");
       const srcLabel = d.source === "cef_official" ? "CEF official" : d.source === "estimated" ? "Estimated" : "Manual";
       tr.innerHTML = `
-        <td>${fmtDate(d.date)}</td>
+        <td>${d.estimate
+          ? `<span class="has-compare" tabindex="0" data-est="${d.estimate.bfp}" data-official="${d.bfp}" data-err="${d.estimate.error_c_per_l}" data-pct="${d.estimate.pct_error ?? ""}">${fmtDate(d.date)}</span>`
+          : fmtDate(d.date)}</td>
         <td><span class="src-badge ${d.source}">${srcLabel}</span></td>
         <td class="num">${fmtCents(d.bfp)}</td>
         <td class="num">${fmtCents(d.unit_over_under)}</td>
@@ -327,6 +358,46 @@
       : `⏳ ${days} ${dayWord} until the next price change (${changeDate})`;
     pill.className = "status-pill countdown-pill" + (days <= 3 ? " urgent" : "");
   }
+
+  const compareTip = document.createElement("div");
+  compareTip.className = "compare-tip";
+  compareTip.setAttribute("role", "tooltip");
+  compareTip.hidden = true;
+  document.body.appendChild(compareTip);
+
+  function showCompareTip(el) {
+    const est = {
+      bfp: parseFloat(el.dataset.est),
+      error_c_per_l: parseFloat(el.dataset.err),
+      pct_error: el.dataset.pct === "" ? null : parseFloat(el.dataset.pct),
+    };
+    const e = describeEstimate(est, parseFloat(el.dataset.official));
+    compareTip.innerHTML = `
+      <div class="compare-tip-title">Estimate vs. CEF official</div>
+      <div class="compare-tip-row"><span>Our estimate</span><strong>${e.estimate} c/l</strong></div>
+      <div class="compare-tip-row"><span>CEF official</span><strong>${e.official} c/l</strong></div>
+      <div class="compare-tip-verdict">Estimate was ${e.verdict}</div>`;
+    compareTip.hidden = false;
+    const r = el.getBoundingClientRect();
+    const tr = compareTip.getBoundingClientRect();
+    let left = r.left;
+    let top = r.top - tr.height - 8;
+    if (top < 8) top = r.bottom + 8;
+    left = Math.max(8, Math.min(left, window.innerWidth - tr.width - 8));
+    compareTip.style.left = `${left}px`;
+    compareTip.style.top = `${top}px`;
+  }
+  const hideCompareTip = () => { compareTip.hidden = true; };
+  document.addEventListener("mouseover", (e) => {
+    const el = e.target.closest(".has-compare");
+    if (el) showCompareTip(el); else if (!compareTip.hidden && document.activeElement?.closest?.(".has-compare") == null) hideCompareTip();
+  });
+  document.addEventListener("focusin", (e) => {
+    const el = e.target.closest(".has-compare");
+    if (el) showCompareTip(el); else hideCompareTip();
+  });
+  document.addEventListener("focusout", (e) => { if (e.target.closest(".has-compare")) hideCompareTip(); });
+  window.addEventListener("scroll", hideCompareTip, { passive: true });
 
   function render() {
     buildTabs();

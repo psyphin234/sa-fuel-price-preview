@@ -152,6 +152,21 @@ def build_status_data():
     accuracy.reconcile(period_reports)
     accuracy_summary = accuracy.get_accuracy_summary()
 
+    # Official days that were estimated first carry that earlier estimate, so the
+    # UI can show how close it was.
+    checked = db.get_accuracy_by_date(latest.period_start, latest.period_end)
+    for fuel in cef.FUELS:
+        for entry in daily_series[fuel]:
+            if entry["source"] != "cef_official":
+                continue
+            rec = checked.get((entry["date"].isoformat(), fuel))
+            if rec:
+                entry["estimate"] = {
+                    "bfp": rec["estimated_bfp"],
+                    "error_c_per_l": round(rec["error_c_per_l"], 3),
+                    "pct_error": round(rec["pct_error"] * 100, 2) if rec["pct_error"] is not None else None,
+                }
+
     next_change = bm.next_price_change_date(latest.pump_price_effective)
 
     return {
