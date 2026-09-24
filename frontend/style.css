@@ -523,3 +523,5 @@ td.num, th.num { text-align: right; }
 .no-data-row td { color: var(--text-muted); background: var(--surface-2); }
 .no-data-row td.no-data-note { font-size: 13px; white-space: normal; }
 .src-badge.none { background: color-mix(in srgb, var(--text-muted) 16%, transparent); color: var(--text-secondary); }
+.no-data-row td.num { font-style: italic; }
+.no-data-row .no-data-note { display: block; margin-top: 4px; font-size: 12px; line-height: 1.4; white-space: normal; max-width: 34ch; }
