@@ -50,6 +50,12 @@ CREATE TABLE IF NOT EXISTS benchmark_daily (
     PRIMARY KEY (trade_date, name)
 );
 
+CREATE TABLE IF NOT EXISTS cef_release_log (
+    report_date TEXT PRIMARY KEY,
+    last_missing_at TEXT,
+    first_seen_at TEXT
+);
+
 CREATE TABLE IF NOT EXISTS accuracy_log (
     date TEXT NOT NULL,
     fuel TEXT NOT NULL,
@@ -227,3 +233,33 @@ def get_benchmark_days(since: dt.date) -> dict:
     for r in rows:
         out.setdefault(r["name"], {})[dt.date.fromisoformat(r["trade_date"])] = r["pct_change"]
     return out
+
+
+def note_report_missing(report_date: dt.date):
+    """Records a check that found no CEF report yet for `report_date`."""
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO cef_release_log (report_date, last_missing_at) VALUES (?, ?) "
+            "ON CONFLICT(report_date) DO UPDATE SET last_missing_at=excluded.last_missing_at "
+            "WHERE cef_release_log.first_seen_at IS NULL",
+            (report_date.isoformat(), dt.datetime.now().isoformat(timespec="seconds")),
+        )
+
+
+def note_report_found(report_date: dt.date):
+    """Records the first time a CEF report for `report_date` was found."""
+    with get_conn() as conn:
+        conn.execute(
+            "INSERT INTO cef_release_log (report_date, first_seen_at) VALUES (?, ?) "
+            "ON CONFLICT(report_date) DO UPDATE SET first_seen_at=excluded.first_seen_at "
+            "WHERE cef_release_log.first_seen_at IS NULL",
+            (report_date.isoformat(), dt.datetime.now().isoformat(timespec="seconds")),
+        )
+
+
+def get_release_log() -> list:
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT * FROM cef_release_log WHERE first_seen_at IS NOT NULL ORDER BY report_date"
+        ).fetchall()
+    return [dict(r) for r in rows]
