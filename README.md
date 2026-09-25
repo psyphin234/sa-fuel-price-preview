@@ -13,12 +13,17 @@ usually with about a one-day lag. This tool:
 1. **Scrapes and parses CEF's own official daily PDFs** for every day already
    published in the current review period (the period that determines next
    month's price change). This part is exact - it's CEF's own numbers.
-2. **Estimates the 1 (occasionally 2) day(s) CEF hasn't published yet** using
-   free market benchmarks - ICE Brent crude, NYMEX RBOB gasoline, NY Harbor
-   ULSD futures, and USD/ZAR spot (all via Yahoo Finance's public quote API,
-   no key required) - applied as a % move on top of the last official,
-   Platts-based figure. This is a same-direction proxy, **not** the real
-   Mediterranean Platts assessment, and can drift in volatile weeks.
+2. **Estimates the 1 (occasionally 2) day(s) CEF hasn't published yet** from
+   free Yahoo Finance hourly prices (no key required): US RBOB petrol, NY Harbor
+   ULSD/heating oil and Brent futures read at 15:00 London - just before the
+   London Platts assessment CEF's figures are built from - plus USD/ZAR at
+   10:00 London, which is what CEF's exchange rate tracks. How much each market
+   counts for each fuel is re-fitted every run on up to the last 250 CEF days
+   (`backend/nowcast.py`). In a backtest over Jun 2025 - Sep 2026 this was
+   typically within 1.35% of CEF's real figure, vs 2.04% for "no change" and
+   2.11% for the original model. It is still a proxy, **not** the real
+   Mediterranean Platts assessment, and misses when European prices diverge
+   from US markets.
 3. **Lets you override the estimate** with a real number if you ever get hold
    of one (a Platts subscription, a trade desk, etc.) - it takes priority over
    the estimate for that date everywhere in the app.
@@ -39,7 +44,7 @@ Requires Python 3.10+ (no Node.js needed).
 .\run.ps1
 ```
 
-This installs the three dependencies (`flask`, `requests`, `pdfplumber`) and
+This installs the dependencies (`flask`, `requests`, `pdfplumber`, `numpy`) and
 starts the server at **http://127.0.0.1:5057**, opening it in your browser.
 
 Or manually:
@@ -55,8 +60,13 @@ python app.py
 ```
 backend/
   cef_scraper.py   - fetches + parses CEF's daily PDF reports
-  market_data.py    - free Yahoo Finance benchmarks (Brent, RBOB, ULSD, USD/ZAR)
-  bfp_model.py       - nowcast + blended-average prediction logic
+  market_data.py    - live Yahoo Finance quotes (Brent, RBOB, ULSD, USD/ZAR)
+  nowcast.py         - estimates unpublished days from hourly market prices,
+                       with weights re-fitted on CEF's own history each run
+  bfp_model.py       - blended-average prediction logic
+  backtest_fetch.py  - downloads CEF's historical reports for backtesting
+  backtest.py        - scores candidate estimation models against that history
+  release_times.py   - prints when CEF's reports tend to come out
   db.py               - SQLite: manual overrides, report cache, prediction history
   app.py                - Flask app / API (private, local only)
   publish.py             - standalone script: builds a status snapshot and
@@ -72,6 +82,7 @@ docs/
 data/
   bfp.db      - local SQLite database (created on first run, gitignored)
   publish.log - log of each scheduled publish run (gitignored)
+  backtest/   - downloaded history used by the backtest (gitignored)
 ```
 
 ## Public site + hourly auto-publish
@@ -133,6 +144,12 @@ either - it only points at GitHub's servers, never your machine:
   DMRE can adjust independently, so treat this as directional, not exact.
 - The review period only closes around the 25th of the month - a prediction
   made early in the cycle can still move a lot before it closes.
+- CEF publishes a report every weekday, public holidays included (on days
+  with no London Platts assessment, e.g. Christmas, it repeats the previous
+  figure). Month-end reports are uploaded to the *next* month's folder on
+  CEF's site, which the scraper checks too.
+- To re-check the model: `python backtest_fetch.py 2025-06-01 <today>` then
+  `python backtest.py` (from `backend/`).
 - Diesel and illuminating paraffin don't have a single national pump price
   (diesel is wholesale/deregulated, paraffin has a price cap) - the "current
   price" shown for those is CEF's own wholesale / max-retail reference row.

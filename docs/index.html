@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=7">
+<link rel="stylesheet" href="style.css?v=8">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
 </head>
 <body>
@@ -128,7 +128,7 @@
 
       <footer class="disclaimer panel">
         <h2>How this works, and what to trust</h2>
-        <p>Every day already published by CEF (<a href="https://cefgroup.co.za/daily-basic-fuel-price/" target="_blank" rel="noopener">cefgroup.co.za</a>) is read directly from their own daily report — that part matches CEF exactly. The one or two most recent days CEF hasn't published yet are <strong>estimated</strong> from free market benchmarks (ICE Brent, NYMEX RBOB gasoline, NY Harbor ULSD futures, USD/ZAR spot), scaled onto the last official Platts-based figure — a same-direction proxy, not the real Mediterranean Platts assessment. The predicted price move is the review-period average over/under recovery so far; the actual government announcement (effective the first Wednesday of the month) can differ because it also folds in separate slate-levy and fuel-levy decisions.</p>
+        <p>Every day already published by CEF (<a href="https://cefgroup.co.za/daily-basic-fuel-price/" target="_blank" rel="noopener">cefgroup.co.za</a>) is read directly from their own daily report — that part matches CEF exactly. The one or two most recent days CEF hasn't published yet are <strong>estimated</strong> from US petrol (RBOB), diesel (heating oil) and Brent crude futures read at 15:00 London — just before the London Platts assessment CEF's figures are built from — plus the USD/ZAR rate. How much each market counts for each fuel is re-learned every hour from how CEF's own figures have tracked them over the past year; tested against 16 months of CEF history, this is typically within about 1.3% of CEF's real figure. It is still a proxy, not the real Mediterranean Platts assessment, so it can miss on days when European prices move differently from US markets. The predicted price move is the review-period average over/under recovery so far; the actual government announcement (effective the first Wednesday of the month) can differ because it also folds in separate slate-levy and fuel-levy decisions.</p>
           <p class="muted small">This data is generated on a private machine and pushed here on a schedule — it is not live. See the timestamp above for how fresh it is.</p>
       </footer>
 
@@ -138,6 +138,6 @@
 
 <footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports</footer>
 
-<script src="app.js?v=7"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>

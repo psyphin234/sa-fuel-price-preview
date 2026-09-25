@@ -41,15 +41,6 @@ CREATE TABLE IF NOT EXISTS estimate_log (
     PRIMARY KEY (date, fuel)
 );
 
-CREATE TABLE IF NOT EXISTS benchmark_daily (
-    trade_date TEXT NOT NULL,
-    name TEXT NOT NULL,
-    pct_change REAL NOT NULL,
-    price REAL,
-    updated_at TEXT NOT NULL,
-    PRIMARY KEY (trade_date, name)
-);
-
 CREATE TABLE IF NOT EXISTS cef_release_log (
     report_date TEXT PRIMARY KEY,
     last_missing_at TEXT,
@@ -124,6 +115,16 @@ def cache_report(report_date: dt.date, report_dict: dict):
             "ON CONFLICT(report_date) DO UPDATE SET report_json=excluded.report_json, cached_at=excluded.cached_at",
             (report_date.isoformat(), json.dumps(report_dict, default=str), dt.datetime.now().isoformat()),
         )
+
+
+def get_cached_reports(start: dt.date, end: dt.date) -> list:
+    """Cached report dicts with start <= report_date <= end, oldest first (no fetching)."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT report_json FROM cef_report_cache WHERE report_date BETWEEN ? AND ? ORDER BY report_date",
+            (start.isoformat(), end.isoformat()),
+        ).fetchall()
+    return [json.loads(r["report_json"]) for r in rows]
 
 
 def get_cached_report(report_date: dt.date):
@@ -208,31 +209,6 @@ def get_accuracy_records(limit: int = 90) -> list:
             "SELECT * FROM accuracy_log ORDER BY date DESC LIMIT ?", (limit,)
         ).fetchall()
     return [dict(r) for r in rows]
-
-
-def upsert_benchmark_day(trade_date: dt.date, name: str, pct_change: float, price: float):
-    """Stores a benchmark's roll-safe day-over-day move for its trading date. Later
-    runs on the same trading date overwrite it, so once the day is over the stored
-    value is that day's final move."""
-    with get_conn() as conn:
-        conn.execute(
-            "INSERT INTO benchmark_daily (trade_date, name, pct_change, price, updated_at) VALUES (?, ?, ?, ?, ?) "
-            "ON CONFLICT(trade_date, name) DO UPDATE SET pct_change=excluded.pct_change, "
-            "price=excluded.price, updated_at=excluded.updated_at",
-            (trade_date.isoformat(), name, pct_change, price, dt.datetime.now().isoformat()),
-        )
-
-
-def get_benchmark_days(since: dt.date) -> dict:
-    """Returns {name: {date: pct_change}} for trading dates on or after `since`."""
-    with get_conn() as conn:
-        rows = conn.execute(
-            "SELECT trade_date, name, pct_change FROM benchmark_daily WHERE trade_date >= ?", (since.isoformat(),)
-        ).fetchall()
-    out = {}
-    for r in rows:
-        out.setdefault(r["name"], {})[dt.date.fromisoformat(r["trade_date"])] = r["pct_change"]
-    return out
 
 
 def note_report_missing(report_date: dt.date):

@@ -9,6 +9,7 @@ import market_data as md
 import bfp_model as bm
 import db
 import accuracy
+import nowcast
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -17,6 +18,10 @@ db.init_db()
 
 _benchmark_cache = {"data": None, "fetched_at": None}
 BENCHMARK_TTL_SECONDS = 120
+_market_cache = {"data": None, "fetched_at": None}
+MARKET_TTL_SECONDS = 600
+HISTORY_DAYS = 380            # enough weekdays for nowcast.TRAIN_WINDOW
+HISTORY_BACKFILL_PER_RUN = 30  # keeps a cold start from making one run very slow
 
 
 def json_default(o):
@@ -38,15 +43,16 @@ class JSONResponse:
         return app.response_class(dumps(obj), status=status, mimetype="application/json")
 
 
+def _report_from_cache(cached: dict) -> cef.DailyReport:
+    for key in ("report_date", "period_start", "period_end", "reference_valid_from", "pump_price_effective"):
+        cached[key] = dt.date.fromisoformat(cached[key])
+    return cef.DailyReport(**cached)
+
+
 def get_report_cached(date: dt.date):
     cached = db.get_cached_report(date)
     if cached:
-        cached["report_date"] = dt.date.fromisoformat(cached["report_date"])
-        cached["period_start"] = dt.date.fromisoformat(cached["period_start"])
-        cached["period_end"] = dt.date.fromisoformat(cached["period_end"])
-        cached["reference_valid_from"] = dt.date.fromisoformat(cached["reference_valid_from"])
-        cached["pump_price_effective"] = dt.date.fromisoformat(cached["pump_price_effective"])
-        return cef.DailyReport(**cached)
+        return _report_from_cache(cached)
     rep = cef.fetch_and_parse(date)
     if rep:
         db.cache_report(date, rep.__dict__)
@@ -70,7 +76,7 @@ def get_period_reports(period_start: dt.date, period_end: dt.date):
     reports = []
     d = period_start
     while d <= period_end:
-        rep = get_report_cached(d)
+        rep = get_report_cached(d) if bm.is_business_day(d) else None
         if rep is not None:
             reports.append(rep)
         d += dt.timedelta(days=1)
@@ -83,12 +89,39 @@ def get_benchmarks(force=False):
             and (now - _benchmark_cache["fetched_at"]).total_seconds() < BENCHMARK_TTL_SECONDS):
         return _benchmark_cache["data"]
     data = md.fetch_all_benchmarks()
-    for name, bench in data.items():
-        if bench.get("market_date") and bench.get("pct_change") is not None:
-            db.upsert_benchmark_day(bench["market_date"], name, bench["pct_change"], bench.get("price"))
     _benchmark_cache["data"] = data
     _benchmark_cache["fetched_at"] = now
     return data
+
+
+def get_market():
+    now = dt.datetime.now()
+    if (_market_cache["data"] and _market_cache["fetched_at"]
+            and (now - _market_cache["fetched_at"]).total_seconds() < MARKET_TTL_SECONDS):
+        return _market_cache["data"]
+    data = nowcast.fetch_market()
+    _market_cache["data"] = data
+    _market_cache["fetched_at"] = now
+    return data
+
+
+def get_history_reports(end: dt.date) -> list:
+    """Official reports for the last HISTORY_DAYS, used to fit the nowcast. Fills
+    gaps in the local cache a few days per run; days CEF never published are
+    simply retried later (there are almost none)."""
+    start = end - dt.timedelta(days=HISTORY_DAYS)
+    cached = {r["report_date"]: r for r in db.get_cached_reports(start, end)}
+    fetched = 0
+    d = end
+    while d >= start and fetched < HISTORY_BACKFILL_PER_RUN:
+        if bm.is_business_day(d) and d.isoformat() not in cached:
+            rep = cef.fetch_and_parse(d)
+            fetched += 1
+            if rep:
+                db.cache_report(d, rep.__dict__)
+                cached[d.isoformat()] = db.get_cached_report(d)
+        d -= dt.timedelta(days=1)
+    return [_report_from_cache(dict(cached[k])) for k in sorted(cached)]
 
 
 def manual_overrides_dict():
@@ -107,11 +140,12 @@ def build_status_data():
     overrides = manual_overrides_dict()
     today = dt.date.today()
 
-    moves = bm.build_daily_moves(benchmarks, db.get_benchmark_days(latest.period_start))
+    market = get_market()
+    weights = nowcast.fit_weights(get_history_reports(latest.report_date), market, cef.FUELS)
 
     predictions = {}
     for fuel in cef.FUELS:
-        pred = bm.build_prediction(fuel, latest, moves, manual_overrides=overrides, today=today)
+        pred = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides, today=today)
         predictions[fuel] = pred
         db.log_prediction(latest.period_start, latest.period_end, fuel,
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
@@ -175,18 +209,15 @@ def build_status_data():
                     "pct_error": round(rec["pct_error"] * 100, 2) if rec["pct_error"] is not None else None,
                 }
 
-    # Days CEF never publishes (public holidays, skipped days) get an indicative
-    # estimate for the table only: kept out of the prediction average, the charts
-    # and accuracy tracking, since no official figure will ever exist. Days the
-    # markets didn't trade (weekends, Christmas...) are skipped - they'd just repeat
-    # the previous day.
+    # A weekday CEF skipped (very rare) gets an indicative estimate for the table
+    # only: kept out of the prediction average, the charts and accuracy tracking,
+    # since no official figure will ever exist for it.
     indicative_days = {fuel: [] for fuel in cef.FUELS}
     d = latest.period_start
     while d <= today:
         base = next((r for r in reversed(period_reports) if r.report_date < d), None)
-        markets_traded = any(d in day_moves for day_moves in moves.values())
-        if base is not None and markets_traded:
-            est = bm.nowcast_single_day(base, d, moves)
+        if base is not None and bm.is_business_day(d):
+            est = bm.nowcast_single_day(base, d, market, weights)
             for fuel in cef.FUELS:
                 if d not in {e["date"] for e in daily_series[fuel]} and fuel in est.bfp:
                     indicative_days[fuel].append({
@@ -208,12 +239,6 @@ def build_status_data():
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
-        "uk_bank_holidays": {
-            d.isoformat(): name
-            for year in range(latest.period_start.year, today.year + 1)
-            for d, name in bm.uk_bank_holidays(year).items()
-            if latest.period_start <= d <= today
-        },
         "next_price_change_date": next_change,
         "days_until_next_price_change": (next_change - today).days,
         "generated_at": dt.datetime.now(),
