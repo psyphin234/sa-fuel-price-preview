@@ -1,7 +1,7 @@
 """
 Scrapes and parses CEF Group's official Daily Basic Fuel Price PDF reports.
 Source: https://cefgroup.co.za/daily-basic-fuel-price/
-URL pattern: https://cefgroup.co.za/wp-content/uploads/{YYYY}/{MM}/Daily-{DD}-{MM}-{YYYY}.pdf
+URL pattern: https://cefgroup.co.za/wp-content/uploads/{upload YYYY}/{upload MM}/Daily-{DD}-{MM}-{YYYY}.pdf
 """
 import re
 import io
@@ -21,7 +21,7 @@ FUEL_LABELS = {
     "illpar": "Illuminating Paraffin",
 }
 
-BASE_URL = "https://cefgroup.co.za/wp-content/uploads/{year}/{month:02d}/Daily-{day:02d}-{month:02d}-{year}.pdf"
+BASE_URL = "https://cefgroup.co.za/wp-content/uploads/{folder_year}/{folder_month:02d}/Daily-{day:02d}-{month:02d}-{year}.pdf"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BFP-preview-tool/1.0"}
 
 NUM = r"\(?-?[\d,]+\.\d+\)?|-"
@@ -68,14 +68,19 @@ class DailyReport:
 
 
 def fetch_pdf_bytes(date: dt.date) -> Optional[bytes]:
-    url = BASE_URL.format(year=date.year, month=date.month, day=date.day)
-    try:
-        resp = requests.get(url, headers=HEADERS, timeout=15)
-    except requests.RequestException:
-        return None
-    if resp.status_code != 200 or not resp.content.startswith(b"%PDF"):
-        return None
-    return resp.content
+    """CEF uploads each report into the folder for the month it was *published*,
+    so a month-end report (published on the 1st) sits in the next month's folder."""
+    next_month = (date.replace(day=1) + dt.timedelta(days=32)).replace(day=1)
+    for folder in (date, next_month):
+        url = BASE_URL.format(folder_year=folder.year, folder_month=folder.month,
+                              day=date.day, month=date.month, year=date.year)
+        try:
+            resp = requests.get(url, headers=HEADERS, timeout=15)
+        except requests.RequestException:
+            continue
+        if resp.status_code == 200 and resp.content.startswith(b"%PDF"):
+            return resp.content
+    return None
 
 
 def parse_pdf(pdf_bytes: bytes) -> Optional[DailyReport]:

@@ -4,3 +4,4 @@ data/bfp.db
 data/*.log
 .venv/
 venv/
+data/backtest/
