@@ -208,10 +208,10 @@ def build_status_data():
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
-        "public_holidays": {
+        "uk_bank_holidays": {
             d.isoformat(): name
             for year in range(latest.period_start.year, today.year + 1)
-            for d, name in bm.sa_public_holidays(year).items()
+            for d, name in bm.uk_bank_holidays(year).items()
             if latest.period_start <= d <= today
         },
         "next_price_change_date": next_change,

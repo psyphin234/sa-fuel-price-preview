@@ -19,20 +19,6 @@ from typing import Optional
 import cef_scraper as cef
 import market_data as md
 
-SA_FIXED_HOLIDAYS = {
-    (1, 1): "New Year's Day",
-    (3, 21): "Human Rights Day",
-    (4, 27): "Freedom Day",
-    (5, 1): "Workers' Day",
-    (6, 16): "Youth Day",
-    (8, 9): "National Women's Day",
-    (9, 24): "Heritage Day",
-    (12, 16): "Day of Reconciliation",
-    (12, 25): "Christmas Day",
-    (12, 26): "Day of Goodwill",
-}
-
-
 def easter_sunday(year: int) -> dt.date:
     """Anonymous Gregorian computus."""
     a = year % 19
@@ -48,28 +34,45 @@ def easter_sunday(year: int) -> dt.date:
     return dt.date(year, month, day + 1)
 
 
+def _nth_monday(year: int, month: int, n: int) -> dt.date:
+    """n-th Monday of the month; n=-1 for the last one."""
+    if n > 0:
+        first = dt.date(year, month, 1)
+        return first + dt.timedelta(days=(0 - first.weekday()) % 7 + 7 * (n - 1))
+    last = dt.date(year + month // 12, month % 12 + 1, 1) - dt.timedelta(days=1)
+    return last - dt.timedelta(days=last.weekday())
+
+
 @lru_cache(maxsize=None)
-def sa_public_holidays(year: int) -> dict:
-    """{date: name} of South African public holidays for `year`. Under the Public
-    Holidays Act a holiday falling on a Sunday moves to the Monday. One-off
-    holidays the President declares (e.g. election days) aren't included."""
-    holidays = {dt.date(year, m, d): name for (m, d), name in SA_FIXED_HOLIDAYS.items()}
+def uk_bank_holidays(year: int) -> dict:
+    """{date: name} of England & Wales bank holidays for `year`, with weekend
+    substitute days. CEF's daily BFP is built from Platts assessments made in
+    London, so CEF publishes on UK working days: it skips UK bank holidays
+    (e.g. 31 Aug 2026) but does publish on SA public holidays (e.g. Heritage
+    Day, 24 Sep 2026). One-off holidays (coronations, jubilees) aren't included."""
     easter = easter_sunday(year)
-    holidays[easter - dt.timedelta(days=2)] = "Good Friday"
-    holidays[easter + dt.timedelta(days=1)] = "Family Day"
-    for d, name in list(holidays.items()):
-        if d.weekday() == 6:
-            monday = d + dt.timedelta(days=1)
-            holidays.setdefault(monday, f"{name} (observed)")
+    holidays = {
+        easter - dt.timedelta(days=2): "Good Friday",
+        easter + dt.timedelta(days=1): "Easter Monday",
+        _nth_monday(year, 5, 1): "Early May bank holiday",
+        _nth_monday(year, 5, -1): "Spring bank holiday",
+        _nth_monday(year, 8, -1): "Summer bank holiday",
+    }
+    for month, day, name in ((1, 1, "New Year's Day"), (12, 25, "Christmas Day"), (12, 26, "Boxing Day")):
+        d = dt.date(year, month, day)
+        while d.weekday() >= 5 or d in holidays:
+            d += dt.timedelta(days=1)
+        holidays[d] = name if d.day == day else f"{name} (substitute day)"
     return holidays
 
 
-def holiday_name(d: dt.date) -> Optional[str]:
-    return sa_public_holidays(d.year).get(d)
+def uk_holiday_name(d: dt.date) -> Optional[str]:
+    return uk_bank_holidays(d.year).get(d)
 
 
 def is_business_day(d: dt.date) -> bool:
-    return d.weekday() < 5 and holiday_name(d) is None
+    """A day CEF normally publishes a daily BFP report for (UK working day)."""
+    return d.weekday() < 5 and uk_holiday_name(d) is None
 
 
 def business_days_between(start: dt.date, end: dt.date) -> int:
