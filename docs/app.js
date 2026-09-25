@@ -327,13 +327,13 @@
 
   const NO_DATA_NOTES = {
     "*": "Weekend — CEF doesn't publish on weekends, and the markets its figures follow are closed.",
-    "**": "Public holiday — CEF doesn't publish on South African public holidays. Where international markets still traded, the figure shown is an estimate for reference only and isn't counted in the prediction.",
-    "***": "No CEF report for this day (usually an international market holiday). Any figure shown is an estimate for reference only and isn't counted in the prediction.",
+    "**": "UK bank holiday — CEF's figures are built from Platts prices assessed in London, which aren't published on UK bank holidays. Where other markets still traded, the figure shown is an estimate for reference only and isn't counted in the prediction.",
+    "***": "No CEF report for this day. Any figure shown is an estimate for reference only and isn't counted in the prediction.",
   };
 
   function noDataReason(iso) {
-    const holiday = (state.data.public_holidays || {})[iso];
-    if (holiday) return { badge: holiday, mark: "**" };
+    const holiday = (state.data.uk_bank_holidays || {})[iso];
+    if (holiday) return { badge: `UK: ${holiday}`, mark: "**" };
     const weekday = new Date(iso + "T00:00:00Z").getUTCDay();
     if (weekday === 0 || weekday === 6) return { badge: "Weekend", mark: "*" };
     return { badge: "No report", mark: "***" };
