@@ -40,6 +40,7 @@ Windows Scheduled Task **"BFP Preview Publish"** runs `backend/run_publish.ps1` 
 
 ## Conventions
 
-- Python 3.10+, with Flask, requests, pdfplumber and numpy (`backend/requirements.txt`). There is no Node or build step, and Chart.js loads from cdnjs.
+- Python 3.10+, with Flask, requests, pdfplumber and numpy (`backend/requirements.txt`). There is no Node or build step.
+- Chart.js 4.5.1 loads from cdnjs with an `integrity` (SRI) hash in both `docs/index.html` and `frontend/index.html`. If you upgrade the version, update the hash too (from `https://api.cdnjs.com/libraries/Chart.js/<version>?fields=sri`), or the browser will refuse to load the script and the charts will disappear.
 - The whole design depends on your PC only making **outbound** connections to CEF, Yahoo Finance and GitHub. Don't add anything that listens publicly or gives the public site a write endpoint.
 - Values carry a `source` of `cef_official`, `estimated` or `manual`, and the UI must keep estimates visibly distinct from official figures.
