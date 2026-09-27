@@ -166,6 +166,25 @@ a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 
 }
 .topbar-actions { display: flex; align-items: center; gap: 12px; }
 
+/* ---- back link to psyphin.co.za ---- */
+.back-nav {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 12px 20px 0;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--header-sub);
+  text-decoration: none;
+  transition: color .15s ease;
+}
+.back-link:hover { color: var(--header-accent); }
+.back-link:focus-visible { outline: 2px solid var(--header-accent); outline-offset: 3px; border-radius: 4px; }
+
 /* ---- buttons ---- */
 .btn {
   font: inherit;
@@ -468,6 +487,7 @@ td.num, th.num { text-align: right; }
   .hero { grid-template-columns: 1fr; }
   .hero-value { font-size: 30px; }
   .brand-inner { padding: 16px; gap: 14px 18px; }
+  .back-nav { padding: 10px 16px 0; }
   .brand-logo { width: 112px; }
   .brand-text { flex-basis: 200px; }
   .subtitle { font-size: 14px; }

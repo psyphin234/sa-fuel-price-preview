@@ -89,7 +89,12 @@ data/
 
 The dashboard is published as a static, **read-only** site at:
 
-**https://psyphin234.github.io/sa-fuel-price-preview/**
+**https://psyphin.co.za/sa-fuel-price-preview/**
+
+(The old `https://psyphin234.github.io/sa-fuel-price-preview/` address
+301-redirects there automatically, because the `psyphin234.github.io` user
+site uses the psyphin.co.za custom domain. The header has a back link to
+https://psyphin.co.za/.)
 
 Source: https://github.com/psyphin234/sa-fuel-price-preview (public repo)
 
