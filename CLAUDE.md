@@ -3,8 +3,8 @@
 Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, and projects the next monthly pump-price change. **README.md** has the full explanation: the model, the project layout, how publishing works, and its limits. Read it before making non-trivial changes. This file only covers what's easy to get wrong.
 
 - Repo: `psyphin234/sa-fuel-price-preview`. The branch is **`master`** (not `main`).
-- Public site: **https://psyphin.co.za/sa-fuel-price-preview/**, served by GitHub Pages from `docs/`. It has no CNAME of its own and inherits psyphin.co.za from the `psyphin234.github.io` user-site repo. The old `psyphin234.github.io/sa-fuel-price-preview/` address 301-redirects to it.
-- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here. If this site's URL changes, update it there too. Moving to `fuel.psyphin.co.za` is covered in README.md under "Custom domain"; DNS is at Afrihost.
+- Public site: **https://fuel.psyphin.co.za/**, served by GitHub Pages from `docs/`. The custom domain is set by `docs/CNAME`; don't delete it. The older `psyphin.co.za/sa-fuel-price-preview/` and `psyphin234.github.io/sa-fuel-price-preview/` addresses 301-redirect here.
+- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here. If this site's URL changes, update it there too. Domain and DNS details (Afrihost `fuel` CNAME → `psyphin234.github.io`) are in README.md under "Custom domain".
 
 ## Two frontends, kept in sync by hand
 
@@ -17,7 +17,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 - `index.html` and `app.js` differ on purpose. `docs/` has no manual-entry form, has slightly different wording, fetches static JSON instead of calling the API, and has a "← psyphin.co.za" back link in the header (absolute URL `https://psyphin.co.za/`). When changing shared UI, make the change in both and keep these differences.
 - When you change a CSS/JS file under `docs/`, bump its `?v=` cache-buster in `docs/index.html` so visitors don't get a stale copy.
 - **Never hand-edit `docs/data/status.json`.** It's generated and overwritten every hour.
-- `docs/index.html` loads GoatCounter (https://psyphin.goatcounter.com/, shared with the psyphin.co.za landing page, path `/sa-fuel-price-preview/`). It's intentionally **not** in `frontend/`, because the local dashboard shouldn't count visits.
+- `docs/index.html` loads GoatCounter (https://psyphin.goatcounter.com/, shared with the psyphin.co.za landing page). A small `window.goatcounter.path` snippet prefixes paths with the host, so this site shows as `fuel.psyphin.co.za/` and the landing page's `/` stays separate. Visits from before 2026-09-27 are logged under `/sa-fuel-price-preview/`. GoatCounter is intentionally **not** in `frontend/`, because the local dashboard shouldn't count visits.
 
 ## The hourly publish bot pushes from this clone
 

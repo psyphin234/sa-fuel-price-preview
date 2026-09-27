@@ -89,12 +89,12 @@ data/
 
 The dashboard is published as a static, **read-only** site at:
 
-**https://psyphin.co.za/sa-fuel-price-preview/**
+**https://fuel.psyphin.co.za/**
 
-(The old `https://psyphin234.github.io/sa-fuel-price-preview/` address
-301-redirects there automatically, because the `psyphin234.github.io` user
-site uses the psyphin.co.za custom domain. The header has a back link to
-https://psyphin.co.za/.)
+(Older addresses redirect there automatically:
+`https://psyphin.co.za/sa-fuel-price-preview/` and
+`https://psyphin234.github.io/sa-fuel-price-preview/`. The header has a back
+link to https://psyphin.co.za/.)
 
 Source: https://github.com/psyphin234/sa-fuel-price-preview (public repo)
 
@@ -124,22 +124,18 @@ endpoint is exactly the kind of exposure this design avoids).
 
 ### Custom domain
 
-The site already has one: it's served at **psyphin.co.za/sa-fuel-price-preview/**
-because the `psyphin234.github.io` user-site repo uses the `psyphin.co.za`
-custom domain, and project sites without their own `CNAME` inherit it. This
-repo needs no `CNAME` file for that. HTTPS is enforced in this repo's
-Settings → Pages. DNS is managed at Afrihost.
+The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
 
-To give it its own subdomain later (e.g. `fuel.psyphin.co.za`):
-
-1. At Afrihost, add a `CNAME` record `fuel` → `psyphin234.github.io.`
-   (a specific record overrides the existing `*` wildcard).
-2. In this repo's Settings → Pages → Custom domain, enter
-   `fuel.psyphin.co.za` (this commits a `docs/CNAME` file - pull it
-   before the next local commit). Tick "Enforce HTTPS" once the certificate
-   is issued.
-3. The old `/sa-fuel-price-preview/` URL then redirects to the subdomain.
-   Update the project card URL in the psyphin.co.za repo's `projects.js`.
+- DNS (at Afrihost): `CNAME` record `fuel.psyphin.co.za` → `psyphin234.github.io`.
+  Afrihost's form needs the full name `fuel.psyphin.co.za`, not just `fuel`.
+  It overrides the zone's `*` wildcard record.
+- `docs/CNAME` contains `fuel.psyphin.co.za`. GitHub created it when the domain
+  was set in Settings → Pages. **Don't delete it**, or the site falls back to
+  psyphin.co.za/sa-fuel-price-preview/.
+- "Enforce HTTPS" is on. GitHub issues and renews the certificate automatically.
+- If the domain is ever changed in Settings → Pages, GitHub commits a new
+  `docs/CNAME`. Run `git pull` straight away, otherwise the hourly publish
+  push will fail.
 
 ## Limits and honesty notes
 
