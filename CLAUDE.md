@@ -17,6 +17,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 - `index.html` and `app.js` differ on purpose. `docs/` has no manual-entry form, has slightly different wording, fetches static JSON instead of calling the API, and has a "← psyphin.co.za" back link in the header (absolute URL `https://psyphin.co.za/`). When changing shared UI, make the change in both and keep these differences.
 - When you change a CSS/JS file under `docs/`, bump its `?v=` cache-buster in `docs/index.html` so visitors don't get a stale copy.
 - **Never hand-edit `docs/data/status.json`.** It's generated and overwritten every hour.
+- `docs/index.html` loads GoatCounter (https://psyphin.goatcounter.com/, shared with the psyphin.co.za landing page, path `/sa-fuel-price-preview/`). It's intentionally **not** in `frontend/`, because the local dashboard shouldn't count visits.
 
 ## The hourly publish bot pushes from this clone
 
