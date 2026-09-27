@@ -4,7 +4,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 
 - Repo: `psyphin234/sa-fuel-price-preview`. The branch is **`master`** (not `main`).
 - Public site: **https://fuel.psyphin.co.za/**, served by GitHub Pages from `docs/`. The custom domain is set by `docs/CNAME`; don't delete it. The older `psyphin.co.za/sa-fuel-price-preview/` and `psyphin234.github.io/sa-fuel-price-preview/` addresses 301-redirect here.
-- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here. If this site's URL changes, update it there too. Domain and DNS details (Afrihost `fuel` CNAME → `psyphin234.github.io`) are in README.md under "Custom domain".
+- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here, and its photo (`assets/img/projects/fuel-chart.jpg` there) is a crop of this site's first chart, "Daily Basic Fuel Price vs. price built into the current pump price". If that chart's look changes, refresh the card image. If this site's URL changes, update it there too. Domain and DNS details (Afrihost `fuel` CNAME → `psyphin234.github.io`) are in README.md under "Custom domain".
 
 ## Two frontends, kept in sync by hand
 
