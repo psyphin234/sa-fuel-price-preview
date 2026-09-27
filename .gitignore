@@ -5,3 +5,6 @@ data/*.log
 .venv/
 venv/
 data/backtest/
+
+# Reference copies of the PsyPhin logo (originals are committed in the psyphin234.github.io repo)
+*.jfif

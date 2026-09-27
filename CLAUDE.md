@@ -4,7 +4,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 
 - Repo: `psyphin234/sa-fuel-price-preview`. The branch is **`master`** (not `main`).
 - Public site: **https://psyphin.co.za/sa-fuel-price-preview/**, served by GitHub Pages from `docs/`. It has no CNAME of its own and inherits psyphin.co.za from the `psyphin234.github.io` user-site repo. The old `psyphin234.github.io/sa-fuel-price-preview/` address 301-redirects to it.
-- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here. If this site's URL changes, update it there too.
+- The landing page's project card (`projects.js` in `E:\Claude_projects\psyphin.co.za`) links here. If this site's URL changes, update it there too. Moving to `fuel.psyphin.co.za` is covered in README.md under "Custom domain"; DNS is at Afrihost.
 
 ## Two frontends, kept in sync by hand
 
@@ -35,6 +35,7 @@ Windows Scheduled Task **"BFP Preview Publish"** runs `backend/run_publish.ps1` 
 - Manual publish: `cd backend; python publish.py`. It pushes too, so treat it like a push.
 - Backtest the model (from `backend/`): `python backtest_fetch.py 2025-06-01 <today>` then `python backtest.py`.
 - `data/` (the SQLite database, logs, backtest cache) is gitignored and stays local.
+- `PsyPhin logo black V3.jfif` and `PsyPhin logo.jfif` in the repo root are local reference copies of the logo, gitignored via `*.jfif`. Keep them. The originals are committed in the psyphin.co.za repo as `psyphin-logo-black.jpg` and `psyphin-logo.jpg`. The site itself uses `docs/assets/logo.jpg`.
 
 ## Conventions
 

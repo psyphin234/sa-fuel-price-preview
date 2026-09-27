@@ -122,24 +122,24 @@ get baked into the next hourly push automatically - the public site has no
 form of its own, since a static site can't accept writes (and a public write
 endpoint is exactly the kind of exposure this design avoids).
 
-### Adding a custom domain (optional)
+### Custom domain
 
-GitHub Pages supports a custom domain for free, and it doesn't expose your PC
-either - it only points at GitHub's servers, never your machine:
+The site already has one: it's served at **psyphin.co.za/sa-fuel-price-preview/**
+because the `psyphin234.github.io` user-site repo uses the `psyphin.co.za`
+custom domain, and project sites without their own `CNAME` inherit it. This
+repo needs no `CNAME` file for that. HTTPS is enforced in this repo's
+Settings → Pages. DNS is managed at Afrihost.
 
-1. In `docs/`, add a file named `CNAME` (no extension) containing just your
-   domain, e.g. `fuel.example.co.za`.
-2. At your domain registrar's DNS settings:
-   - For a subdomain (`fuel.example.co.za`): add a `CNAME` record pointing to
-     `psyphin234.github.io`.
-   - For an apex/root domain (`example.co.za`): add `A` records pointing to
-     GitHub Pages' IPs: `185.199.108.153`, `185.199.109.153`,
-     `185.199.110.153`, `185.199.111.153`.
-3. Commit and push the `CNAME` file (or set it in the repo's Settings → Pages
-   → Custom domain, which creates the file for you).
-4. Wait for DNS to propagate (can take a few minutes to a few hours), then
-   tick "Enforce HTTPS" in Settings → Pages once GitHub shows the domain as
-   verified.
+To give it its own subdomain later (e.g. `fuel.psyphin.co.za`):
+
+1. At Afrihost, add a `CNAME` record `fuel` → `psyphin234.github.io.`
+   (a specific record overrides the existing `*` wildcard).
+2. In this repo's Settings → Pages → Custom domain, enter
+   `fuel.psyphin.co.za` (this commits a `docs/CNAME` file - pull it
+   before the next local commit). Tick "Enforce HTTPS" once the certificate
+   is issued.
+3. The old `/sa-fuel-price-preview/` URL then redirects to the subdomain.
+   Update the project card URL in the psyphin.co.za repo's `projects.js`.
 
 ## Limits and honesty notes
 
