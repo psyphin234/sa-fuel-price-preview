@@ -14,7 +14,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 | `docs/` | **Public** read-only GitHub Pages site | `docs/data/status.json` |
 
 - `style.css` is identical in both. Keep it that way: apply a CSS change to both files.
-- `index.html` and `app.js` differ on purpose. `docs/` has no manual-entry form, has slightly different wording, fetches static JSON instead of calling the API, and has a "← psyphin.co.za" back link in the header (absolute URL `https://psyphin.co.za/`). When changing shared UI, make the change in both and keep these differences.
+- `index.html` and `app.js` differ on purpose. `docs/` has no manual-entry form, has slightly different wording, fetches static JSON instead of calling the API, and has a "← More PsyPhin tools" back link in the header (absolute URL `https://psyphin.co.za/#tools`, the Tools section of the landing page; the towing checker at psyphin.co.za/sa-towing-check/ uses the same pill). When changing shared UI, make the change in both and keep these differences.
 - When you change a CSS/JS file under `docs/`, bump its `?v=` cache-buster in `docs/index.html` so visitors don't get a stale copy.
 - **Never hand-edit `docs/data/status.json`.** It's generated and overwritten every hour.
 - `docs/index.html` loads GoatCounter (https://psyphin.goatcounter.com/, shared with the psyphin.co.za landing page). A small `window.goatcounter.path` snippet prefixes paths with the host, so this site shows as `fuel.psyphin.co.za/` and the landing page's `/` stays separate. Visits from before 2026-09-27 are logged under `/sa-fuel-price-preview/`. GoatCounter is intentionally **not** in `frontend/`, because the local dashboard shouldn't count visits.
