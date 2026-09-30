@@ -66,7 +66,11 @@
     const dir = pred.direction; // "increase" | "decrease" | "no change"
 
     $("#hero-current").textContent = fmtRand(pred.current_price_c_per_l);
-    $("#hero-current-label").textContent = PRICE_ROW_LABEL[state.fuel] + " (current cycle)";
+    // In the days before a price change CEF already reports the upcoming price.
+    const effective = state.data.latest_official_report.pump_price_effective;
+    const upcoming = effective > state.data.generated_at.slice(0, 10);
+    $("#hero-current-title").textContent = upcoming ? `New price from ${fmtDate(effective)}` : "Current price";
+    $("#hero-current-label").textContent = PRICE_ROW_LABEL[state.fuel] + (upcoming ? " (announced)" : " (current cycle)");
 
     const changeEl = $("#hero-change");
     changeEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
@@ -85,7 +89,9 @@
     let conf = `${officialDays} official day${officialDays === 1 ? "" : "s"}`;
     if (estDays) conf += ` + ${estDays} estimated`;
     if (manDays) conf += ` + ${manDays} manual`;
-    $("#hero-confidence").textContent = conf + " in this review period so far";
+    $("#hero-confidence").textContent = state.data.review_period_closed
+      ? `Review period closed ${fmtDate(state.data.review_period_close)} — ${conf}`
+      : conf + " in this review period so far";
 
     $("#period-range").textContent =
       `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;
@@ -342,7 +348,9 @@
     const start = state.data.latest_official_report.period_start;
     const lastSeries = [...byDate.keys()].sort().pop() || start;
     const generated = state.data.generated_at.slice(0, 10);
-    const end = generated > lastSeries ? generated : lastSeries;
+    let end = generated > lastSeries ? generated : lastSeries;
+    const close = state.data.review_period_close;
+    if (close && end > close && lastSeries <= close) end = close;
     const tbody = $("#daily-table tbody");
     tbody.innerHTML = "";
     const usedMarks = new Set();

@@ -212,9 +212,10 @@ def build_status_data():
     # A weekday CEF skipped (very rare) gets an indicative estimate for the table
     # only: kept out of the prediction average, the charts and accuracy tracking,
     # since no official figure will ever exist for it.
+    period_close = bm.review_period_close(bm.next_price_change_date(latest.pump_price_effective))
     indicative_days = {fuel: [] for fuel in cef.FUELS}
     d = latest.period_start
-    while d <= today:
+    while d <= min(today, period_close):
         base = next((r for r in reversed(period_reports) if r.report_date < d), None)
         if base is not None and bm.is_business_day(d):
             est = bm.nowcast_single_day(base, d, market, weights)
@@ -227,7 +228,7 @@ def build_status_data():
                     })
         d += dt.timedelta(days=1)
 
-    next_change = bm.next_price_change_date(latest.pump_price_effective)
+    next_change = bm.upcoming_price_change(latest.pump_price_effective, today)
 
     return {
         "latest_official_report": latest,
@@ -240,6 +241,8 @@ def build_status_data():
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
         "next_price_change_date": next_change,
+        "review_period_close": period_close,
+        "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
         "generated_at": dt.datetime.now(),
     }

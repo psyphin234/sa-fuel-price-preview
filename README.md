@@ -143,8 +143,14 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   recovery. The real government announcement (effective the first Wednesday
   of the month) also folds in separate slate-levy and fuel-levy decisions
   DMRE can adjust independently, so treat this as directional, not exact.
-- The review period only closes around the 25th of the month - a prediction
-  made early in the cycle can still move a lot before it closes.
+- A review period runs from the Friday before one price change (first
+  Wednesday of the month) to the Thursday before the next one's Friday, i.e.
+  it closes about six days before the change (the Thursday when that Friday is
+  a public holiday; checked against every changeover May 2025 - Aug 2026). A
+  prediction made early in the period can still move a lot before it closes.
+  After it closes the site stops adding estimated days to it, and from the
+  first report of the new period CEF already shows the upcoming price, which
+  the site labels "New price from <date>" until it takes effect.
 - CEF publishes a report every weekday, public holidays included (on days
   with no London Platts assessment, e.g. Christmas, it repeats the previous
   figure). Month-end reports are uploaded to the *next* month's folder on

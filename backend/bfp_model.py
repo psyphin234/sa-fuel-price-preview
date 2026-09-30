@@ -42,17 +42,38 @@ def first_wednesday(year: int, month: int) -> dt.date:
 
 
 def next_price_change_date(pump_price_effective: dt.date) -> dt.date:
-    """SA fuel prices change on the first Wednesday of each month (verified
-    against every 2026 DMRE announcement so far - Jan 7, Mar 4, Apr 1, May 6,
-    Jun 3, Jul 1, Aug 5). The *exact* day the underlying review data stops
-    being updated isn't a fixed calendar date (it shifts a little with the
-    Mediterranean trading calendar), so we count down to this known,
-    government-set date instead of guessing that one."""
+    """The price change after the one effective on `pump_price_effective`. SA fuel
+    prices change on the first Wednesday of each month (verified against every
+    2026 DMRE announcement so far - Jan 7, Mar 4, Apr 1, May 6, Jun 3, Jul 1, Aug 5)."""
     year, month = pump_price_effective.year, pump_price_effective.month + 1
     if month > 12:
         month = 1
         year += 1
     return first_wednesday(year, month)
+
+
+def upcoming_price_change(pump_price_effective: dt.date, today: dt.date) -> dt.date:
+    """The next price change a visitor is waiting for. In the first days of a new
+    review period CEF's reports already carry the *upcoming* price (effective on a
+    date still ahead), so that date is the next change until it has passed."""
+    if pump_price_effective >= today:
+        return pump_price_effective
+    return next_price_change_date(pump_price_effective)
+
+
+# Public holidays that can land on the Friday a review period would start on.
+_HOLIDAYS_NEAR_MONTH_START = {(1, 1), (4, 27), (5, 1), (12, 26)}
+
+
+def review_period_close(change_date: dt.date) -> dt.date:
+    """Last day of the review period that feeds the price change on `change_date`.
+    Checked against every changeover from May 2025 to Aug 2026: the next period
+    starts on the Friday before the price-change Wednesday (15 of 16), or on the
+    Thursday when that Friday is a public holiday (30 Apr 2026, as 1 May was one)."""
+    next_start = change_date - dt.timedelta(days=5)
+    if (next_start.month, next_start.day) in _HOLIDAYS_NEAR_MONTH_START:
+        next_start -= dt.timedelta(days=1)
+    return next_start - dt.timedelta(days=1)
 
 
 def business_days_after(after: dt.date, through: dt.date) -> list:
@@ -122,7 +143,9 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
     official_avg = latest.avg_over_under.get(fuel)
     official_days = business_days_between(latest.period_start, latest.period_end)
 
-    gap_days = business_days_after(latest.report_date, today)
+    # days after the period closes belong to the next price change, not this one
+    period_close = review_period_close(next_price_change_date(latest.pump_price_effective))
+    gap_days = business_days_after(latest.report_date, min(today, period_close))
 
     day_values = []
     for d in gap_days:
@@ -164,7 +187,7 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
         predicted_new_price_c_per_l=round(predicted_new_price, 2) if predicted_new_price is not None else None,
         direction=direction,
         note="Based on CEF's official review-period average so far, plus this tool's estimate for "
-             f"{n_new} day(s) not yet published by CEF. The review period only closes around the "
-             "25th of the month, and the final government-announced price also reflects separate "
+             f"{n_new} day(s) not yet published by CEF. The review period closes about six days "
+             "before the price change, and the final government-announced price also reflects separate "
              "slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
     )
