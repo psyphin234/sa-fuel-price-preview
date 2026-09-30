@@ -92,7 +92,7 @@
       "current_price_c_per_l": 2692.0,
       "predicted_new_price_c_per_l": 3013.05,
       "direction": "increase",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
     },
     "petrol93": {
       "fuel": "petrol93",
@@ -128,7 +128,7 @@
       "current_price_c_per_l": 2676.0,
       "predicted_new_price_c_per_l": 2976.89,
       "direction": "increase",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
     },
     "diesel005": {
       "fuel": "diesel005",
@@ -164,7 +164,7 @@
       "current_price_c_per_l": 2911.11,
       "predicted_new_price_c_per_l": 3187.56,
       "direction": "increase",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
     },
     "diesel0005": {
       "fuel": "diesel0005",
@@ -200,7 +200,7 @@
       "current_price_c_per_l": 2955.51,
       "predicted_new_price_c_per_l": 3271.72,
       "direction": "increase",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
     },
     "illpar": {
       "fuel": "illpar",
@@ -236,7 +236,7 @@
       "current_price_c_per_l": 2705.0,
       "predicted_new_price_c_per_l": 3051.16,
       "direction": "increase",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period only closes around the 25th of the month, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee."
     }
   },
   "daily_series": {
@@ -1225,7 +1225,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.4269,
+  "current_exchange_rate": 16.4346,
   "accuracy": {
     "n": 25,
     "mean_abs_pct_error": 1.59,
@@ -1234,6 +1234,8 @@
     "status": "ready"
   },
   "next_price_change_date": "2026-10-07",
+  "review_period_close": "2026-10-01",
+  "review_period_closed": false,
   "days_until_next_price_change": 7,
-  "generated_at": "2026-09-30T21:18:46.777180"
+  "generated_at": "2026-09-30T22:18:44.641839"
 }
