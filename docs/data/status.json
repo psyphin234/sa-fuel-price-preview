@@ -1216,6 +1216,6 @@
   "next_price_change_date": "2026-10-07",
   "review_period_close": "2026-10-01",
   "review_period_closed": true,
-  "days_until_next_price_change": 4,
-  "generated_at": "2026-10-03T23:18:50.936622"
+  "days_until_next_price_change": 3,
+  "generated_at": "2026-10-04T00:18:49.919110"
 }
