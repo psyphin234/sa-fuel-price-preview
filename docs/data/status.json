@@ -248,23 +248,13 @@
         "date": "2026-09-23",
         "bfp": 1796.84,
         "unit_over_under": -381.95,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 1783.271,
-          "error_c_per_l": 13.569,
-          "pct_error": 0.76
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-24",
         "bfp": 1861.234,
         "unit_over_under": -446.344,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 1764.816,
-          "error_c_per_l": 96.418,
-          "pct_error": 5.18
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-25",
@@ -435,23 +425,13 @@
         "date": "2026-09-23",
         "bfp": 1753.365,
         "unit_over_under": -354.475,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 1739.871,
-          "error_c_per_l": 13.494,
-          "pct_error": 0.77
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-24",
         "bfp": 1817.762,
         "unit_over_under": -418.872,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 1722.116,
-          "error_c_per_l": 95.646,
-          "pct_error": 5.26
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-25",
@@ -622,23 +602,13 @@
         "date": "2026-09-23",
         "bfp": 2248.841,
         "unit_over_under": -315.211,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2196.295,
-          "error_c_per_l": 52.546,
-          "pct_error": 2.34
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-24",
         "bfp": 2290.58,
         "unit_over_under": -356.95,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2226.965,
-          "error_c_per_l": 63.615,
-          "pct_error": 2.78
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-25",
@@ -809,23 +779,13 @@
         "date": "2026-09-23",
         "bfp": 2333.523,
         "unit_over_under": -355.493,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2279.932,
-          "error_c_per_l": 53.591,
-          "pct_error": 2.3
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-24",
         "bfp": 2373.539,
         "unit_over_under": -395.509,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2310.823,
-          "error_c_per_l": 62.716,
-          "pct_error": 2.64
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-25",
@@ -996,23 +956,13 @@
         "date": "2026-09-23",
         "bfp": 2213.239,
         "unit_over_under": -398.111,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2154.709,
-          "error_c_per_l": 58.53,
-          "pct_error": 2.64
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-24",
         "bfp": 2290.673,
         "unit_over_under": -475.545,
-        "source": "cef_official",
-        "estimate": {
-          "bfp": 2191.709,
-          "error_c_per_l": 98.964,
-          "pct_error": 4.32
-        }
+        "source": "cef_official"
       },
       {
         "date": "2026-09-25",
@@ -1205,17 +1155,17 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.6235,
+  "current_exchange_rate": 16.6613,
   "accuracy": {
-    "n": 35,
-    "mean_abs_pct_error": 1.52,
-    "mean_abs_error_c_per_l": 32.49,
-    "accuracy_pct": 98.5,
+    "n": 25,
+    "mean_abs_pct_error": 0.97,
+    "mean_abs_error_c_per_l": 21.12,
+    "accuracy_pct": 99.0,
     "status": "ready"
   },
   "next_price_change_date": "2026-10-07",
   "review_period_close": "2026-10-01",
   "review_period_closed": true,
   "days_until_next_price_change": 2,
-  "generated_at": "2026-10-05T15:18:53.878419"
+  "generated_at": "2026-10-05T16:18:51.690958"
 }
