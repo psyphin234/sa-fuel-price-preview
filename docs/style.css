@@ -347,6 +347,7 @@ a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 
   margin-bottom: 8px;
 }
 .hero-sub { color: var(--text-secondary); font-size: 13px; }
+.hero-badge + .hero-sub { margin-top: 8px; }
 .hero-badge {
   display: inline-flex;
   align-items: center;

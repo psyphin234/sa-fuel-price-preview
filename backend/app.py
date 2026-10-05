@@ -124,6 +124,20 @@ def get_history_reports(end: dt.date) -> list:
     return [_report_from_cache(dict(cached[k])) for k in sorted(cached)]
 
 
+def get_next_reference(latest):
+    """The BFP contribution in the upcoming pump price, while `latest` still
+    predates that price change (see bm.next_reference_price). None otherwise."""
+    if latest.report_date >= latest.pump_price_effective:
+        return None
+    d = latest.period_start
+    for _ in range(7):
+        d -= dt.timedelta(days=1)
+        rep = get_report_cached(d) if bm.is_business_day(d) else None
+        if rep is not None:
+            return bm.next_reference_price(rep) if rep.period_start < latest.period_start else None
+    return None
+
+
 def manual_overrides_dict():
     raw = db.get_manual_overrides()
     return raw  # already {date: {"bfp": {...}, "exchange_rate": ...}}
@@ -142,10 +156,12 @@ def build_status_data():
 
     market = get_market()
     weights = nowcast.fit_weights(get_history_reports(latest.report_date), market, cef.FUELS)
+    next_reference = get_next_reference(latest)
 
     predictions = {}
     for fuel in cef.FUELS:
-        pred = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides, today=today)
+        pred = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides, today=today,
+                                   next_reference=next_reference)
         predictions[fuel] = pred
         db.log_prediction(latest.period_start, latest.period_end, fuel,
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
@@ -218,7 +234,7 @@ def build_status_data():
     while d <= min(today, period_close):
         base = next((r for r in reversed(period_reports) if r.report_date < d), None)
         if base is not None and bm.is_business_day(d):
-            est = bm.nowcast_single_day(base, d, market, weights)
+            est = bm.nowcast_single_day(base, d, market, weights, next_reference)
             for fuel in cef.FUELS:
                 if d not in {e["date"] for e in daily_series[fuel]} and fuel in est.bfp:
                     indicative_days[fuel].append({

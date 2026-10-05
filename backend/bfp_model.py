@@ -97,13 +97,37 @@ class DayEstimate:
     note: Optional[str] = None
 
 
-def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, market: dict, weights: dict) -> DayEstimate:
+def next_reference_price(closing: cef.DailyReport) -> dict:
+    """The BFP contribution built into the next pump price, from the last report of
+    the review period that sets it: the old contribution less the period's average
+    over/(under) recovery. Matches CEF's new figure to within ~1 c/l for every fuel
+    and changeover May 2025 - Sep 2026 (petrol 93 can be ~10 c/l off, as it
+    usually moves by petrol 95's amount)."""
+    return {
+        fuel: round(ref - closing.avg_over_under[fuel], 2)
+        for fuel, ref in closing.reference_price.items()
+        if ref is not None and closing.avg_over_under.get(fuel) is not None
+    }
+
+
+def reference_for_day(base: cef.DailyReport, day: dt.date, next_reference: dict = None) -> dict:
+    """The BFP contribution CEF measures `day` against. Reports from the first days
+    of a review period still carry the old one; it switches when the new pump price
+    takes effect, which may fall among the days being estimated."""
+    if next_reference and base.report_date < base.pump_price_effective <= day:
+        return next_reference
+    return base.reference_price
+
+
+def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, market: dict, weights: dict,
+                       next_reference: dict = None) -> DayEstimate:
     """Estimate one day's BFP from the last official report (see nowcast.py)."""
     bfp_est, fx_est = nowcast.estimate(base, target_date, market, weights, cef.FUELS)
+    reference = reference_for_day(base, target_date, next_reference)
     unit_est = {
-        fuel: round(base.reference_price[fuel] - v, 3)
+        fuel: round(reference[fuel] - v, 3)
         for fuel, v in bfp_est.items()
-        if base.reference_price.get(fuel) is not None
+        if reference.get(fuel) is not None
     }
     return DayEstimate(
         date=target_date,
@@ -134,9 +158,11 @@ class Prediction:
 
 
 def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: dict,
-                      manual_overrides: dict = None, today: dt.date = None) -> Prediction:
+                      manual_overrides: dict = None, today: dt.date = None,
+                      next_reference: dict = None) -> Prediction:
     """manual_overrides: {date: {"bfp": {...}, "exchange_rate": ...}} - real numbers the user typed in,
-    which take priority over the estimated nowcast for that date."""
+    which take priority over the estimated nowcast for that date. next_reference: see
+    next_reference_price; only needed when `latest` predates its pump price change."""
     manual_overrides = manual_overrides or {}
     today = today or dt.date.today()
 
@@ -152,7 +178,7 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
         if d in manual_overrides and "bfp" in manual_overrides[d] and fuel in manual_overrides[d]["bfp"]:
             mo = manual_overrides[d]
             bfp_val = mo["bfp"][fuel]
-            ref = latest.reference_price.get(fuel)
+            ref = reference_for_day(latest, d, next_reference).get(fuel)
             day_values.append(DayEstimate(
                 date=d, source="manual", bfp={fuel: bfp_val},
                 unit_over_under={fuel: round(ref - bfp_val, 3)} if ref is not None else {},
@@ -160,7 +186,7 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
                 note="Manually entered value.",
             ))
         else:
-            day_values.append(nowcast_single_day(latest, d, market, weights))
+            day_values.append(nowcast_single_day(latest, d, market, weights, next_reference))
 
     n_new = len(day_values)
     new_sum = sum(dv.unit_over_under.get(fuel, 0) for dv in day_values if fuel in dv.unit_over_under)

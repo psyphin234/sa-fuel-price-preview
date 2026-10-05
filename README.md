@@ -151,6 +151,10 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   After it closes the site stops adding estimated days to it, and from the
   first report of the new period CEF already shows the upcoming price, which
   the site labels "New price from <date>" until it takes effect.
+  Those first reports still measure against the old price's BFP contribution,
+  and CEF switches on the change date. When estimated days run past that date,
+  the site uses the new contribution, derived as the old one less the closed
+  period's average over/(under) recovery (within ~1 c/l of CEF's figure).
 - CEF publishes a report every weekday, public holidays included (on days
   with no London Platts assessment, e.g. Christmas, it repeats the previous
   figure). Month-end reports are uploaded to the *next* month's folder on
