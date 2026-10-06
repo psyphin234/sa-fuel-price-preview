@@ -72,6 +72,9 @@
     $("#hero-current-title").textContent = upcoming ? `New price from ${fmtDate(effective)}` : "Current price";
     $("#hero-current-label").textContent = PRICE_ROW_LABEL[state.fuel] + (upcoming ? " (announced)" : " (current cycle)");
 
+    const changeDate = state.data.predicted_change_date;
+    $("#hero-change-title").textContent = changeDate ? `Predicted change on ${fmtDate(changeDate)}` : "Predicted next-cycle move";
+
     const changeEl = $("#hero-change");
     changeEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
     changeEl.className = "hero-value " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "");
@@ -89,9 +92,12 @@
     let conf = `${officialDays} official day${officialDays === 1 ? "" : "s"}`;
     if (estDays) conf += ` + ${estDays} estimated`;
     if (manDays) conf += ` + ${manDays} manual`;
+    const projDays = pred.projected_days_count || 0;
     $("#hero-confidence").textContent = state.data.review_period_closed
       ? `Review period closed ${fmtDate(state.data.review_period_close)} — ${conf}`
-      : conf + " in this review period so far";
+      : conf + " so far" + (projDays
+        ? `; the other ${projDays} day${projDays === 1 ? "" : "s"} to ${fmtDate(state.data.review_period_close)} assume the BFP stays where it is now`
+        : " in this review period");
 
     $("#period-range").textContent =
       `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;

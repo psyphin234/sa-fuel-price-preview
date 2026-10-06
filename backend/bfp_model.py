@@ -148,6 +148,8 @@ class Prediction:
     official_days_count: int
     blended_avg_over_under: float
     blended_days_count: int
+    projected_days_count: int
+    projected_avg_over_under: float
     estimated_days: list
     manual_days: list
     predicted_pump_price_change_c_per_l: float
@@ -193,8 +195,23 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
     blended_days = official_days + n_new
     blended_avg = ((official_avg * official_days) + new_sum) / blended_days if blended_days else official_avg
 
-    direction = "increase" if blended_avg < 0 else ("decrease" if blended_avg > 0 else "no change")
-    predicted_change = -blended_avg  # under-recovery (negative) -> price must rise to recover it
+    # The rest of the period, assuming the BFP stays at its latest level. Each day is
+    # measured against the reference CEF will use then: early in a period that is
+    # mostly the new one, so the to-date average alone overstates the move.
+    last_day = day_values[-1].date if day_values else latest.report_date
+    last_bfp = day_values[-1].bfp.get(fuel) if day_values else latest.bfp.get(fuel)
+    projected_sum, projected_days = 0.0, 0
+    if last_bfp is not None:
+        for d in business_days_after(max(last_day, today), period_close):
+            ref = reference_for_day(latest, d, next_reference).get(fuel)
+            if ref is not None:
+                projected_sum += ref - last_bfp
+                projected_days += 1
+    total_days = blended_days + projected_days
+    projected_avg = ((blended_avg * blended_days) + projected_sum) / total_days if total_days else blended_avg
+
+    direction = "increase" if projected_avg < 0 else ("decrease" if projected_avg > 0 else "no change")
+    predicted_change = -projected_avg  # under-recovery (negative) -> price must rise to recover it
 
     current_price = latest.current_price.get(fuel)
     predicted_new_price = (current_price + predicted_change) if current_price is not None else None
@@ -206,6 +223,8 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
         official_days_count=official_days,
         blended_avg_over_under=round(blended_avg, 3),
         blended_days_count=blended_days,
+        projected_days_count=projected_days,
+        projected_avg_over_under=round(projected_avg, 3),
         estimated_days=[asdict(dv) for dv in day_values if dv.source == "estimated"],
         manual_days=[asdict(dv) for dv in day_values if dv.source == "manual"],
         predicted_pump_price_change_c_per_l=round(predicted_change, 2),
@@ -213,7 +232,10 @@ def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: 
         predicted_new_price_c_per_l=round(predicted_new_price, 2) if predicted_new_price is not None else None,
         direction=direction,
         note="Based on CEF's official review-period average so far, plus this tool's estimate for "
-             f"{n_new} day(s) not yet published by CEF. The review period closes about six days "
+             f"{n_new} day(s) not yet published by CEF"
+             + (f", and {projected_days} more day(s) to the end of the review period assuming the BFP stays "
+                "where it is now" if projected_days else "")
+             + ". The review period closes about six days "
              "before the price change, and the final government-announced price also reflects separate "
              "slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
     )

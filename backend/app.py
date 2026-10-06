@@ -257,6 +257,7 @@ def build_status_data():
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
         "next_price_change_date": next_change,
+        "predicted_change_date": bm.next_price_change_date(latest.pump_price_effective),
         "review_period_close": period_close,
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,

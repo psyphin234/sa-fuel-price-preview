@@ -27,8 +27,9 @@ usually with about a one-day lag. This tool:
 3. **Lets you override the estimate** with a real number if you ever get hold
    of one (a Platts subscription, a trade desk, etc.) - it takes priority over
    the estimate for that date everywhere in the app.
-4. Blends CEF's own official period-to-date average with your day(s) to
-   project the next monthly price move, and shows the estimated new pump
+4. Blends CEF's own official period-to-date average with your day(s), and
+   the rest of the period at today's level, to project the next monthly
+   price move, and shows the estimated new pump
    price alongside the current one.
 
 There is no free, legitimate source for the actual Platts Mediterranean cargo
@@ -140,7 +141,14 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
 ## Limits and honesty notes
 
 - The predicted price change is the review-period average unit over/(under)
-  recovery. The real government announcement (effective the first Wednesday
+  recovery, with the period's remaining business days projected at the latest
+  BFP (official or estimated) against the reference CEF will use on each day.
+  Without that projection the first days of a period, still measured against
+  the old reference, dominated the figure: in Oct 2026 the site showed +R4.56
+  for petrol 95 the day before a R3.33 rise took effect, against about +R1.51
+  projected. Over 14 periods (Aug 2025 - Oct 2026) the projection roughly
+  halved the error against the final average at every stage of the period.
+  The real government announcement (effective the first Wednesday
   of the month) also folds in separate slate-levy and fuel-levy decisions
   DMRE can adjust independently, so treat this as directional, not exact.
 - A review period runs from the Friday before one price change (first
