@@ -21,6 +21,7 @@ BENCHMARK_TTL_SECONDS = 120
 _market_cache = {"data": None, "fetched_at": None}
 MARKET_TTL_SECONDS = 600
 HISTORY_DAYS = 380            # enough weekdays for nowcast.TRAIN_WINDOW
+CHART_DAYS = 30               # days of history in the price and USD/ZAR charts
 HISTORY_BACKFILL_PER_RUN = 30  # keeps a cold start from making one run very slow
 
 
@@ -182,7 +183,8 @@ def build_status_data():
     today = dt.date.today()
 
     market = get_market()
-    weights = nowcast.fit_weights(get_history_reports(latest.report_date), market, cef.FUELS)
+    history = get_history_reports(latest.report_date)
+    weights = nowcast.fit_weights(history, market, cef.FUELS)
     next_reference = get_next_reference(latest)
 
     predictions = {}
@@ -194,25 +196,38 @@ def build_status_data():
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
 
     period_reports = get_period_reports(latest.period_start, latest.period_end)
+    # The charts cover the last CHART_DAYS, which can span two review periods.
+    # Each day carries the reference price it was measured against and the price
+    # change its period feeds ("cycle"), so the UI can mark where periods meet.
+    chart_start = today - dt.timedelta(days=CHART_DAYS)
+    chart_reports = [r for r in history if r.report_date >= chart_start]
+    if not chart_reports or chart_reports[-1].report_date < latest.report_date:
+        chart_reports.append(latest)
+    current_cycle = bm.next_price_change_date(latest.pump_price_effective)
     daily_series = {
         fuel: [
             {
                 "date": r.report_date,
                 "bfp": r.bfp.get(fuel),
                 "unit_over_under": r.unit_over_under.get(fuel),
+                "reference": r.reference_price.get(fuel),
+                "cycle": bm.next_price_change_date(r.pump_price_effective),
                 "source": "cef_official",
             }
-            for r in period_reports
+            for r in chart_reports
         ]
         for fuel in cef.FUELS
     }
     # append estimated/manual gap days from each fuel's prediction onto the series
     for fuel in cef.FUELS:
         for day in predictions[fuel].estimated_days + predictions[fuel].manual_days:
+            bfp, uou = day["bfp"].get(fuel), day["unit_over_under"].get(fuel)
             daily_series[fuel].append({
                 "date": day["date"],
-                "bfp": day["bfp"].get(fuel),
-                "unit_over_under": day["unit_over_under"].get(fuel),
+                "bfp": bfp,
+                "unit_over_under": uou,
+                "reference": round(bfp + uou, 2) if bfp is not None and uou is not None else None,
+                "cycle": current_cycle,
                 "source": day["source"],
             })
 
@@ -220,7 +235,8 @@ def build_status_data():
     # than repeating it inside each fuel's daily_series.
     exchange_rate_series = [
         {"date": r.report_date, "rate": r.exchange_rate, "source": "cef_official"}
-        for r in period_reports
+        for r in chart_reports
+        if r.exchange_rate is not None
     ]
     first_fuel = cef.FUELS[0]
     for day in predictions[first_fuel].estimated_days + predictions[first_fuel].manual_days:
@@ -239,7 +255,7 @@ def build_status_data():
 
     # Official days that were estimated first carry that earlier estimate, so the
     # UI can show how close it was.
-    checked = db.get_accuracy_by_date(latest.period_start, latest.period_end)
+    checked = db.get_accuracy_by_date(chart_start, latest.period_end)
     for fuel in cef.FUELS:
         for entry in daily_series[fuel]:
             if entry["source"] != "cef_official":

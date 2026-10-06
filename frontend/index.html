@@ -100,9 +100,9 @@
 
       <section class="panel">
         <div class="panel-head">
-          <h2>Daily Basic Fuel Price vs. price built into the current pump price</h2>
-          <p class="muted small">The blue line is each day's real import cost. The flat orange line is the cost that's already priced into what you're paying right now — it was fixed when the current month's price was set, and only changes on the next price change. The gap between them is the daily over/under-recovery below.</p>
-          <p class="muted small">Review period: <span id="period-range">—</span>. Solid = CEF official. Dashed / hollow marker = this tool's estimate for a day CEF hasn't published yet.</p>
+          <h2>Daily Basic Fuel Price vs. price built into the pump price</h2>
+          <p class="muted small">The blue line is each day's real import cost. The orange line is the cost that was priced into the pump price on that day — it's fixed when each month's price is set, and steps up or down on the price-change date. The gap between them is the daily over/under-recovery below.</p>
+          <p class="muted small">Last 30 days. Current review period: <span id="period-range">—</span>; the dashed vertical line marks where the previous one ended. Solid = CEF official. Dashed / hollow marker = this tool's estimate for a day CEF hasn't published yet.</p>
         </div>
         <div class="chart-wrap"><canvas id="chart-bfp" height="110"></canvas></div>
       </section>
@@ -110,7 +110,7 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Daily unit over/(under) recovery</h2>
-          <p class="muted small">Below the zero line = under-recovery (fuel cost more that day than what's priced in — pushes the next price up). Above zero = over-recovery (pushes it down).</p>
+          <p class="muted small">Below the zero line = under-recovery (fuel cost more that day than what's priced in — pushes the next price up). Above zero = over-recovery (pushes it down). Last 30 days; each review period's average sets its own price change, so the dashed line splits the two.</p>
         </div>
         <div class="chart-wrap"><canvas id="chart-recovery" height="110"></canvas></div>
       </section>
@@ -118,7 +118,7 @@
       <section class="panel">
         <div class="panel-head">
           <h2>USD/ZAR exchange rate</h2>
-          <p class="muted small">The rand's strength against the dollar is one of the two big drivers of the fuel price — a weaker rand (higher number) pushes fuel prices up, a stronger rand pulls them down.</p>
+          <p class="muted small">The rand's strength against the dollar is one of the two big drivers of the fuel price — a weaker rand (higher number) pushes fuel prices up, a stronger rand pulls them down. The chart shows the last 30 days.</p>
         </div>
         <div class="fx-current">
           <span class="fx-value" id="fx-current">—</span>
@@ -179,6 +179,6 @@
 
 <footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports</footer>
 
-<script src="app.js?v=10"></script>
+<script src="app.js?v=11"></script>
 </body>
 </html>

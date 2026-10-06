@@ -137,13 +137,70 @@
         : " in this review period");
   }
 
+  const fmtShortDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { day: "2-digit", month: "short" });
+
+  // Dashed vertical line where one review period ends and the next begins, with
+  // the price change each side feeds when there is room for the label.
+  function cycleDivider(series) {
+    return {
+      id: "cycleDivider",
+      afterDatasetsDraw(chart) {
+        const { top, bottom, left, right } = chart.chartArea;
+        const xs = chart.scales.x;
+        const ctx = chart.ctx;
+        ctx.save();
+        ctx.font = "12px " + getComputedStyle(document.body).fontFamily;
+        ctx.textBaseline = "top";
+        for (let i = 1; i < series.length; i++) {
+          const before = series[i - 1].cycle, after = series[i].cycle;
+          if (!before || !after || before === after) continue;
+          const x = (xs.getPixelForValue(i - 1) + xs.getPixelForValue(i)) / 2;
+          ctx.strokeStyle = cssVar("--text-muted");
+          ctx.lineWidth = 1;
+          ctx.setLineDash([4, 4]);
+          ctx.beginPath();
+          ctx.moveTo(x, top);
+          ctx.lineTo(x, bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          // Each label sits on its own side of the line; one that doesn't fit there
+          // goes on a second row on the other side, its arrow still pointing across.
+          const labels = [`← sets ${fmtShortDate(before)} price`, `sets ${fmtShortDate(after)} price →`];
+          const widths = labels.map((t) => ctx.measureText(t).width);
+          const fits = [x - 6 - widths[0] >= left, x + 6 + widths[1] <= right];
+          labels.forEach((text, k) => {
+            const onLeft = k === 0 ? fits[0] : !fits[1];
+            const row = fits[k] ? 0 : 1;
+            const x0 = onLeft ? x - 6 - widths[k] : x + 6;
+            if (x0 < left || x0 + widths[k] > right) return;
+            const y = top + 4 + row * 18;
+            ctx.fillStyle = cssVar("--surface-1") + "e6";
+            ctx.fillRect(x0 - 3, y - 2, widths[k] + 6, 17);
+            ctx.fillStyle = cssVar("--text-secondary");
+            ctx.textAlign = "left";
+            ctx.fillText(text, x0, y);
+          });
+        }
+        ctx.restore();
+      },
+    };
+  }
+
+  // Headroom at the top of a chart for the divider's labels.
+  function withDividerRoom(opts, series) {
+    if (series.some((d, k) => k > 0 && d.cycle && series[k - 1].cycle && d.cycle !== series[k - 1].cycle)) {
+      opts.scales.y.afterDataLimits = (scale) => { scale.max += (scale.max - scale.min) * 0.25; };
+    }
+    return opts;
+  }
+
   function renderCharts() {
     const series = [...state.data.daily_series[state.fuel]].sort((a, b) => a.date.localeCompare(b.date));
     const referenceValue = state.data.latest_official_report.reference_price[state.fuel];
 
     const labels = series.map((d) => fmtDate(d.date));
     const bfpValues = series.map((d) => d.bfp);
-    const refValues = series.map(() => referenceValue);
+    const refValues = series.map((d) => d.reference ?? referenceValue);
     const isEstimated = series.map((d) => d.source !== "cef_official");
     const priorEstimates = series.map((d) => d.estimate ? d.estimate.bfp : null);
     const hasPriorEstimates = priorEstimates.some((v) => v !== null);
@@ -177,8 +234,9 @@
             fill: false,
           },
           {
-            label: "Built into current pump price",
+            label: "Built into the pump price",
             data: refValues,
+            stepped: true,
             borderColor: orange,
             backgroundColor: orange,
             borderWidth: 2,
@@ -201,7 +259,8 @@
           }] : []),
         ],
       },
-      options: chartOptions(grid, textSec, "c/l"),
+      options: withDividerRoom(chartOptions(grid, textSec, "c/l"), series),
+      plugins: [cycleDivider(series)],
     });
 
     const overUnder = series.map((d) => d.unit_over_under);
@@ -250,7 +309,8 @@
           },
         ],
       },
-      options: chartOptions(grid, textSec, "c/l"),
+      options: withDividerRoom(chartOptions(grid, textSec, "c/l"), series),
+      plugins: [cycleDivider(series)],
     });
   }
 
