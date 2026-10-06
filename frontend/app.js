@@ -63,7 +63,44 @@
     });
   }
 
+  const dirClass = (c) => c > 0 ? "increase" : c < 0 ? "decrease" : "";
+
+  // Until an announced change takes effect it leads, and the next cycle's
+  // prediction (only a few days in, so still uncertain) is a smaller early look.
+  function renderAnnounced() {
+    const ann = state.data.announced_change;
+    const change = ann ? ann.change[state.fuel] : undefined;
+    const show = change !== undefined;
+    $("#hero-announced").hidden = !show;
+    $("#hero-forecast").hidden = show;
+    if (!show) return false;
+
+    const pred = state.data.predictions[state.fuel];
+    $("#ann-title").textContent = `Price change on ${fmtDate(ann.effective)}`;
+    const changeEl = $("#ann-change");
+    changeEl.textContent = fmtRandDelta(change);
+    changeEl.className = "hero-value " + dirClass(change);
+    const badge = $("#ann-badge");
+    badge.className = "hero-badge " + (dirClass(change) || "flat");
+    badge.textContent = change > 0 ? "▲ Announced increase" : change < 0 ? "▼ Announced decrease" : "■ Announced: no change";
+    $("#ann-prices").textContent =
+      `${PRICE_ROW_LABEL[state.fuel]}: ${fmtRand(ann.previous_price[state.fuel])} → ${fmtRand(ann.new_price[state.fuel])}`;
+
+    $("#early-title").textContent = `Early look: ${fmtDate(state.data.predicted_change_date)}`;
+    const earlyEl = $("#early-change");
+    earlyEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
+    earlyEl.className = "hero-value " + dirClass(pred.predicted_pump_price_change_c_per_l);
+    const days = pred.blended_days_count;
+    $("#early-sub").textContent =
+      `About ${fmtRand(pred.predicted_new_price_c_per_l)}. Only ${days} day${days === 1 ? "" : "s"} of the review period so far, so this can still move a lot.`;
+    return true;
+  }
+
   function renderHero() {
+    $("#period-range").textContent =
+      `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;
+    if (renderAnnounced()) return;
+
     const pred = state.data.predictions[state.fuel];
     const dir = pred.direction; // "increase" | "decrease" | "no change"
 
@@ -100,9 +137,6 @@
       : conf + " so far" + (projDays
         ? `; the other ${projDays} day${projDays === 1 ? "" : "s"} to ${fmtDate(state.data.review_period_close)} assume the BFP stays where it is now`
         : " in this review period");
-
-    $("#period-range").textContent =
-      `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;
   }
 
   function renderCharts() {

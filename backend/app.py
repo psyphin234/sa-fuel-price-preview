@@ -124,18 +124,45 @@ def get_history_reports(end: dt.date) -> list:
     return [_report_from_cache(dict(cached[k])) for k in sorted(cached)]
 
 
-def get_next_reference(latest):
-    """The BFP contribution in the upcoming pump price, while `latest` still
-    predates that price change (see bm.next_reference_price). None otherwise."""
-    if latest.report_date >= latest.pump_price_effective:
-        return None
+def get_closing_report(latest):
+    """The last report of the review period before `latest`'s, or None."""
     d = latest.period_start
     for _ in range(7):
         d -= dt.timedelta(days=1)
         rep = get_report_cached(d) if bm.is_business_day(d) else None
         if rep is not None:
-            return bm.next_reference_price(rep) if rep.period_start < latest.period_start else None
+            return rep if rep.period_start < latest.period_start else None
     return None
+
+
+def get_next_reference(latest):
+    """The BFP contribution in the upcoming pump price, while `latest` still
+    predates that price change (see bm.next_reference_price). None otherwise."""
+    if latest.report_date >= latest.pump_price_effective:
+        return None
+    closing = get_closing_report(latest)
+    return bm.next_reference_price(closing) if closing else None
+
+
+def get_announced_change(latest, today):
+    """While a new price is announced but not yet in effect: its date, the old and
+    new prices, and the change per fuel. None otherwise."""
+    if today >= latest.pump_price_effective:
+        return None
+    closing = get_closing_report(latest)
+    if closing is None:
+        return None
+    previous, new = closing.current_price, latest.current_price
+    return {
+        "effective": latest.pump_price_effective,
+        "previous_price": previous,
+        "new_price": new,
+        "change": {
+            fuel: round(new[fuel] - previous[fuel], 2)
+            for fuel in cef.FUELS
+            if new.get(fuel) is not None and previous.get(fuel) is not None
+        },
+    }
 
 
 def manual_overrides_dict():
@@ -256,6 +283,7 @@ def build_status_data():
         "exchange_rate_series": exchange_rate_series,
         "current_exchange_rate": benchmarks.get("usdzar", {}).get("price"),
         "accuracy": accuracy_summary,
+        "announced_change": get_announced_change(latest, today),
         "next_price_change_date": next_change,
         "predicted_change_date": bm.next_price_change_date(latest.pump_price_effective),
         "review_period_close": period_close,

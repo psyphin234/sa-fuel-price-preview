@@ -362,6 +362,11 @@ a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 
 .hero-badge.flat { background: color-mix(in srgb, var(--text-muted) 18%, transparent); color: var(--text-secondary); }
 .hero-value.increase { color: var(--status-critical); }
 .hero-value.decrease { color: var(--delta-up-good); }
+.hero[hidden] { display: none; }
+/* Between CEF opening a new review period and the announced change taking effect:
+   the announced change leads, with a smaller early look at the next one. */
+.hero--announced { grid-template-columns: 2fr 1fr; }
+.hero-card--early .hero-value { font-size: 24px; }
 
 /* ---- panels ---- */
 .panel {

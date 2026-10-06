@@ -157,8 +157,11 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   a public holiday; checked against every changeover May 2025 - Aug 2026). A
   prediction made early in the period can still move a lot before it closes.
   After it closes the site stops adding estimated days to it, and from the
-  first report of the new period CEF already shows the upcoming price, which
-  the site labels "New price from <date>" until it takes effect.
+  first report of the new period CEF already shows the upcoming price. Until
+  it takes effect the site leads with that announced change (old price, new
+  price and the difference, from the last report of the closed period) and
+  shows the next cycle's prediction only as a smaller "early look", since it
+  rests on just a few days.
   Those first reports still measure against the old price's BFP contribution,
   and CEF switches on the change date. When estimated days run past that date,
   the site uses the new contribution, derived as the old one less the closed
