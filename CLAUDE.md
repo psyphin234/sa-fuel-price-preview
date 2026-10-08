@@ -14,6 +14,7 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 | `docs/` | **Public** read-only GitHub Pages site | `docs/data/status.json` |
 
 - `style.css` is identical in both. Keep it that way: apply a CSS change to both files.
+- **Always dark** (since 2026-10-08, to match psyphin.co.za and the other tools): both `index.html` files have `<html data-theme="dark">` and `<meta name="color-scheme" content="dark">`, so the `:root[data-theme="dark"]` tokens apply whatever the visitor's setting. The light tokens are still in `style.css` but unused. Dark mode uses the shared background `#020203`, cards `#111418`/`#181c21`, and the faint circuit-trace `body::before` pattern (via `--circuit-pattern`), the same as psyphin.co.za. Charts read their colours from these CSS variables when they draw.
 - `index.html` and `app.js` differ on purpose. `docs/` has no manual-entry form, has slightly different wording, fetches static JSON instead of calling the API, and has a "← More PsyPhin tools" back link in the header (absolute URL `https://psyphin.co.za/#tools`, the Tools section of the landing page; the towing checker at psyphin.co.za/sa-towing-check/ uses the same pill). When changing shared UI, make the change in both and keep these differences.
 - When you change a CSS/JS file under `docs/`, bump its `?v=` cache-buster in `docs/index.html` so visitors don't get a stale copy.
 - **Never hand-edit `docs/data/status.json`.** It's generated and overwritten every hour.
