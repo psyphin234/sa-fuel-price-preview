@@ -21,13 +21,13 @@ Previews South Africa's daily Basic Fuel Price (BFP) the way CEF calculates it, 
 
 ## The hourly publish bot pushes from this clone
 
-Windows Scheduled Task **"BFP Preview Publish"** runs `backend/run_publish.ps1` → `backend/publish.py` **every hour at about :18**, in this working copy. It rebuilds `docs/data/status.json`, then runs `git add` on that file, a plain `git commit`, and `git push`. Consequences:
+Windows Scheduled Task **"BFP Preview Publish"** runs `wscript.exe backend/run_publish_hidden.vbs` → `backend/run_publish.ps1` → `backend/publish.py` in this working copy, on two triggers: **every hour at about :18**, and **every 15 minutes (:00, :15, :30, :45) from 07:00 to 11:00 on weekdays** to pick up CEF's morning report quickly. The `.vbs` launcher keeps it from flashing a console window and stealing focus. Don't point the task straight at `powershell.exe`, because `-WindowStyle Hidden` doesn't prevent the flash. It rebuilds `docs/data/status.json`, then runs `git add` on that file, a plain `git commit`, and `git push`. Consequences:
 
 - **Anything staged gets swept into the bot's "Update BFP preview data" commit.** Don't leave files staged; stage and commit in one step.
 - **Any unpushed local commits get pushed** with the bot's commit. Don't leave half-finished work committed on `master`.
 - **It commits to whichever branch is checked out.** Stay on `master`, or switch back well before :18. Otherwise data commits land on your feature branch and the push fails.
 - **It never pulls.** If `origin/master` gets ahead (for example after an edit on github.com or a push from another machine), the bot's pushes fail until this clone is updated. Always push from this clone and `git pull --rebase` before pushing.
-- Avoid committing or pushing between about :15 and :22. Check `data/publish.log` for the last run's result.
+- Avoid committing or pushing between about :15 and :22, and on weekday mornings (07:00–11:00) also within a couple of minutes of :00, :30 and :45. Check `data/publish.log` for the last run's result.
 
 ## Running things
 
@@ -35,7 +35,7 @@ Windows Scheduled Task **"BFP Preview Publish"** runs `backend/run_publish.ps1` 
 - To stop the dashboard, close its window or kill **only that PID** (`netstat -ano | findstr :5057`). **Never** kill `python.exe` by image name: that would also kill the dashboard and any publish run in progress.
 - Manual publish: `cd backend; python publish.py`. It pushes too, so treat it like a push.
 - Backtest the model (from `backend/`): `python backtest_fetch.py 2025-06-01 <today>` then `python backtest.py`.
-- `data/` (the SQLite database, logs, backtest cache) is gitignored and stays local.
+- `data/` (the SQLite database and its `*.bak*` copies, logs, backtest cache) is gitignored and stays local.
 - `PsyPhin logo black V3.jfif` and `PsyPhin logo.jfif` in the repo root are local reference copies of the logo, gitignored via `*.jfif`. Keep them. The originals are committed in the psyphin.co.za repo as `psyphin-logo-black.jpg` and `psyphin-logo.jpg`. The site itself uses `docs/assets/logo.jpg`.
 
 ## Conventions

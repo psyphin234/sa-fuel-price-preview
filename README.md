@@ -107,8 +107,14 @@ repo or the published site; the repo's commit history just shows automated
 commits from your GitHub account, same as any scheduled bot would.
 
 A Windows Scheduled Task named **"BFP Preview Publish"** runs
-`backend/run_publish.ps1` every hour (only while you're logged in - that's
-Task Scheduler's default and needs no stored password). Each run:
+`backend/run_publish.ps1` every hour at about :18, plus every 15 minutes
+from 07:00 to 11:00 on weekdays to pick up CEF's morning report quickly
+(only while you're logged in - that's Task Scheduler's default and needs no
+stored password). The task's action is
+`wscript.exe "E:\Claude_projects\BFP_Website\backend\run_publish_hidden.vbs"`,
+a tiny launcher that starts the PowerShell script fully hidden: pointing the
+task at `powershell.exe -WindowStyle Hidden` directly still flashes a console
+window and steals focus. Each run:
 
 1. Re-scrapes CEF's latest PDFs + free market benchmarks
 2. Rebuilds `docs/data/status.json`

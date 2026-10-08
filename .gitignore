@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 data/bfp.db
 data/*.log
+data/*.bak*
 .venv/
 venv/
 data/backtest/
