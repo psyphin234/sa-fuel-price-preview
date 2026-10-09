@@ -45,10 +45,17 @@ Requires Python 3.10+ (no Node.js needed).
 .\run.ps1
 ```
 
-This installs the dependencies (`flask`, `requests`, `pdfplumber`, `numpy`) and
-starts the server at **http://127.0.0.1:5057**, opening it in your browser.
+This starts the server in the background with **no window** (through
+`backend/run_dashboard_hidden.vbs` → `backend/run_dashboard.ps1`, which installs
+the dependencies `flask`, `requests`, `pdfplumber`, `numpy` first) and opens
+**http://127.0.0.1:5057** in your browser. Its output goes to
+`data/dashboard.log`. Stop it with:
 
-Or manually:
+```powershell
+.\stop.ps1
+```
+
+Or run it in the foreground, with a console:
 
 ```powershell
 cd backend

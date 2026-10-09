@@ -42,8 +42,8 @@ The last panel before "How this works" is supplementary context, deliberately pl
 
 ## Running things
 
-- Dashboard: `.\run.ps1`. It installs requirements, opens the browser and runs `python app.py` on port 5057 in the foreground.
-- To stop the dashboard, close its window or kill **only that PID** (`netstat -ano | findstr :5057`). **Never** kill `python.exe` by image name: that would also kill the dashboard and any publish run in progress.
+- Dashboard: `.\run.ps1` starts it **hidden** (since 2026-10-09, owner's request): `wscript backend\run_dashboard_hidden.vbs` → `backend\run_dashboard.ps1` (pip install, then `python app.py` on port 5057, output to `data\dashboard.log`, rewritten each launch). It waits for the port and opens the browser; if the dashboard is already running it just opens the browser.
+- Stop it with `.\stop.ps1`: it kills only the process listening on 5057 and its launch chain (`app.py`, the reloader, the hidden PowerShell). **Never** kill `python.exe` by image name: that would also kill any publish run in progress. After backend changes, run `.\stop.ps1; .\run.ps1` to pick them up.
 - Manual publish: `cd backend; python publish.py`. It pushes too, so treat it like a push.
 - Backtest the model (from `backend/`): `python backtest_fetch.py 2025-06-01 <today>` then `python backtest.py`.
 - `data/` (the SQLite database and its `*.bak*` copies, logs, backtest cache) is gitignored and stays local.
