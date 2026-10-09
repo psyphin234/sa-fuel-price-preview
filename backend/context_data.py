@@ -41,6 +41,15 @@ HORMUZ_FROM = dt.date(2025, 10, 1)
 # The Iran war began on 28 February 2026 (Baird Maritime / Kpler; the IRGC
 # declared the strait closed on 2 March). "Normal" is the year before that.
 CONFLICT_START = dt.date(2026, 2, 28)
+# Marked on the Hormuz chart (dotted lines; a "to" date shades the span). Added
+# after the cache is read, so editing these shows up on the next publish.
+# Ceasefire: the Islamabad Memorandum was signed on 17 June 2026 and the
+# ceasefire collapsed when fighting resumed on 8 July (Wikipedia, "2026 Iran
+# war ceasefire"); PortWatch's counts rise and fall on those dates.
+HORMUZ_EVENTS = [
+    {"from": CONFLICT_START.isoformat(), "label": "Conflict begins"},
+    {"from": "2026-06-17", "to": "2026-07-08", "label": "Ceasefire"},
+]
 
 
 def _brent_futures() -> dict:
@@ -163,7 +172,10 @@ def get_context() -> dict:
     if changed:
         CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
         CACHE_PATH.write_text(json.dumps(cache), encoding="utf-8")
-    return {name: (cache.get(name) or {}).get("data") for name in PARTS}
+    out = {name: (cache.get(name) or {}).get("data") for name in PARTS}
+    if out["hormuz"]:
+        out["hormuz"] = {**out["hormuz"], "events": HORMUZ_EVENTS}
+    return out
 
 
 if __name__ == "__main__":

@@ -134,25 +134,50 @@
     $("#ctx-brent-asof").textContent = "Data: " + parts.join("; ") + ".";
   }
 
-  // A dashed vertical line where the conflict began, with a small label.
-  const markerPlugin = (index, label) => ({
-    id: "ctxMarker",
-    afterDatasetsDraw(chart) {
-      if (index < 0) return;
+  // Dotted vertical lines for events (h.events, from context_data.py). An event
+  // with a "to" date gets a line at each end and faint shading between. Each
+  // label sits on its own row so neighbouring labels never overlap.
+  const eventsPlugin = (series, events) => ({
+    id: "ctxEvents",
+    beforeDatasetsDraw(chart) {
       const { ctx, chartArea, scales } = chart;
-      const x = scales.x.getPixelForValue(index);
       ctx.save();
-      ctx.strokeStyle = cssVar("--text-muted");
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(x, chartArea.top);
-      ctx.lineTo(x, chartArea.bottom);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      for (const ev of events) {
+        if (!ev.to) continue;
+        const a = series.findIndex((r) => r[0] >= ev.from);
+        let b = series.findIndex((r) => r[0] >= ev.to);
+        if (a < 0) continue;
+        if (b < 0) b = series.length - 1;
+        const x0 = scales.x.getPixelForValue(a), x1 = scales.x.getPixelForValue(b);
+        ctx.fillStyle = cssVar("--series-blue") + "1f";
+        ctx.fillRect(x0, chartArea.top, x1 - x0, chartArea.bottom - chartArea.top);
+      }
+      ctx.restore();
+    },
+    afterDatasetsDraw(chart) {
+      const { ctx, chartArea, scales } = chart;
+      ctx.save();
       ctx.font = "12px " + getComputedStyle(document.body).fontFamily;
-      ctx.fillStyle = cssVar("--text-secondary");
-      const w = ctx.measureText(label).width;
-      ctx.fillText(label, Math.min(x + 6, chartArea.right - w), chartArea.top + 12);
+      events.forEach((ev, row) => {
+        const xs = [ev.from, ev.to].filter(Boolean)
+          .map((d) => series.findIndex((r) => r[0] >= d))
+          .filter((i) => i >= 0)
+          .map((i) => scales.x.getPixelForValue(i));
+        if (!xs.length) return;
+        ctx.strokeStyle = cssVar("--text-muted");
+        ctx.setLineDash([2, 3]);
+        for (const x of xs) {
+          ctx.beginPath();
+          ctx.moveTo(x, chartArea.top);
+          ctx.lineTo(x, chartArea.bottom);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        ctx.fillStyle = cssVar("--text-secondary");
+        const w = ctx.measureText(ev.label).width;
+        const x = xs.length > 1 ? (xs[0] + xs[1]) / 2 - w / 2 : xs[0] + 6;
+        ctx.fillText(ev.label, Math.max(chartArea.left + 2, Math.min(x, chartArea.right - w)), chartArea.top + 12 + row * 16);
+      });
       ctx.restore();
     },
   });
@@ -219,7 +244,7 @@
         ],
       },
       options: opts,
-      plugins: [markerPlugin(s.findIndex((r) => r[0] >= h.conflict_start), "Conflict begins")],
+      plugins: [eventsPlugin(s, h.events || [{ from: h.conflict_start, label: "Conflict begins" }])],
     });
 
     $("#ctx-hormuz-asof").textContent = `Data to ${fmtDate(h.data_to)}. PortWatch publishes a few days late and revises recent days.`;
