@@ -558,6 +558,7 @@
     renderFx();
     renderCharts();
     renderTable();
+    if (window.renderContext) window.renderContext(state.data.context);
   }
 
   async function loadData() {

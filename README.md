@@ -62,6 +62,9 @@ python app.py
 backend/
   cef_scraper.py   - fetches + parses CEF's daily PDF reports
   market_data.py    - live Yahoo Finance quotes (Brent, RBOB, ULSD, USD/ZAR)
+  context_data.py   - background only, not used by the model: Brent futures
+                      (Yahoo) vs. Dated Brent spot (EIA), and Strait of Hormuz
+                      ship crossings (IMF PortWatch); cached for 3 hours
   nowcast.py         - estimates unpublished days from hourly market prices,
                        with weights re-fitted on CEF's own history each run
   bfp_model.py       - blended-average prediction logic
@@ -78,12 +81,15 @@ frontend/
                                    API, has the manual-override form)
 docs/
   index.html, style.css, app.js  - the PUBLIC, read-only GitHub Pages build
+  context.js                     - the "Oil and the Strait of Hormuz" section
+                                   (identical copy in frontend/)
                                    (fetches docs/data/status.json, no backend calls)
   data/status.json                 - the published snapshot (overwritten each run)
 data/
   bfp.db      - local SQLite database (created on first run, gitignored)
   publish.log - log of each scheduled publish run (gitignored)
   backtest/   - downloaded history used by the backtest (gitignored)
+  context_cache.json - last good copy of the background feeds (gitignored)
 ```
 
 ## Public site + hourly auto-publish

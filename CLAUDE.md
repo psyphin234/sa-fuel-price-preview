@@ -30,6 +30,16 @@ Windows Scheduled Task **"BFP Preview Publish"** runs `wscript.exe backend/run_p
 - **It never pulls.** If `origin/master` gets ahead (for example after an edit on github.com or a push from another machine), the bot's pushes fail until this clone is updated. Always push from this clone and `git pull --rebase` before pushing.
 - Avoid committing or pushing between about :15 and :22, and on weekday mornings (07:00–11:00) also within a couple of minutes of :00, :30 and :45. Check `data/publish.log` for the last run's result.
 
+## Background section: oil and the Strait of Hormuz (since 2026-10-09)
+
+The last panel before "How this works" is supplementary context, deliberately placed below all the headline cards, charts and the table. **It never feeds the prediction.**
+
+- Data: `backend/context_data.py` → `context` in the payload (`brent_futures`, `brent_spot`, `hormuz`, each `null` if never fetched). Brent futures = Yahoo `BZ=F` daily closes; physical = the EIA's daily Europe Brent spot (Dated Brent), scraped from `https://www.eia.gov/dnav/pet/hist/RBRTED.htm` (weekly releases, so a few days behind); Hormuz = IMF PortWatch daily transits for `chokepoint6` from its public ArcGIS feed (about 5 days behind, revised later). No API keys.
+- Each part is cached in `data/context_cache.json` (gitignored) for 3 hours, since publish.py runs up to five times an hour. A failed fetch keeps the last good copy; `app.py` wraps the call so it can never stop a publish.
+- "Normal before the conflict" is PortWatch's own average for the 365 days before `CONFLICT_START` (2026-02-28) in context_data.py, so both sides of the comparison come from the same source.
+- **PortWatch undercounts during the conflict:** it only sees ships broadcasting AIS. In Sept 2026, Lloyd's List, Kpler and Windward (which add back "dark" crossings) counted roughly 3–5× more, and PortWatch's April–June tanker volume was 8% of pre-war against the EIA's 23%. The caveat box under the chart says so; keep it while the conflict lasts.
+- Frontend: `context.js` is **identical** in `docs/` and `frontend/` (copy it across), builds the decorative tanker SVG (CSS keyframes `.tanker-art` in style.css, off under prefers-reduced-motion) and both charts. Each `app.js` calls `window.renderContext(state.data.context)` at the end of `render()`. The panel and each block hide themselves when their data is missing.
+
 ## Running things
 
 - Dashboard: `.\run.ps1`. It installs requirements, opens the browser and runs `python app.py` on port 5057 in the foreground.
@@ -46,5 +56,5 @@ Windows Scheduled Task **"BFP Preview Publish"** runs `wscript.exe backend/run_p
 - **Backups:** the Windows Scheduled Task **"Project Backup"** runs `E:\Backup\Project_Backups\backup-projects.ps1` nightly at 02:00 (started through `backup-projects-hidden.vbs` via `wscript.exe` so no window flashes, the same approach as the publish task). It copies all of `E:\Claude_projects` (including local-only data such as the fuel site's `data\bfp.db` and the project source folders) to `E:\Backup\Project_Backups\latest\` (adds and updates, never deletes) plus a dated zip in `daily\` (newest 14 kept); log in `backup.log`. `E:\Backup` is in turn backed up to the owner's NAS, so a disk failure is covered too (and the code is also on GitHub).
 - Python 3.10+, with Flask, requests, pdfplumber and numpy (`backend/requirements.txt`). There is no Node or build step.
 - Chart.js 4.5.1 loads from cdnjs with an `integrity` (SRI) hash in both `docs/index.html` and `frontend/index.html`. If you upgrade the version, update the hash too (from `https://api.cdnjs.com/libraries/Chart.js/<version>?fields=sri`), or the browser will refuse to load the script and the charts will disappear.
-- The whole design depends on your PC only making **outbound** connections to CEF, Yahoo Finance and GitHub. Don't add anything that listens publicly or gives the public site a write endpoint.
+- The whole design depends on your PC only making **outbound** connections to CEF, Yahoo Finance, GitHub, and (for the background section) eia.gov and IMF PortWatch's ArcGIS feed. Don't add anything that listens publicly or gives the public site a write endpoint.
 - Values carry a `source` of `cef_official`, `estimated` or `manual`, and the UI must keep estimates visibly distinct from official figures.

@@ -599,6 +599,7 @@
     renderTable();
     renderManualForm();
     renderManualList();
+    if (window.renderContext) window.renderContext(state.data.context);
   }
 
   async function loadData() {

@@ -10,6 +10,7 @@ import bfp_model as bm
 import db
 import accuracy
 import nowcast
+import context_data
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -289,6 +290,13 @@ def build_status_data():
 
     next_change = bm.upcoming_price_change(latest.pump_price_effective, today)
 
+    # Background section (Brent futures vs spot, Hormuz traffic); never allowed
+    # to stop the payload, since the model doesn't use it.
+    try:
+        context = context_data.get_context()
+    except Exception:
+        context = None
+
     return {
         "latest_official_report": latest,
         "benchmarks": benchmarks,
@@ -305,6 +313,7 @@ def build_status_data():
         "review_period_close": period_close,
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
+        "context": context,
         "generated_at": dt.datetime.now(),
     }
 

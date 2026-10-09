@@ -592,3 +592,112 @@ td.num, th.num { text-align: right; }
 .fn-mark { font-size: 0.75em; margin-left: 1px; color: var(--text-muted); font-style: normal; }
 .table-notes { margin-top: 12px; }
 .table-notes p { margin: 0 0 4px; font-size: 12px; color: var(--text-secondary); max-width: 100ch; }
+
+/* ---- background: oil and the Strait of Hormuz (context.js) ----
+   Sits below everything else; supplementary, so quieter than the panels above. */
+.context-panel[hidden], .context-block[hidden] { display: none; }
+.context-eyebrow {
+  margin: 0 0 4px !important;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--brand);
+}
+.context-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.context-block {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--gridline);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.context-block h3 { margin: 0 0 12px; font-size: 15px; font-weight: 650; }
+.context-block p { margin: 12px 0 0; }
+.ctx-figures { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.ctx-stat {
+  flex: 1 1 120px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--surface-1);
+  border: 1px solid var(--gridline);
+}
+.ctx-stat-label { font-size: 12px; color: var(--text-secondary); }
+.ctx-stat-value { font-size: 22px; font-weight: 650; font-variant-numeric: tabular-nums; line-height: 1.3; }
+.ctx-stat-sub { font-size: 12px; color: var(--text-muted); }
+.ctx-stat--alert .ctx-stat-value { color: var(--series-orange); }
+.ctx-caveat {
+  padding: 10px 12px;
+  border-left: 3px solid var(--series-orange);
+  border-radius: 0 8px 8px 0;
+  background: color-mix(in srgb, var(--series-orange) 10%, transparent);
+  color: var(--text-secondary);
+}
+.ctx-source { color: var(--text-muted); }
+.ctx-source a, .ctx-caveat a { color: var(--text-secondary); }
+
+/* The tanker: decoration only. Waves slide one wavelength (--wl) per loop. */
+.tanker-art {
+  height: clamp(78px, 11vw, 124px);
+  margin: -24px -24px 14px;
+  border-radius: 14px 14px 0 0;
+  overflow: hidden;
+  background: linear-gradient(to bottom, transparent, color-mix(in srgb, var(--series-blue) 8%, transparent));
+}
+.tanker-art svg { display: block; width: 100%; height: 100%; }
+.tanker-art .ta-moon { fill: #e9edf2; opacity: 0.55; }
+.tanker-art .ta-moon-glow { fill: #e9edf2; opacity: 0.06; }
+.tanker-art .ta-wave--back path { fill: color-mix(in srgb, var(--series-blue) 22%, var(--surface-1)); }
+.tanker-art .ta-wave--mid path { fill: color-mix(in srgb, var(--series-blue) 34%, var(--surface-1)); }
+.tanker-art .ta-wave--front path { fill: color-mix(in srgb, var(--series-blue) 50%, var(--surface-1)); }
+.tanker-art .ta-wave { animation: ta-wave 7s linear infinite; }
+.tanker-art .ta-wave--mid { animation-duration: 5.5s; animation-direction: reverse; }
+.tanker-art .ta-wave--front { animation-duration: 4.5s; }
+@keyframes ta-wave { from { transform: translateX(0); } to { transform: translateX(var(--wl)); } }
+
+.tanker-art .ta-ship {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  animation: ta-rock 6s ease-in-out infinite;
+}
+@keyframes ta-rock {
+  0%, 100% { transform: translateY(0) rotate(-0.8deg); }
+  50% { transform: translateY(2.5px) rotate(0.8deg); }
+}
+.tanker-art .ta-hull { fill: #3a4656; }
+.tanker-art .ta-boot { fill: #a8352f; }
+.tanker-art .ta-deck { fill: none; stroke: #c9d1db; stroke-width: 1.5; }
+.tanker-art .ta-pipes, .tanker-art .ta-mast { fill: none; stroke: #8994a2; stroke-width: 1.6; }
+.tanker-art .ta-house { fill: #d5dbe3; }
+.tanker-art .ta-bridge { fill: #eef1f5; }
+.tanker-art .ta-windows { fill: none; stroke: #2a323c; stroke-width: 2.2; }
+.tanker-art .ta-funnel { fill: #1f262e; }
+.tanker-art .ta-funnel-band { fill: var(--series-blue); }
+.tanker-art .ta-name { stroke: #c9d1db; stroke-width: 1.4; opacity: 0.6; }
+.tanker-art .ta-smoke circle {
+  fill: #9aa4b0;
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ta-smoke 4.5s ease-out infinite;
+}
+.tanker-art .ta-smoke circle:nth-child(2) { animation-delay: 1.5s; }
+.tanker-art .ta-smoke circle:nth-child(3) { animation-delay: 3s; }
+@keyframes ta-smoke {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  15% { opacity: 0.45; }
+  100% { opacity: 0; transform: translate(-34px, -22px) scale(2.2); }
+}
+.tanker-art .ta-far-ship { fill: color-mix(in srgb, var(--series-blue) 30%, var(--surface-1)); animation: ta-far 70s linear infinite; }
+@keyframes ta-far { from { transform: translate(-60px, 93px); } to { transform: translate(1060px, 93px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tanker-art *, .tanker-art .ta-smoke circle { animation: none !important; }
+  .tanker-art .ta-far-ship { transform: translate(120px, 93px); }
+}
+
+@media (max-width: 760px) {
+  .context-grid { grid-template-columns: 1fr; }
+  .context-block { padding: 14px; }
+  .tanker-art { margin: -18px -16px 12px; }
+}

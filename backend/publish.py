@@ -5,7 +5,8 @@ docs/data/status.json, and pushes it to GitHub so the public GitHub Pages
 site can pick it up.
 
 Run this on a schedule (Windows Task Scheduler). It only ever makes OUTBOUND
-connections (to cefgroup.co.za, Yahoo Finance, and github.com) - it never
+connections (to cefgroup.co.za, Yahoo Finance, eia.gov, IMF PortWatch's
+ArcGIS feed, and github.com) - it never
 opens a port or accepts a connection, so nothing about this machine is
 discoverable from the published site or its repo.
 """
