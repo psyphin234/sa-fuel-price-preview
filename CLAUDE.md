@@ -58,3 +58,7 @@ The last panel before "How this works" is supplementary context, deliberately pl
 - Chart.js 4.5.1 loads from cdnjs with an `integrity` (SRI) hash in both `docs/index.html` and `frontend/index.html`. If you upgrade the version, update the hash too (from `https://api.cdnjs.com/libraries/Chart.js/<version>?fields=sri`), or the browser will refuse to load the script and the charts will disappear.
 - The whole design depends on your PC only making **outbound** connections to CEF, Yahoo Finance, GitHub, and (for the background section) eia.gov and IMF PortWatch's ArcGIS feed. Don't add anything that listens publicly or gives the public site a write endpoint.
 - Values carry a `source` of `cef_official`, `estimated` or `manual`, and the UI must keep estimates visibly distinct from official figures.
+
+## Search (SEO)
+
+Set up 2026-10-13, following the [Runbook: SEO for Small Sites & Tools](https://claude.ai/code/artifact/0e4d5503-7f20-4cb5-a25b-840f4caa3545). The `<title>` leads with the tool's name and adds the words people search for; the meta description is at most 155 characters (Google cuts the rest). `docs/index.html` (not `frontend/`) has a canonical link, Open Graph tags (image: the psyphin.co.za fuel card image), a description in its `WebSite` JSON-LD (keep it the same as the meta description), and a footer link to the EV cost tool. `docs/robots.txt` and `docs/sitemap.xml` are the site's. `robots.txt` and `sitemap.xml` are at the site root: **update the sitemap's `lastmod` when a page's content changes.** Indexable.
