@@ -1535,7 +1535,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.487,
+  "current_exchange_rate": 16.5006,
   "accuracy": {
     "n": 55,
     "mean_abs_pct_error": 1.14,
@@ -4388,5 +4388,5 @@
       ]
     }
   },
-  "generated_at": "2026-10-13T18:18:41.400332"
+  "generated_at": "2026-10-13T19:18:44.842593"
 }
