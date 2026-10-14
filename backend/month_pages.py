@@ -57,7 +57,8 @@ DESC_MAX = 155
 # ---------- formatting ----------
 
 def esc(s) -> str:
-    return html.escape(str(s), quote=True)
+    """For text and double-quoted attributes; apostrophes stay as they are."""
+    return html.escape(str(s), quote=False).replace('"', "&quot;")
 
 
 def d_long(d: dt.date) -> str:
