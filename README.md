@@ -82,6 +82,8 @@ backend/
   app.py                - Flask app / API (private, local only)
   publish.py             - standalone script: builds a status snapshot and
                            pushes it to docs/data/status.json on GitHub
+  month_pages.py           - builds the monthly pages in docs/fuel-price/ and
+                             docs/sitemap.xml (called by publish.py)
   run_publish.ps1          - Task Scheduler wrapper around publish.py, with logging
 frontend/
   index.html, style.css, app.js  - the full local dashboard (talks to the Flask
@@ -92,6 +94,8 @@ docs/
                                    (identical copy in frontend/)
                                    (fetches docs/data/status.json, no backend calls)
   data/status.json                 - the published snapshot (overwritten each run)
+  fuel-price/                      - one page per monthly price change, plus a
+                                     forecast page and a history index (generated)
 data/
   bfp.db      - local SQLite database (created on first run, gitignored)
   publish.log - log of each scheduled publish run (gitignored)
@@ -131,7 +135,9 @@ window and steals focus. Each run:
 
 1. Re-scrapes CEF's latest PDFs + free market benchmarks
 2. Rebuilds `docs/data/status.json`
-3. Commits and pushes it, if anything changed
+3. Rebuilds the monthly pages in `docs/fuel-price/` and the sitemap (only
+   files whose text changed are rewritten)
+4. Commits and pushes them, if anything changed
 
 To manage the task: open **Task Scheduler** → look under the root
 `\` folder for "BFP Preview Publish". You can change the interval, pause it,

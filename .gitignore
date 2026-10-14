@@ -7,6 +7,7 @@ data/*.bak*
 venv/
 data/backtest/
 data/context_cache.json
+data/month_pages_forecast.json
 
 # Reference copies of the PsyPhin logo (originals are committed in the psyphin234.github.io repo)
 *.jfif
