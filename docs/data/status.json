@@ -86,7 +86,8 @@
             "illpar": -277.527
           },
           "exchange_rate": 16.4862,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment."
+          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
+          "fallback": false
         }
       ],
       "manual_days": [],
@@ -124,7 +125,8 @@
             "illpar": -277.527
           },
           "exchange_rate": 16.4862,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment."
+          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
+          "fallback": false
         }
       ],
       "manual_days": [],
@@ -162,7 +164,8 @@
             "illpar": -277.527
           },
           "exchange_rate": 16.4862,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment."
+          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
+          "fallback": false
         }
       ],
       "manual_days": [],
@@ -200,7 +203,8 @@
             "illpar": -277.527
           },
           "exchange_rate": 16.4862,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment."
+          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
+          "fallback": false
         }
       ],
       "manual_days": [],
@@ -238,7 +242,8 @@
             "illpar": -277.527
           },
           "exchange_rate": 16.4862,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment."
+          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
+          "fallback": false
         }
       ],
       "manual_days": [],
@@ -456,9 +461,9 @@
         "cycle": "2026-11-04",
         "source": "cef_official",
         "estimate": {
-          "bfp": 1913.618,
-          "error_c_per_l": -39.988,
-          "pct_error": -2.13
+          "bfp": 1891.222,
+          "error_c_per_l": -17.592,
+          "pct_error": -0.94
         }
       },
       {
@@ -702,9 +707,9 @@
         "cycle": "2026-11-04",
         "source": "cef_official",
         "estimate": {
-          "bfp": 1874.869,
-          "error_c_per_l": -25.487,
-          "pct_error": -1.38
+          "bfp": 1852.786,
+          "error_c_per_l": -3.404,
+          "pct_error": -0.18
         }
       },
       {
@@ -948,9 +953,9 @@
         "cycle": "2026-11-04",
         "source": "cef_official",
         "estimate": {
-          "bfp": 2330.761,
-          "error_c_per_l": -45.427,
-          "pct_error": -1.99
+          "bfp": 2298.428,
+          "error_c_per_l": -13.094,
+          "pct_error": -0.57
         }
       },
       {
@@ -1194,9 +1199,9 @@
         "cycle": "2026-11-04",
         "source": "cef_official",
         "estimate": {
-          "bfp": 2413.928,
-          "error_c_per_l": -44.723,
-          "pct_error": -1.89
+          "bfp": 2380.639,
+          "error_c_per_l": -11.434,
+          "pct_error": -0.48
         }
       },
       {
@@ -1440,9 +1445,9 @@
         "cycle": "2026-11-04",
         "source": "cef_official",
         "estimate": {
-          "bfp": 2499.361,
-          "error_c_per_l": -104.749,
-          "pct_error": -4.37
+          "bfp": 2464.335,
+          "error_c_per_l": -69.723,
+          "pct_error": -2.91
         }
       },
       {
@@ -1605,12 +1610,12 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.602,
+  "current_exchange_rate": 16.5975,
   "accuracy": {
     "n": 60,
-    "mean_abs_pct_error": 1.25,
-    "mean_abs_error_c_per_l": 27.14,
-    "accuracy_pct": 98.8,
+    "mean_abs_pct_error": 1.14,
+    "mean_abs_error_c_per_l": 24.72,
+    "accuracy_pct": 98.9,
     "status": "ready"
   },
   "announced_change": null,
@@ -2100,7 +2105,7 @@
         ],
         [
           "2026-10-14",
-          106.76
+          105.97
         ]
       ],
       "data_to": "2026-10-14"
@@ -4493,5 +4498,5 @@
       ]
     }
   },
-  "generated_at": "2026-10-14T21:18:41.573260"
+  "generated_at": "2026-10-14T22:18:45.986086"
 }
