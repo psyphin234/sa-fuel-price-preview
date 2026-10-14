@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SA Fuel Price History: Monthly Petrol and Diesel Price Changes</title>
+<meta name="description" content="Every South African petrol and diesel price change since July 2025, with what drove each one, from CEF&#x27;s daily Basic Fuel Price reports.">
+<link rel="canonical" href="https://fuel.psyphin.co.za/fuel-price/">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" type="image/png" sizes="96x96" href="/assets/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/favicon-192x192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://fuel.psyphin.co.za/fuel-price/">
+<meta property="og:title" content="SA Fuel Price History: Monthly Petrol and Diesel Price Changes">
+<meta property="og:description" content="Every South African petrol and diesel price change since July 2025, with what drove each one, from CEF&#x27;s daily Basic Fuel Price reports.">
+<meta property="og:image" content="https://psyphin.co.za/assets/img/projects/fuel-chart.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Fuel price forecast",
+      "item": "https://fuel.psyphin.co.za/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Fuel price history",
+      "item": "https://fuel.psyphin.co.za/fuel-price/"
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=15">
+<style>
+.month-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; margin: 0 0 20px; font-size: 14px; }
+.month-nav > :last-child { text-align: right; }
+.month-nav a, .prose a, .site-footer a { color: var(--brand); }
+.prose p { margin: 0 0 12px; max-width: 75ch; color: var(--text-secondary); line-height: 1.6; }
+.prose p:last-child { margin-bottom: 0; }
+.prose strong { color: var(--text-primary); }
+.hero-card .hero-label { margin-bottom: 6px; }
+td.up { color: var(--status-critical); }
+td.down { color: var(--delta-up-good); }
+.price-chart { width: 100%; height: auto; display: block; }
+.price-chart text { fill: var(--text-muted); font-size: 12px; font-family: inherit; }
+.chart-key { display: flex; gap: 4px 18px; font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
+.chart-key { flex-wrap: wrap; }
+.chart-key span::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+@media (min-width: 761px) { .hero { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) {
+  .month-table th, .month-table td { padding: 9px 6px; font-size: 13px; }
+  .month-table th { font-size: 11px; letter-spacing: 0.02em; }
+  .month-table td:first-child { white-space: normal; }
+  .price-chart text { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<header class="brand-bar">
+  <nav class="back-nav" aria-label="Site">
+    <a href="/" class="back-link"><span class="back-link-arrow" aria-hidden="true">&larr;</span> Live fuel price forecast <span class="back-link-domain">fuel.psyphin.co.za</span></a>
+  </nav>
+  <div class="brand-inner">
+    <img src="/assets/logo.jpg" alt="PsyPhin" class="brand-logo" width="560" height="501">
+    <div class="brand-text">
+      <p class="brand-eyebrow">South Africa · Monthly fuel price changes</p>
+      <h1>South African fuel price history</h1>
+      <p class="subtitle">Every petrol and diesel price change since July 2025, from CEF's daily reports.</p>
+    </div>
+  </div>
+</header>
+
+<div class="page">
+<main>
+<section class="panel prose">
+<p>South Africa's fuel price changes on the first Wednesday of every month. Petrol 95 in Gauteng went from R21.35 a litre before the July 2025 change to R30.25 after October 2026's. Each month below has its own page with every fuel's price and what moved it.</p>
+</section>
+<section class="panel">
+<div class="panel-head"><h2>Price by month</h2></div>
+<svg class="price-chart" viewBox="0 0 720 300" role="img" aria-label="Petrol 95 and diesel price by month, July 2025 to October 2026">
+<line x1="64" x2="708" y1="260.0" y2="260.0" style="stroke:var(--gridline)"/><text x="56" y="260.0" dominant-baseline="middle" text-anchor="end">R16</text><line x1="64" x2="708" y1="199.0" y2="199.0" style="stroke:var(--gridline)"/><text x="56" y="199.0" dominant-baseline="middle" text-anchor="end">R20</text><line x1="64" x2="708" y1="138.0" y2="138.0" style="stroke:var(--gridline)"/><text x="56" y="138.0" dominant-baseline="middle" text-anchor="end">R24</text><line x1="64" x2="708" y1="77.0" y2="77.0" style="stroke:var(--gridline)"/><text x="56" y="77.0" dominant-baseline="middle" text-anchor="end">R28</text><line x1="64" x2="708" y1="16.0" y2="16.0" style="stroke:var(--gridline)"/><text x="56" y="16.0" dominant-baseline="middle" text-anchor="end">R32</text>
+<path d="M64.0,170.5H109.8V174.8H146.5V175.4H183.1V174.1H228.9V181.9H265.6V177.5H311.4V187.6H348.0V197.5H384.7V194.4H421.3V147.8H467.2V97.9H503.8V76.1H540.5V106.0H586.3V113.9H622.9V93.5H668.7V42.7H708.0" fill="none" style="stroke:var(--series-blue)" stroke-width="2.5"/>
+<path d="M64.0,208.9H109.8V198.9H146.5V207.5H183.1V209.0H228.9V212.2H265.6V202.2H311.4V223.1H348.0V230.7H384.7V221.3H421.3V108.9H467.2V28.6H503.8V78.1H540.5V126.0H586.3V104.9H622.9V60.1H668.7V16.7H708.0" fill="none" style="stroke:var(--series-orange)" stroke-width="2.5"/>
+<text x="64.0" y="292">Jul 2025</text><text x="708.0" y="292" text-anchor="end">Oct 2026</text>
+</svg>
+<div class="chart-key"><span style="color:var(--series-blue)">Petrol 95 (Gauteng pump price)</span><span style="color:var(--series-orange)">Diesel 0.05% (wholesale)</span></div>
+</section>
+<section class="panel">
+<div class="panel-head"><h2>Every change</h2>
+<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price; diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy or fuel-levy change.</p></div>
+<div class="table-wrap">
+<table class="month-table">
+<thead><tr><th>Month</th><th class="num">Petrol 95</th><th class="num">Diesel 0.05%</th></tr></thead>
+<tbody>
+<tr><td><a href="/fuel-price/november-2026/">November 2026</a><br><span class="muted small">Forecast</span></td><td class="num">+R1.37<br><span class="muted small">~R31.62</span></td><td class="num">+R1.23<br><span class="muted small">~R33.18</span></td></tr>
+<tr><td><a href="/fuel-price/october-2026/">October 2026</a><br><span class="muted small">7 October 2026</span></td><td class="num">+R3.33<br><span class="muted small">R30.25</span></td><td class="num">+R2.84<br><span class="muted small">R31.95</span></td></tr>
+<tr><td><a href="/fuel-price/september-2026/">September 2026</a><br><span class="muted small">2 September 2026</span></td><td class="num">+R1.34<br><span class="muted small">R26.92</span></td><td class="num">+R2.94<br><span class="muted small">R29.11</span></td></tr>
+<tr><td><a href="/fuel-price/august-2026/">August 2026</a><br><span class="muted small">5 August 2026</span></td><td class="num">−52c<br><span class="muted small">R25.58</span></td><td class="num">+R1.38<br><span class="muted small">R26.17</span></td></tr>
+<tr><td><a href="/fuel-price/july-2026/">July 2026</a><br><span class="muted small">1 July 2026</span></td><td class="num">−R1.96<br><span class="muted small">R26.10</span></td><td class="num">−R3.14<br><span class="muted small">R24.79</span></td></tr>
+<tr><td><a href="/fuel-price/june-2026/">June 2026</a><br><span class="muted small">3 June 2026</span></td><td class="num">+R1.43<br><span class="muted small">R28.06</span></td><td class="num">−R3.25<br><span class="muted small">R27.93</span></td></tr>
+<tr><td><a href="/fuel-price/may-2026/">May 2026</a><br><span class="muted small">6 May 2026</span></td><td class="num">+R3.27<br><span class="muted small">R26.63</span></td><td class="num">+R5.27<br><span class="muted small">R31.18</span></td></tr>
+<tr><td><a href="/fuel-price/april-2026/">April 2026</a><br><span class="muted small">1 April 2026</span></td><td class="num">+R3.06<br><span class="muted small">R23.36</span></td><td class="num">+R7.37<br><span class="muted small">R25.91</span></td></tr>
+<tr><td><a href="/fuel-price/march-2026/">March 2026</a><br><span class="muted small">4 March 2026</span></td><td class="num">+20c<br><span class="muted small">R20.30</span></td><td class="num">+62c<br><span class="muted small">R18.54</span></td></tr>
+<tr><td><a href="/fuel-price/february-2026/">February 2026</a><br><span class="muted small">4 February 2026</span></td><td class="num">−65c<br><span class="muted small">R20.10</span></td><td class="num">−50c<br><span class="muted small">R17.92</span></td></tr>
+<tr><td><a href="/fuel-price/january-2026/">January 2026</a><br><span class="muted small">7 January 2026</span></td><td class="num">−66c<br><span class="muted small">R20.75</span></td><td class="num">−R1.37<br><span class="muted small">R18.42</span></td></tr>
+<tr><td><a href="/fuel-price/december-2025/">December 2025</a><br><span class="muted small">3 December 2025</span></td><td class="num">+29c<br><span class="muted small">R21.41</span></td><td class="num">+65c<br><span class="muted small">R19.79</span></td></tr>
+<tr><td><a href="/fuel-price/november-2025/">November 2025</a><br><span class="muted small">5 November 2025</span></td><td class="num">−51c<br><span class="muted small">R21.12</span></td><td class="num">−21c<br><span class="muted small">R19.13</span></td></tr>
+<tr><td><a href="/fuel-price/october-2025/">October 2025</a><br><span class="muted small">1 October 2025</span></td><td class="num">+8c<br><span class="muted small">R21.63</span></td><td class="num">−10c<br><span class="muted small">R19.34</span></td></tr>
+<tr><td><a href="/fuel-price/september-2025/">September 2025</a><br><span class="muted small">3 September 2025</span></td><td class="num">−4c<br><span class="muted small">R21.55</span></td><td class="num">−56c<br><span class="muted small">R19.44</span></td></tr>
+<tr><td><a href="/fuel-price/august-2025/">August 2025</a><br><span class="muted small">6 August 2025</span></td><td class="num">−28c<br><span class="muted small">R21.59</span></td><td class="num">+65c<br><span class="muted small">R20.00</span></td></tr>
+<tr><td><a href="/fuel-price/july-2025/">July 2025</a><br><span class="muted small">2 July 2025</span></td><td class="num">+52c<br><span class="muted small">R21.87</span></td><td class="num">+82c<br><span class="muted small">R19.35</span></td></tr>
+</tbody>
+</table>
+</div>
+</section>
+<section class="panel disclaimer">
+<h2>Where the figures come from</h2>
+<p>CEF's daily Basic Fuel Price reports (<a href="https://cefgroup.co.za/daily-basic-fuel-price/" target="_blank" rel="noopener">cefgroup.co.za</a>), which carry the price in force and the running average over- or under-recovery that sets the next change. The <a href="/">live forecast</a> shows where next month's price is heading.</p>
+</section>
+</main>
+</div>
+
+<footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports &middot; <a href="/">Next month's fuel price forecast</a> &middot; <a href="/fuel-price/">Fuel price history</a></footer>
+
+<!-- GoatCounter is shared with psyphin.co.za; prefix paths with the host so this site is counted separately -->
+<script>window.goatcounter = { path: function (p) { return location.host + p; } };</script>
+<script data-goatcounter="https://psyphin.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</body>
+</html>
