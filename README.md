@@ -101,6 +101,9 @@ data/
   publish.log - log of each scheduled publish run (gitignored)
   backtest/   - downloaded history used by the backtest (gitignored)
   context_cache.json - last good copy of the background feeds (gitignored)
+  market_cache.json  - last good Yahoo hourly prices, used for up to 24 hours
+                       if Yahoo fails, so estimates don't fall back to "no
+                       change" (gitignored)
 ```
 
 ## Public site + hourly auto-publish

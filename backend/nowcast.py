@@ -15,15 +15,25 @@ Chosen by backtesting against CEF's own history (backtest.py, Jun 2025 - Sep 202
 
 Backtest mean absolute error: 1.35% vs 2.04% for "no change" and 2.11% for the
 previous model (proxy % move at the New York close).
+
+Yahoo occasionally fails every request for a run or several (7 of ~750 runs from
+late Sep to mid Oct 2026). Each good download is kept in data/market_cache.json,
+and a failed symbol falls back to that copy for up to CACHE_MAX_AGE_HOURS, so a
+blip doesn't turn every estimate into "no change" (on 12 Oct 2026 one such run,
+three minutes before CEF published, became the estimate scored for 9 Oct).
 """
 import datetime as dt
+import json
 import math
+from pathlib import Path
 
 import numpy as np
 import requests
 
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BFP-preview-tool/1.0"}
 YF_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
+CACHE_PATH = Path(__file__).parent.parent / "data" / "market_cache.json"
+CACHE_MAX_AGE_HOURS = 24
 
 FEATURES = {"rbob": "RB=F", "ho": "HO=F", "brent": "BZ=F"}
 FX_SYMBOL = "ZAR=X"
@@ -64,22 +74,65 @@ class HourlySeries:
         return float(self.closes[i])
 
 
-def fetch_hourly(symbol: str, range_: str = "2y") -> HourlySeries:
+def fetch_hourly_bars(symbol: str, range_: str = "2y") -> list:
+    """[[unix time, close], ...] hourly bars from Yahoo, gaps dropped."""
     resp = requests.get(YF_CHART_URL.format(symbol=symbol), headers=HEADERS,
                         params={"range": range_, "interval": "1h"}, timeout=30)
     resp.raise_for_status()
     result = resp.json()["chart"]["result"][0]
-    return HourlySeries(zip(result["timestamp"], result["indicators"]["quote"][0]["close"]))
+    bars = [[t, c] for t, c in zip(result["timestamp"], result["indicators"]["quote"][0]["close"])
+            if c is not None]
+    if not bars:
+        raise ValueError("no prices")
+    return bars
+
+
+def _load_cache() -> dict:
+    try:
+        return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def _save_cache(cache: dict):
+    try:
+        CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
+        tmp = CACHE_PATH.with_suffix(".tmp")
+        tmp.write_text(json.dumps(cache), encoding="utf-8")
+        tmp.replace(CACHE_PATH)
+    except OSError:
+        pass
 
 
 def fetch_market() -> dict:
-    """{name: HourlySeries} for the model's inputs plus "usdzar". Missing on failure."""
-    market = {}
+    """{name: HourlySeries} for the model's inputs plus "usdzar". A symbol Yahoo
+    fails on uses its last good copy if that's under CACHE_MAX_AGE_HOURS old, and is
+    missing otherwise. Failures are printed (stdout: run_publish.ps1 stops on stderr)
+    so they show in publish.log."""
+    cache = _load_cache()
+    now = dt.datetime.now()
+    market, problems, fetched = {}, [], False
     for name, symbol in {**FEATURES, "usdzar": FX_SYMBOL}.items():
         try:
-            market[name] = fetch_hourly(symbol)
-        except Exception:
-            pass
+            bars = fetch_hourly_bars(symbol)
+            cache[symbol] = {"fetched_at": now.isoformat(timespec="seconds"), "bars": bars}
+            fetched = True
+        except Exception as e:
+            entry = cache.get(symbol)
+            try:
+                age = now - dt.datetime.fromisoformat(entry["fetched_at"])
+            except (TypeError, KeyError, ValueError):
+                age = None
+            if age is None or age > dt.timedelta(hours=CACHE_MAX_AGE_HOURS):
+                problems.append(f"{symbol} failed ({e}), no recent saved copy")
+                continue
+            problems.append(f"{symbol} failed ({e}), using copy from {entry['fetched_at']}")
+            bars = entry["bars"]
+        market[name] = HourlySeries(bars)
+    if fetched:
+        _save_cache(cache)
+    if problems:
+        print("Yahoo market data: " + "; ".join(problems))
     return market
 
 
@@ -130,13 +183,15 @@ def fit_weights(history: list, market: dict, fuels: list) -> dict:
 
 
 def estimate(base, target_day: dt.date, market: dict, weights: dict, fuels: list):
-    """Estimated {fuel: BFP c/l} and exchange rate for `target_day`, from official
-    report `base`. Falls back to "dollar part unchanged, exchange rate updated" (and
-    finally to "no change") when market data or fitted weights are missing."""
+    """Estimated {fuel: BFP c/l}, exchange rate, and whether that's a fallback, for
+    `target_day` from official report `base`. Falls back to "dollar part unchanged,
+    exchange rate updated" (and finally to "no change") when market data or fitted
+    weights are missing."""
     fx = base.exchange_rate
     ratio = fx_ratio(market, base.report_date, target_day) if fx else None
     fx_est = fx * ratio if ratio else fx
     x = product_features(market, base.report_date, target_day)
+    fallback = ratio is None or x is None or not all(f in weights for f in fuels)
     bfp = {}
     for fuel in fuels:
         b = base.bfp.get(fuel)
@@ -147,4 +202,4 @@ def estimate(base, target_day: dt.date, market: dict, weights: dict, fuels: list
             continue
         usd_move = float(np.dot(weights[fuel], x)) if (x is not None and fuel in weights) else 0.0
         bfp[fuel] = round(b / fx * math.exp(usd_move) * fx_est, 3)
-    return bfp, (round(fx_est, 4) if fx_est else None)
+    return bfp, (round(fx_est, 4) if fx_est else None), fallback

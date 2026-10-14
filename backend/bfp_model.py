@@ -95,6 +95,7 @@ class DayEstimate:
     unit_over_under: dict
     exchange_rate: Optional[float] = None
     note: Optional[str] = None
+    fallback: bool = False  # estimated without market data (see nowcast.estimate)
 
 
 def next_reference_price(closing: cef.DailyReport) -> dict:
@@ -122,7 +123,7 @@ def reference_for_day(base: cef.DailyReport, day: dt.date, next_reference: dict 
 def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, market: dict, weights: dict,
                        next_reference: dict = None) -> DayEstimate:
     """Estimate one day's BFP from the last official report (see nowcast.py)."""
-    bfp_est, fx_est = nowcast.estimate(base, target_date, market, weights, cef.FUELS)
+    bfp_est, fx_est, fallback = nowcast.estimate(base, target_date, market, weights, cef.FUELS)
     reference = reference_for_day(base, target_date, next_reference)
     unit_est = {
         fuel: round(reference[fuel] - v, 3)
@@ -135,6 +136,7 @@ def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, market: dict
         bfp=bfp_est,
         unit_over_under=unit_est,
         exchange_rate=fx_est,
+        fallback=fallback,
         note="Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how "
              "CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
     )

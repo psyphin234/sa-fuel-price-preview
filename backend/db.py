@@ -160,13 +160,16 @@ def get_prediction_history(fuel: str = None, limit: int = 200) -> list:
     return [dict(r) for r in rows]
 
 
-def upsert_estimate(date: dt.date, fuel: str, estimated_bfp: float):
+def upsert_estimate(date: dt.date, fuel: str, estimated_bfp: float, keep_existing: bool = False):
     """Remembers today's estimated BFP for (date, fuel) so its accuracy can be
-    checked once CEF publishes the real figure for that date."""
+    checked once CEF publishes the real figure for that date. keep_existing: only
+    log it if nothing is logged for that day yet."""
+    on_conflict = ("DO NOTHING" if keep_existing else
+                   "DO UPDATE SET estimated_bfp=excluded.estimated_bfp, logged_at=excluded.logged_at")
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO estimate_log (date, fuel, estimated_bfp, logged_at) VALUES (?, ?, ?, ?) "
-            "ON CONFLICT(date, fuel) DO UPDATE SET estimated_bfp=excluded.estimated_bfp, logged_at=excluded.logged_at",
+            f"ON CONFLICT(date, fuel) {on_conflict}",
             (date.isoformat(), fuel, estimated_bfp, dt.datetime.now().isoformat()),
         )
 

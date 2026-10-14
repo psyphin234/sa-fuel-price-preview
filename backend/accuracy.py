@@ -16,7 +16,8 @@ import cef_scraper as cef
 
 
 def log_estimates(predictions: dict):
-    """predictions: {fuel: bfp_model.Prediction}."""
+    """predictions: {fuel: bfp_model.Prediction}. A fallback estimate (made without
+    market data) never replaces one already logged for that day."""
     for fuel, pred in predictions.items():
         for day in pred.estimated_days:
             date = day["date"]
@@ -24,7 +25,7 @@ def log_estimates(predictions: dict):
                 date = dt.date.fromisoformat(date)
             bfp_val = day["bfp"].get(fuel)
             if bfp_val is not None:
-                db.upsert_estimate(date, fuel, bfp_val)
+                db.upsert_estimate(date, fuel, bfp_val, keep_existing=day.get("fallback", False))
 
 
 def reconcile(period_reports: list):
