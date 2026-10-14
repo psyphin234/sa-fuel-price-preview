@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js" integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -199,6 +199,30 @@
           <p class="muted small">This data is generated on a private machine and pushed here on a schedule — it is not live. See the timestamp above for how fresh it is.</p>
       </footer>
 
+    </section>
+
+    <section class="panel disclaimer faq-panel" aria-labelledby="faq-title">
+      <h2 id="faq-title">Common questions</h2>
+      <details>
+        <summary>When does the fuel price change in South Africa?</summary>
+        <p>On the first Wednesday of every month. The prediction above is for the next change.</p>
+      </details>
+      <details>
+        <summary>How is next month's petrol and diesel price predicted?</summary>
+        <p>From the average daily over- or under-recovery for the whole review period: the days so far, plus the rest of the period assuming the Basic Fuel Price stays where it is now. Days CEF has published are read straight from its daily report; the one or two most recent days are estimated from fuel futures and the rand, typically within about 1.3% of CEF's real figure.</p>
+      </details>
+      <details>
+        <summary>What is an over-recovery or under-recovery?</summary>
+        <p>The gap between what fuel actually cost to import on a day (the Basic Fuel Price) and the cost already built into the pump price. An under-recovery, where fuel cost more than what's priced in, pushes the next price up; an over-recovery pushes it down.</p>
+      </details>
+      <details>
+        <summary>Why can the official price change differ from the prediction?</summary>
+        <p>The government's announcement also folds in separate decisions: the slate levy, which adjusts itself every month, usually by a few cents a litre, and any fuel levy change announced in the national budget.</p>
+      </details>
+      <details>
+        <summary>What makes the fuel price go up?</summary>
+        <p>Two big drivers: international fuel prices, and the rand's strength against the dollar. A weaker rand pushes fuel prices up; a stronger rand pulls them down.</p>
+      </details>
     </section>
   </main>
 </div>

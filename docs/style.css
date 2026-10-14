@@ -521,6 +521,12 @@ td.num, th.num { text-align: right; }
 .disclaimer p { color: var(--text-secondary); margin: 0 0 8px; max-width: 90ch; }
 .disclaimer p:last-child { margin-bottom: 0; }
 
+/* Common questions (public site only; plain text so search engines read it) */
+.faq-panel details { border-top: 1px solid var(--border); padding: 10px 0; }
+.faq-panel details:first-of-type { border-top: 0; }
+.faq-panel summary { cursor: pointer; font-weight: 600; color: var(--text-primary); }
+.faq-panel details p { margin: 8px 0 0; }
+
 .site-footer {
   border-top: 1px solid var(--border);
   padding: 20px 20px calc(24px + env(safe-area-inset-bottom, 0px));
