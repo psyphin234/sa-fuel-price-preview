@@ -314,7 +314,19 @@
           },
         ],
       },
-      options: withDividerRoom(chartOptions(grid, textSec, "c/l"), series),
+      options: (() => {
+        const opts = withDividerRoom(chartOptions(grid, textSec, "c/l"), series);
+        // The line is blue above zero and red below, so the key needs both colours.
+        opts.plugins.legend.labels.generateLabels = (chart) => {
+          const [line, ...rest] = Chart.defaults.plugins.legend.labels.generateLabels(chart);
+          return [
+            { ...line, text: "Over-recovery", fillStyle: blue, strokeStyle: blue },
+            { ...line, text: "Under-recovery", fillStyle: red, strokeStyle: red },
+            ...rest,
+          ];
+        };
+        return opts;
+      })(),
       plugins: [cycleDivider(series)],
     });
   }
