@@ -37,7 +37,7 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
-    --circuit-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none'%3E%3Cg stroke='%233fb6ff' stroke-opacity='0.09' stroke-width='1'%3E%3Cpath d='M0 40h46l18 18h44M108 58v42l18 18h54M24 180v-44l18-18h34M180 22h-34L124 0M76 118v-20l-14-14H0M146 180v-26l12-12h22'/%3E%3C/g%3E%3Cg fill='%233fb6ff' fill-opacity='0.16'%3E%3Ccircle cx='108' cy='58' r='2.2'/%3E%3Ccircle cx='76' cy='118' r='2.2'/%3E%3Ccircle cx='146' cy='22' r='2.2'/%3E%3Ccircle cx='146' cy='154' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+    --circuit-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none'%3E%3Cg stroke='%233fb6ff' stroke-opacity='0.136' stroke-width='1'%3E%3Cpath d='M0 40h46l18 18h44M108 58v42l18 18h54M24 180v-44l18-18h34M180 22h-34L124 0M76 118v-20l-14-14H0M146 180v-26l12-12h22'/%3E%3C/g%3E%3Cg fill='%233fb6ff' fill-opacity='0.256'%3E%3Ccircle cx='108' cy='58' r='2.2'/%3E%3Ccircle cx='76' cy='118' r='2.2'/%3E%3Ccircle cx='146' cy='22' r='2.2'/%3E%3Ccircle cx='146' cy='154' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
     --page-plane:     #020203; /* same as psyphin.co.za and the other tools */
     --surface-1:      #111418;
     --surface-2:      #181c21;
@@ -66,7 +66,7 @@
 }
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --circuit-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none'%3E%3Cg stroke='%233fb6ff' stroke-opacity='0.09' stroke-width='1'%3E%3Cpath d='M0 40h46l18 18h44M108 58v42l18 18h54M24 180v-44l18-18h34M180 22h-34L124 0M76 118v-20l-14-14H0M146 180v-26l12-12h22'/%3E%3C/g%3E%3Cg fill='%233fb6ff' fill-opacity='0.16'%3E%3Ccircle cx='108' cy='58' r='2.2'/%3E%3Ccircle cx='76' cy='118' r='2.2'/%3E%3Ccircle cx='146' cy='22' r='2.2'/%3E%3Ccircle cx='146' cy='154' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
+  --circuit-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180' fill='none'%3E%3Cg stroke='%233fb6ff' stroke-opacity='0.136' stroke-width='1'%3E%3Cpath d='M0 40h46l18 18h44M108 58v42l18 18h54M24 180v-44l18-18h34M180 22h-34L124 0M76 118v-20l-14-14H0M146 180v-26l12-12h22'/%3E%3C/g%3E%3Cg fill='%233fb6ff' fill-opacity='0.256'%3E%3Ccircle cx='108' cy='58' r='2.2'/%3E%3Ccircle cx='76' cy='118' r='2.2'/%3E%3Ccircle cx='146' cy='22' r='2.2'/%3E%3Ccircle cx='146' cy='154' r='2.2'/%3E%3C/g%3E%3C/svg%3E");
   --page-plane:     #020203; /* same as psyphin.co.za and the other tools */
   --surface-1:      #111418;
   --surface-2:      #181c21;
@@ -107,21 +107,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Faint circuit-trace pattern behind the top of the page, the same as
-   psyphin.co.za's, in dark mode only
-   (--circuit-pattern is none in light mode); it fades out downwards. */
+/* Circuit-trace pattern, the same on psyphin.co.za and every PsyPhin tool
+   (change them together), in dark mode only
+   (--circuit-pattern is none in light mode). Fixed behind the whole page so it shows all
+   the way down. */
 body::before {
   content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1100px;
+  position: fixed;
+  inset: 0;
   z-index: -1;
   pointer-events: none;
   background-image: var(--circuit-pattern, none);
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
-  mask-image: linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.6) 45%, transparent 100%);
 }
 
 a { color: var(--brand); text-decoration-thickness: 1px; text-underline-offset: 2px; }
