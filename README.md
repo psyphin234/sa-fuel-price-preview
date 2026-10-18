@@ -93,8 +93,10 @@ docs/
   context.js                     - the "Oil and the Strait of Hormuz" section
                                    (identical copy in frontend/)
                                    (fetches docs/data/status.json, no backend calls)
-  fx.js                          - decoration only: the glowing circuit-board
-                                   background, the import-routes map in the header, chart-line glow, panels fading in on
+  circuit.js                     - the glowing circuit-board background (identical
+                                   copy in frontend/ and on psyphin.co.za)
+  fx.js                          - decoration only: the import-routes map in the
+                                   header, chart-line glow, panels fading in on
                                    scroll (identical copy in frontend/)
   data/status.json                 - the published snapshot (overwritten each run)
   fuel-price/                      - one page per monthly price change, plus a

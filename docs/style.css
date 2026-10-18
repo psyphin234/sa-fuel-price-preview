@@ -135,10 +135,11 @@ body {
 }
 
 /* Fixed layers behind the whole page: a glowing circuit board and slow-drifting
-   pools of blue and violet light. fx.js draws the circuit on two canvases
-   (.circuit-fx: traces generated to fit the screen, light pulses running along
-   them) and adds .fx-circuit to <html>, which hides the static fallback tile
-   in body::before. Pages without fx.js (the month pages) keep the tile. */
+   pools of blue and violet light. circuit.js (the same on every PsyPhin site)
+   draws the circuit on two canvases (.circuit-fx: traces generated to fit the
+   screen, light pulses running along them) and adds .fx-circuit to <html>,
+   which hides the static fallback tile in body::before. Pages without
+   circuit.js (the month pages) keep the tile. */
 body::before,
 body::after {
   content: "";
