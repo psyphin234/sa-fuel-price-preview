@@ -9,25 +9,26 @@
 <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192x192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
 <meta name="description" content="Daily preview of South Africa's Basic Fuel Price and a projection of the next pump-price change.">
-<meta name="theme-color" content="#000000">
+<meta name="theme-color" content="#040817">
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=12">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=13">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js" integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
-<header class="brand-bar">
+<header class="brand-bar brand-bar--hero">
+  <canvas class="hero-fx" aria-hidden="true"></canvas>
   <div class="brand-inner">
     <img src="assets/logo.jpg" alt="PsyPhin" class="brand-logo" width="560" height="501">
     <div class="brand-text">
       <p class="brand-eyebrow">South Africa &middot; Daily fuel price tracker</p>
       <h1>SA Basic Fuel Price Preview</h1>
       <p class="subtitle">A preview of CEF's daily Basic Fuel Price, built the same way CEF does it — plus your own under/over-recovery projection for the next pump-price change.</p>
-    </div>
-    <div class="topbar-actions">
-      <button id="refresh-btn" class="btn btn-primary">Refresh data</button>
+      <div class="topbar-actions">
+        <button id="refresh-btn" class="btn btn-primary">Refresh data</button>
+      </div>
     </div>
   </div>
 </header>
@@ -208,6 +209,7 @@
 
 <footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports</footer>
 
+<script src="fx.js?v=1"></script>
 <script src="context.js?v=2"></script>
 <script src="app.js?v=12"></script>
 </body>
