@@ -8,11 +8,13 @@
    the traces up around the mouse pointer. Both canvases get class "circuit-fx"
    (fixed behind the page, styled in each site's CSS), and <html> gets
    "fx-circuit" so the CSS can hide its static fallback tile. Under
-   prefers-reduced-motion the board is drawn once and stays still. */
+   prefers-reduced-motion, or on a page whose <html> has data-circuit="still",
+   the board is drawn once and stays still. */
 (() => {
   "use strict";
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const still = document.documentElement.dataset.circuit === "still";
 
   function setUpCircuit() {
     const base = document.createElement("canvas");
@@ -229,7 +231,7 @@
         lastW = W; lastH = H;
       }, 200);
     });
-    if (reduceMotion) return;
+    if (reduceMotion || still) return;
 
     window.addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") pointer = [e.clientX, e.clientY]; }, { passive: true });
     document.documentElement.addEventListener("pointerleave", () => { pointer = null; });
