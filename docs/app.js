@@ -131,9 +131,9 @@
     if (manDays) conf += ` + ${manDays} manual`;
     const projDays = pred.projected_days_count || 0;
     $("#hero-confidence").textContent = state.data.review_period_closed
-      ? `Review period closed ${fmtDate(state.data.review_period_close)} — ${conf}`
+      ? `Review period closed ${fmtDate(state.data.review_period_close)} (${conf})`
       : conf + " so far" + (projDays
-        ? `; the other ${projDays} day${projDays === 1 ? "" : "s"} to ${fmtDate(state.data.review_period_close)} assume the BFP stays where it is now`
+        ? `. The other ${projDays} day${projDays === 1 ? "" : "s"} to ${fmtDate(state.data.review_period_close)} assume the BFP stays where it is now`
         : " in this review period");
   }
 
@@ -393,7 +393,7 @@
       fill.style.width = "0%";
       fill.className = "accuracy-meter-fill unknown";
       headline.textContent = "Not enough data yet";
-      sub.textContent = "Estimate tracking just started — the first comparison lands once CEF publishes the next official day.";
+      sub.textContent = "Estimate tracking just started. The first comparison comes once CEF publishes the next official day.";
       return;
     }
 
@@ -401,7 +401,7 @@
     fill.style.width = `${pct}%`;
     fill.className = "accuracy-meter-fill " + (pct >= 97 ? "" : pct >= 90 ? "warning" : "critical");
     headline.textContent = `${pct}% accurate on average`;
-    const warmup = acc.status === "warming_up" ? " — still an early sample, so treat this loosely" : "";
+    const warmup = acc.status === "warming_up" ? " (still an early sample, so treat this loosely)" : "";
     sub.textContent = `Based on ${acc.n} estimated day${acc.n === 1 ? "" : "s"} checked against CEF's real figures so far: typically about ${acc.mean_abs_error_c_per_l} c/l (${acc.mean_abs_pct_error}%) off${warmup}.`;
   }
 
@@ -424,7 +424,7 @@
               const day = ctx.dataset.estimateFor && ctx.dataset.estimateFor[ctx.dataIndex];
               if (day && day.estimate) {
                 const e = describeEstimate(day.estimate, day.bfp);
-                return `Our estimate was ${e.estimate} ${unit} — ${e.verdict}`;
+                return `Our estimate was ${e.estimate} ${unit}, ${e.verdict}`;
               }
               return `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)} ${unit}`;
             },
@@ -444,7 +444,7 @@
   };
 
   const NO_DATA_NOTES = {
-    "*": "Weekend — CEF only publishes on weekdays.",
+    "*": "Weekend. CEF only publishes on weekdays.",
     "**": "CEF didn't publish a report for this weekday (rare). Any figure shown is an estimate for reference only and isn't counted in the prediction.",
   };
 
@@ -505,7 +505,7 @@
   function renderStatusBar() {
     const generated = new Date(state.data.generated_at);
     $("#last-updated").textContent =
-      `Data updated ${generated.toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })} at ${generated.toLocaleTimeString("en-ZA")} — refreshes every hour`;
+      `Data updated ${generated.toLocaleDateString("en-ZA", { day: "2-digit", month: "short" })} at ${generated.toLocaleTimeString("en-ZA")}, refreshes every hour`;
 
     const days = state.data.days_until_next_price_change;
     const changeDate = fmtDate(state.data.next_price_change_date);
@@ -517,7 +517,7 @@
     }
     const dayWord = days === 1 ? "day" : "days";
     pill.textContent = days <= 0
-      ? `⏳ Price change day — ${changeDate}`
+      ? `⏳ Price change day, ${changeDate}`
       : `⏳ ${days} ${dayWord} until the next price change (${changeDate})`;
     pill.className = "status-pill countdown-pill" + (days <= 3 ? " urgent" : "");
   }

@@ -355,7 +355,7 @@ def drivers(m: dict) -> str:
         bfp_txt = f" Its import cost averaged {rand(bfp)} a litre." if bfp else ""
         diff = actual - market
         if abs(diff) < 9.5:
-            verdict = (f"On its own that called for a change of {signed(market)}; the official change, "
+            verdict = (f"On its own that called for a change of {signed(market)}. The official change, "
                        f"{signed(actual)}, was within a few cents of it.")
         else:
             verdict = (f"On its own that called for a change of {signed(market)}. The official change was "
@@ -415,7 +415,7 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>All fuels, {esc(d_short(e))}</h2>
-<p class="muted small">Gauteng pump prices for petrol; coastal prices are lower by the cost of transport inland. Diesel and paraffin have no single pump price, so these are CEF's wholesale and maximum retail price rows.</p></div>
+<p class="muted small">Gauteng pump prices for petrol. Coastal prices are lower by the cost of transport inland. Diesel and paraffin have no single pump price, so these are CEF's wholesale and maximum retail price rows.</p></div>
 {price_table(m['old'], new, ch, 'After')}
 </section>
 <section class="panel prose">
@@ -452,7 +452,7 @@ def forecast_page(s: dict, prev_m) -> str:
                 f"nearly in. The official announcement can still differ by any slate-levy or fuel-levy change.")
     else:
         sure = (f"The review period runs from {d_long(start)} to {d_long(close)}. CEF has published "
-                f"{s['official_days']} of its {total} days so far; the rest assume the Basic Fuel Price stays where "
+                f"{s['official_days']} of its {total} days so far, and the rest assume the Basic Fuel Price stays where "
                 f"it is now, so the figure can still move a lot before the period closes. It leaves out any "
                 f"slate-levy or fuel-levy change, which the official announcement adds.")
     body = f"""{month_nav(prev_m, None)}
@@ -467,7 +467,7 @@ def forecast_page(s: dict, prev_m) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>All fuels, forecast for {esc(d_short(e))}</h2>
-<p class="muted small">Before any slate-levy or fuel-levy change. Gauteng pump prices for petrol; CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
+<p class="muted small">Before any slate-levy or fuel-levy change. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
 {price_table(cur, new, ch, 'Forecast', approx=True)}
 </section>"""
     return page(f"/fuel-price/{slug(e)}/", title, desc, f"Fuel price {name}: forecast",
@@ -551,7 +551,7 @@ def index_page(months: list, snap) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>Every change</h2>
-<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price; diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy or fuel-levy change.</p></div>
+<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price, and diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy or fuel-levy change.</p></div>
 <div class="table-wrap">
 <table class="month-table">
 <thead><tr><th>Month</th><th class="num">Petrol 95</th><th class="num">Diesel 0.05%</th></tr></thead>
