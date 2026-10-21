@@ -75,6 +75,9 @@ backend/
   nowcast.py         - estimates unpublished days from hourly market prices,
                        with weights re-fitted on CEF's own history each run
   bfp_model.py       - blended-average prediction logic
+  fuel_levy.py       - announced fuel levy changes, kept by hand (e.g. the
+                       MTBPS relief of Nov 2026 - Jan 2027); added on top of
+                       the BFP forecast for the price change they fall on
   backtest_fetch.py  - downloads CEF's historical reports for backtesting
   backtest.py        - scores candidate estimation models against that history
   release_times.py   - prints when CEF's reports tend to come out
@@ -184,6 +187,10 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   The real government announcement (effective the first Wednesday
   of the month) also folds in separate slate-levy and fuel-levy decisions
   DMRE can adjust independently, so treat this as directional, not exact.
+  Once a fuel levy change is announced, add it to `backend/fuel_levy.py`:
+  the site then adds it to the forecast for that price change (the hero
+  shows the total and the BFP-only figure; paraffin has no fuel levy).
+  `predicted_pump_price_change_c_per_l` itself stays BFP-only.
 - A review period runs from the Friday before one price change (first
   Wednesday of the month) to the Thursday before the next one's Friday, i.e.
   it closes about six days before the change (the Thursday when that Friday is

@@ -65,6 +65,28 @@
 
   const dirClass = (c) => c > 0 ? "increase" : c < 0 ? "decrease" : "";
 
+  // An announced fuel levy change on the forecast date (backend/fuel_levy.py). The
+  // model only forecasts the Basic Fuel Price part, so this is added on top.
+  const levyFor = (fuel) => {
+    const lc = state.data.levy_change;
+    return lc && lc.effective === state.data.predicted_change_date ? (lc.change[fuel] || 0) : 0;
+  };
+  function levyNote(fuel, bfpChange) {
+    const levy = levyFor(fuel);
+    const lc = state.data.levy_change;
+    if (!levy) {
+      return lc && lc.effective === state.data.predicted_change_date
+        ? "Paraffin carries no fuel levy, so the announced levy change doesn't apply. Before any slate-levy change."
+        : "";
+    }
+    const amount = fmtRand(Math.abs(levy)).replace("/l", "");
+    const what = levy < 0
+      ? `the ${amount} fuel levy cut`
+      : `the fuel levy going back up by ${amount} as the relief winds down`;
+    return `Includes ${what} announced in the ${lc.source} on ${fmtDate(lc.announced)}. ` +
+      `Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.`;
+  }
+
   // Until an announced change takes effect it leads, and the next cycle's
   // prediction (only a few days in, so still uncertain) is a smaller early look.
   function renderAnnounced() {
@@ -88,11 +110,15 @@
 
     $("#early-title").textContent = `Early look: ${fmtDate(state.data.predicted_change_date)}`;
     const earlyEl = $("#early-change");
-    earlyEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
-    earlyEl.className = "hero-value " + dirClass(pred.predicted_pump_price_change_c_per_l);
+    const levy = levyFor(state.fuel);
+    const early = pred.predicted_pump_price_change_c_per_l + levy;
+    earlyEl.textContent = fmtRandDelta(early);
+    earlyEl.className = "hero-value " + dirClass(early);
     const days = pred.blended_days_count;
+    const note = levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l);
     $("#early-sub").textContent =
-      `About ${fmtRand(pred.predicted_new_price_c_per_l)}. Only ${days} day${days === 1 ? "" : "s"} of the review period so far, so this can still move a lot.`;
+      `About ${fmtRand(pred.predicted_new_price_c_per_l + levy)}. Only ${days} day${days === 1 ? "" : "s"} of the review period so far, so this can still move a lot.` +
+      (note ? " " + note : "");
     return true;
   }
 
@@ -102,7 +128,9 @@
     if (renderAnnounced()) return;
 
     const pred = state.data.predictions[state.fuel];
-    const dir = pred.direction; // "increase" | "decrease" | "no change"
+    const levy = levyFor(state.fuel);
+    const change = pred.predicted_pump_price_change_c_per_l + levy;
+    const dir = levy ? (change > 0 ? "increase" : change < 0 ? "decrease" : "no change") : pred.direction;
 
     $("#hero-current").textContent = fmtRand(pred.current_price_c_per_l);
     // In the days before a price change CEF already reports the upcoming price.
@@ -115,7 +143,7 @@
     $("#hero-change-title").textContent = changeDate ? `Predicted change on ${fmtDate(changeDate)}` : "Predicted next-cycle move";
 
     const changeEl = $("#hero-change");
-    changeEl.textContent = fmtRandDelta(pred.predicted_pump_price_change_c_per_l);
+    changeEl.textContent = fmtRandDelta(change);
     changeEl.className = "hero-value " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "");
 
     const badge = $("#hero-direction-badge");
@@ -123,8 +151,10 @@
     const label = dir === "increase" ? "Price expected to rise" : dir === "decrease" ? "Price expected to fall" : "Little change expected";
     badge.className = "hero-badge " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "flat");
     badge.textContent = `${icon} ${label}`;
+    $("#hero-change-note").textContent =
+      levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l) || "Before any slate-levy or fuel-levy change";
 
-    $("#hero-newprice").textContent = fmtRand(pred.predicted_new_price_c_per_l);
+    $("#hero-newprice").textContent = fmtRand(pred.predicted_new_price_c_per_l + levy);
     const officialDays = pred.official_days_count;
     const estDays = pred.estimated_days.length;
     const manDays = pred.manual_days.length;

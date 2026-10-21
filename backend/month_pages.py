@@ -169,8 +169,11 @@ def build_months(cycles: list) -> list:
 def forecast_snapshot(status: dict):
     """The forecast as of CEF's latest report. Kept until a new report (or the
     period closing) changes it, so the pages don't churn with every hourly run."""
+    levy_change = status.get("levy_change")
+    if levy_change and levy_change["effective"] != status["predicted_change_date"]:
+        levy_change = None
     key = [status["latest_official_report"]["report_date"], status["predicted_change_date"],
-           status["review_period_closed"]]
+           status["review_period_closed"], levy_change]
     try:
         saved = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
         if saved.get("key") == key:
@@ -188,6 +191,7 @@ def forecast_snapshot(status: dict):
         "official_days": preds["petrol95"]["official_days_count"],
         "current": {f: preds[f]["current_price_c_per_l"] for f in FUELS},
         "change": {f: preds[f]["predicted_pump_price_change_c_per_l"] for f in FUELS},
+        "levy": levy_change,  # announced fuel levy change on that date (fuel_levy.py), or None
     }
     SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_PATH.write_text(json.dumps(snap, indent=2), encoding="utf-8")
@@ -438,7 +442,9 @@ def forecast_page(s: dict, prev_m) -> str:
     report = dt.date.fromisoformat(s["report_date"])
     start = dt.date.fromisoformat(s["period_start"])
     close = dt.date.fromisoformat(s["period_close"])
-    ch, cur = s["change"], s["current"]
+    levy = s.get("levy")
+    ch = {f: s["change"][f] + (levy["change"].get(f, 0) if levy else 0) for f in FUELS}
+    cur = s["current"]
     new = {f: cur[f] + ch[f] for f in FUELS}
     p95, d05 = ch["petrol95"], ch["diesel005"]
     name = month_name(e)
@@ -447,14 +453,24 @@ def forecast_page(s: dict, prev_m) -> str:
     desc = trim_desc(
         f"Forecast of South Africa's fuel price change on {d_short(e)}: petrol 95 {about(p95)}, "
         f"diesel {about(d05)}, from CEF's daily data. Updated every weekday.")
+    levies = "slate-levy change" if levy else "slate-levy or fuel-levy change"
     if s["closed"]:
         sure = (f"The review period closed on {d_long(close)}, so CEF's figures for the whole period are in or "
-                f"nearly in. The official announcement can still differ by any slate-levy or fuel-levy change.")
+                f"nearly in. The official announcement can still differ by any {levies}.")
     else:
         sure = (f"The review period runs from {d_long(start)} to {d_long(close)}. CEF has published "
                 f"{s['official_days']} of its {total} days so far, and the rest assume the Basic Fuel Price stays where "
                 f"it is now, so the figure can still move a lot before the period closes. It leaves out any "
-                f"slate-levy or fuel-levy change, which the official announcement adds.")
+                f"{levies}, which the official announcement adds.")
+    levy_p = ""
+    if levy:
+        lp, ld = levy["change"]["petrol95"], levy["change"]["diesel005"]
+        what = (f"the fuel levy cut of {amount(-lp)} a litre on petrol and {amount(-ld)} on diesel" if lp < 0 else
+                f"the fuel levy going back up by {amount(lp)} a litre on petrol and {amount(ld)} on diesel as the relief winds down")
+        levy_p = (f"\n<p>These figures include {what}, announced in the {esc(levy['source'])} on "
+                  f"{esc(d_long(dt.date.fromisoformat(levy['announced'])))}. Paraffin carries no fuel levy. On the Basic Fuel "
+                  f"Price alone, petrol 95 is heading for {signed(s['change']['petrol95'])} and diesel for "
+                  f"{signed(s['change']['diesel005'])} a litre.</p>")
     body = f"""{month_nav(prev_m, None)}
 {hero([
     ("Petrol 95, forecast", p95, f"About {rand(new['petrol95'])} a litre (Gauteng)"),
@@ -462,12 +478,12 @@ def forecast_page(s: dict, prev_m) -> str:
 ])}
 <section class="panel prose">
 <p>South Africa's next fuel price change takes effect on <strong>{esc(d_long(e))}</strong>. On CEF's figures up to its report of {esc(d_long(report))}, petrol 95 is heading {'for no change' if abs(p95) < 0.5 else change_words(p95) + ' a litre'} and diesel (0.05% sulphur) {'for no change' if abs(d05) < 0.5 else change_words(d05)}.</p>
-<p>{sure}</p>
+<p>{sure}</p>{levy_p}
 <p>This page is updated each weekday when CEF publishes a new report. The <a href="/">live forecast</a> is updated every hour, with charts and every day of the period.</p>
 </section>
 <section class="panel">
 <div class="panel-head"><h2>All fuels, forecast for {esc(d_short(e))}</h2>
-<p class="muted small">Before any slate-levy or fuel-levy change. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
+<p class="muted small">Before any {levies}{' (the announced fuel levy change is included)' if levy else ''}. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
 {price_table(cur, new, ch, 'Forecast', approx=True)}
 </section>"""
     return page(f"/fuel-price/{slug(e)}/", title, desc, f"Fuel price {name}: forecast",
@@ -525,7 +541,8 @@ def index_page(months: list, snap) -> str:
     rows = []
     if snap:
         e = dt.date.fromisoformat(snap["effective"])
-        ch = snap["change"]
+        levy = snap.get("levy")
+        ch = {f: snap["change"][f] + (levy["change"].get(f, 0) if levy else 0) for f in FUELS}
         rows.append(
             f'<tr><td><a href="/fuel-price/{slug(e)}/">{month_name(e)}</a><br><span class="muted small">Forecast</span></td>'
             f'<td class="num">{signed(ch["petrol95"])}<br><span class="muted small">~{rand(snap["current"]["petrol95"] + ch["petrol95"])}</span></td>'
@@ -551,7 +568,7 @@ def index_page(months: list, snap) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>Every change</h2>
-<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price, and diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy or fuel-levy change.</p></div>
+<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price, and diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy change{' but includes the announced fuel levy change' if snap and snap.get('levy') else ' or fuel-levy change'}.</p></div>
 <div class="table-wrap">
 <table class="month-table">
 <thead><tr><th>Month</th><th class="num">Petrol 95</th><th class="num">Diesel 0.05%</th></tr></thead>

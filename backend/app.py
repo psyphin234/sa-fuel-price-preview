@@ -11,6 +11,7 @@ import db
 import accuracy
 import nowcast
 import context_data
+import fuel_levy
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -310,6 +311,9 @@ def build_status_data():
         "announced_change": get_announced_change(latest, today),
         "next_price_change_date": next_change,
         "predicted_change_date": bm.next_price_change_date(latest.pump_price_effective),
+        # announced fuel levy change on that date, on top of the BFP forecast (or None)
+        "levy_change": fuel_levy.levy_change(latest.pump_price_effective,
+                                             bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
         "review_period_close": period_close,
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
