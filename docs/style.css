@@ -608,6 +608,23 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
   cursor: help;
 }
 .levy-tag[hidden] { display: none; }
+/* Under the fuel tabs while temporary fuel levy relief is announced or in force. */
+.levy-banner {
+  margin: -8px 0 24px;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  border: 1px solid color-mix(in srgb, var(--brand) 35%, transparent);
+  border-left: 3px solid var(--brand);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--brand) 8%, var(--glass));
+  -webkit-backdrop-filter: blur(14px) saturate(140%);
+          backdrop-filter: blur(14px) saturate(140%);
+  box-shadow: 0 0 24px -10px var(--brand);
+}
+.levy-banner strong { color: var(--brand); }
+.levy-banner[hidden] { display: none; }
 .hero-sub + .levy-tag { margin: 8px 0 0; }
 /* Between CEF opening a new review period and the announced change taking effect:
    the announced change leads, with a smaller early look at the next one. */

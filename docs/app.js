@@ -83,6 +83,30 @@
       `and in force from ${fmtDate(r.start)} to ${fmtDate(r.end)}. The price goes back up by this much when it ends.`;
   }
 
+  // Banner under the fuel tabs while temporary levy relief is announced or in force.
+  function renderLevyBanner() {
+    const el = $("#levy-banner");
+    const today = state.data.generated_at.slice(0, 10);
+    const periods = (state.data.levy_relief || []).filter((r) => r.end >= today);
+    el.hidden = !periods.length;
+    if (!periods.length) return;
+    const priceDate = state.data.latest_official_report.pump_price_effective;
+    const inPrice = periods.some((r) => r.start <= priceDate && priceDate <= r.end);
+    const lead = !inPrice ? `Fuel levy relief from ${fmtDate(periods[0].start)}.`
+      : priceDate > today ? `Fuel levy relief is built into the new price from ${fmtDate(priceDate)}.`
+      : "Fuel levy relief is built into the current price.";
+    const steps = periods.map((r, i) => i === 0
+      ? `${fmtRand(r.relief.petrol95)} off petrol and ${fmtRand(r.relief.diesel005)} off diesel ` +
+        (r.start > today ? `from ${fmtDate(r.start)} ` : "") + `to ${fmtDate(r.end)}`
+      : `then ${fmtRand(r.relief.petrol95)} and ${fmtRand(r.relief.diesel005)} to ${fmtDate(r.end)}`);
+    const strong = document.createElement("strong");
+    strong.textContent = lead;
+    el.replaceChildren(strong, ` Announced in the ${periods[0].source} on ${fmtDate(periods[0].announced)}: ` +
+      `${steps.join(", ")}. ` +
+      (inPrice ? "Prices go back up as it ends, and the forecast below includes that. " : "The forecast below includes it. ") +
+      "Paraffin has no fuel levy.");
+  }
+
   function levyNote(fuel, bfpChange) {
     const levy = levyFor(fuel);
     const lc = state.data.levy_change;
@@ -611,6 +635,7 @@
 
   function render() {
     buildTabs();
+    renderLevyBanner();
     renderStatusBar();
     renderHero();
     renderAccuracy();
