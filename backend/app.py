@@ -314,6 +314,7 @@ def build_status_data():
         # announced fuel levy change on that date, on top of the BFP forecast (or None)
         "levy_change": fuel_levy.levy_change(latest.pump_price_effective,
                                              bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
+        "levy_relief": fuel_levy.schedule(cef.FUELS),  # temporary levy cuts, to mark prices that include one
         "review_period_close": period_close,
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,

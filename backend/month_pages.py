@@ -22,6 +22,7 @@ from pathlib import Path
 
 import bfp_model as bm
 import db
+import fuel_levy
 
 REPO_ROOT = Path(__file__).parent.parent
 DOCS = REPO_ROOT / "docs"
@@ -337,6 +338,7 @@ def drivers(m: dict) -> str:
     """Why it moved: the review period's average over/(under) recovery against
     the announced change, for petrol 95 and diesel 0.05%."""
     paras = []
+    levy = fuel_levy.levy_change(m["prev_effective"], m["effective"], FUELS)
     period = f"from {d_long(m['period_start'])} to {d_long(m['period_end'])}"
     paras.append(
         f"<p>Each month's change is set by the <strong>review period</strong> before it, here {period}. "
@@ -357,10 +359,20 @@ def drivers(m: dict) -> str:
             gap = f"cost on average {amount(ou)} a litre <strong>less</strong> to import than was built into the price (an over-recovery)"
         bfp = m["avg_bfp"].get(f)
         bfp_txt = f" Its import cost averaged {rand(bfp)} a litre." if bfp else ""
-        diff = actual - market
+        step = levy["change"][f] if levy else 0
+        expected = market + step
+        diff = actual - expected
+        verdict = f"On its own that called for a change of {signed(market)}."
+        if step:
+            what = "The temporary fuel levy cut" if step < 0 else "The fuel levy going back up as the temporary relief winds down"
+            verdict += (f" {what}, announced in the {esc(levy['source'])} on "
+                        f"{d_long(levy['announced'])}, {'took' if step < 0 else 'added'} {amount(step)}"
+                        f"{' off' if step < 0 else ''}, for {signed(expected)}.")
         if abs(diff) < 9.5:
-            verdict = (f"On its own that called for a change of {signed(market)}. The official change, "
-                       f"{signed(actual)}, was within a few cents of it.")
+            verdict += f" The official change, {signed(actual)}, was within a few cents of {'that' if step else 'it'}."
+        elif step:
+            verdict += (f" The official change was {signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: "
+                        f"the rest comes from other decisions outside the Basic Fuel Price, such as the slate levy.")
         else:
             verdict = (f"On its own that called for a change of {signed(market)}. The official change was "
                        f"{signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: the rest comes from "
@@ -409,6 +421,11 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
              f"wholesale price of diesel (0.05% sulphur) {moves(d05)} {rand(new['diesel005'])}.")
     if future:
         intro += " The new prices are already in CEF's daily reports ahead of the date."
+    relief = fuel_levy.relief_on(e)
+    if relief:
+        intro += (f" These prices include temporary fuel levy relief of {amount(relief['petrol'])} a litre on petrol and "
+                  f"{amount(relief['diesel'])} on diesel, in force until {d_long(relief['end'])}; the price goes back up "
+                  f"by that much when it ends.")
     body = f"""{month_nav(prev_m, next_m)}
 {hero([
     ("Petrol 95", p95, f"New price {rand(new['petrol95'])} a litre (Gauteng)"),

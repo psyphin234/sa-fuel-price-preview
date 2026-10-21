@@ -25,8 +25,8 @@
   const fmtRand = (c) => c === null || c === undefined ? "—" : `R${centsToRand(c).toFixed(2)}/l`;
   const fmtRandDelta = (c) => {
     if (c === null || c === undefined) return "—";
-    const sign = c > 0 ? "+" : "";
-    return `${sign}R${centsToRand(c).toFixed(2)}/l`;
+    const sign = c > 0 ? "+" : c < 0 ? "−" : "";
+    return `${sign}R${centsToRand(Math.abs(c)).toFixed(2)}/l`;
   };
   const fmtCents = (c) => c === null || c === undefined ? "—" : c.toFixed(2);
   const describeEstimate = (est, official) => {
@@ -71,6 +71,20 @@
     const lc = state.data.levy_change;
     return lc && lc.effective === state.data.predicted_change_date ? (lc.change[fuel] || 0) : 0;
   };
+  // A temporary levy cut in force on a price-change date, for marking prices that
+  // have it built in (they go back up when it ends).
+  const reliefOn = (iso, fuel) =>
+    (state.data.levy_relief || []).find((r) => iso && r.start <= iso && iso <= r.end && r.relief[fuel]);
+  function setLevyTag(sel, iso) {
+    const el = $(sel);
+    const r = reliefOn(iso, state.fuel);
+    el.hidden = !r;
+    if (!r) return;
+    el.textContent = `Includes ${fmtRand(r.relief[state.fuel])} fuel levy relief, to ${fmtDate(r.end)}`;
+    el.title = `A temporary cut in the fuel levy, announced in the ${r.source} on ${fmtDate(r.announced)} ` +
+      `and in force from ${fmtDate(r.start)} to ${fmtDate(r.end)}. The price goes back up by this much when it ends.`;
+  }
+
   function levyNote(fuel, bfpChange) {
     const levy = levyFor(fuel);
     const lc = state.data.levy_change;
@@ -81,10 +95,9 @@
     }
     const amount = fmtRand(Math.abs(levy)).replace("/l", "");
     const what = levy < 0
-      ? `the ${amount} fuel levy cut`
-      : `the fuel levy going back up by ${amount} as the relief winds down`;
-    return `Includes ${what} announced in the ${lc.source} on ${fmtDate(lc.announced)}. ` +
-      `Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.`;
+      ? `the ${amount} fuel levy cut announced in the ${lc.source} on ${fmtDate(lc.announced)}`
+      : `the fuel levy going back up by ${amount} as the ${lc.source} relief winds down`;
+    return `Includes ${what}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.`;
   }
 
   // Until an announced change takes effect it leads, and the next cycle's
@@ -107,6 +120,7 @@
     badge.textContent = change > 0 ? "▲ Announced increase" : change < 0 ? "▼ Announced decrease" : "■ Announced: no change";
     $("#ann-prices").textContent =
       `${PRICE_ROW_LABEL[state.fuel]}: ${fmtRand(ann.previous_price[state.fuel])} → ${fmtRand(ann.new_price[state.fuel])}`;
+    setLevyTag("#ann-levy", ann.effective);
 
     $("#early-title").textContent = `Early look: ${fmtDate(state.data.predicted_change_date)}`;
     const earlyEl = $("#early-change");
@@ -114,6 +128,7 @@
     const early = pred.predicted_pump_price_change_c_per_l + levy;
     earlyEl.textContent = fmtRandDelta(early);
     earlyEl.className = "hero-value " + dirClass(early);
+    setLevyTag("#early-levy", state.data.predicted_change_date);
     const days = pred.blended_days_count;
     const note = levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l);
     $("#early-sub").textContent =
@@ -138,6 +153,7 @@
     const upcoming = effective > state.data.generated_at.slice(0, 10);
     $("#hero-current-title").textContent = upcoming ? `New price from ${fmtDate(effective)}` : "Current price";
     $("#hero-current-label").textContent = PRICE_ROW_LABEL[state.fuel] + (upcoming ? " (announced)" : " (current cycle)");
+    setLevyTag("#hero-current-levy", effective);
 
     const changeDate = state.data.predicted_change_date;
     $("#hero-change-title").textContent = changeDate ? `Predicted change on ${fmtDate(changeDate)}` : "Predicted next-cycle move";
@@ -155,6 +171,7 @@
       levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l) || "Before any slate-levy or fuel-levy change";
 
     $("#hero-newprice").textContent = fmtRand(pred.predicted_new_price_c_per_l + levy);
+    setLevyTag("#hero-newprice-levy", changeDate);
     const officialDays = pred.official_days_count;
     const estDays = pred.estimated_days.length;
     const manDays = pred.manual_days.length;

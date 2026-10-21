@@ -27,7 +27,8 @@ RELIEF = [
 ]
 
 
-def _relief_on(day: dt.date):
+def relief_on(day: dt.date):
+    """The relief period in force on `day`, or None."""
     for r in RELIEF:
         if r["start"] <= day <= r["end"]:
             return r
@@ -38,7 +39,7 @@ def levy_change(previous_effective: dt.date, new_effective: dt.date, fuels: list
     """The announced levy change between the price in force from `previous_effective`
     and the one from `new_effective`, in cents a litre per fuel (positive = the price
     rises). None if no announced change falls in between."""
-    before, after = _relief_on(previous_effective), _relief_on(new_effective)
+    before, after = relief_on(previous_effective), relief_on(new_effective)
     if before is after:
         return None
     change = {}
@@ -54,3 +55,11 @@ def levy_change(previous_effective: dt.date, new_effective: dt.date, fuels: list
         "announced": announcer["announced"],
         "source": announcer["source"],
     }
+
+
+def schedule(fuels: list) -> list:
+    """Every relief period, with its cut in cents a litre per fuel, so the site can
+    mark any price that has relief built in."""
+    return [{"start": r["start"], "end": r["end"], "announced": r["announced"], "source": r["source"],
+             "relief": {f: r.get(LEVY_FUELS.get(f), 0) for f in fuels}}
+            for r in RELIEF]

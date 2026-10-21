@@ -594,6 +594,21 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
 .hero-value.increase { color: var(--status-critical); text-shadow: 0 0 28px color-mix(in srgb, var(--status-critical) 45%, transparent); }
 .hero-value.decrease { color: var(--delta-up-good); text-shadow: 0 0 28px color-mix(in srgb, var(--status-good) 45%, transparent); }
 .hero[hidden] { display: none; }
+/* A price with temporary fuel levy relief built in (it goes back up when the relief ends). */
+.levy-tag {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 10px;
+  margin: 0 0 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--brand) 40%, transparent);
+  background: color-mix(in srgb, var(--brand) 12%, transparent);
+  color: var(--brand);
+  cursor: help;
+}
+.levy-tag[hidden] { display: none; }
+.hero-sub + .levy-tag { margin: 8px 0 0; }
 /* Between CEF opening a new review period and the announced change taking effect:
    the announced change leads, with a smaller early look at the next one. */
 .hero--announced { grid-template-columns: 2fr 1fr; }

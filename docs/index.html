@@ -32,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js" integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
@@ -78,10 +78,12 @@
           <div class="hero-value" id="ann-change">—</div>
           <div class="hero-badge" id="ann-badge">—</div>
           <div class="hero-sub" id="ann-prices">—</div>
+          <div class="levy-tag" id="ann-levy" hidden></div>
         </div>
         <div class="hero-card hero-card--early">
           <div class="hero-label" id="early-title">Early look at the next change</div>
           <div class="hero-value" id="early-change">—</div>
+          <div class="levy-tag" id="early-levy" hidden></div>
           <div class="hero-sub" id="early-sub">—</div>
         </div>
       </section>
@@ -90,6 +92,7 @@
         <div class="hero-card">
           <div class="hero-label" id="hero-current-title">Current price</div>
           <div class="hero-value" id="hero-current">—</div>
+          <div class="levy-tag" id="hero-current-levy" hidden></div>
           <div class="hero-sub" id="hero-current-label">—</div>
         </div>
         <div class="hero-card hero-card--predicted">
@@ -101,6 +104,7 @@
         <div class="hero-card">
           <div class="hero-label">Estimated new price</div>
           <div class="hero-value" id="hero-newprice">—</div>
+          <div class="levy-tag" id="hero-newprice-levy" hidden></div>
           <div class="hero-sub" id="hero-confidence">—</div>
         </div>
       </section>
@@ -233,7 +237,7 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=2"></script>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=17"></script>
 <!-- GoatCounter is shared with psyphin.co.za; prefix paths with the host so this site's "/" is counted separately -->
 <script>window.goatcounter = { path: function (p) { return location.host + p; } };</script>
 <script data-goatcounter="https://psyphin.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
