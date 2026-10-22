@@ -196,7 +196,7 @@
     });
 
     $("#ctx-hormuz-figures").replaceChildren(
-      stat("Ships a day seen crossing", h.avg_7d.toFixed(1), `7-day average to ${fmtDay(h.data_to)}`, h.avg_7d < h.normal_per_day / 2 ? "alert" : ""),
+      stat("Ships a day seen on tracking", h.avg_7d.toFixed(1), `7-day average to ${fmtDay(h.data_to)}`, h.avg_7d < h.normal_per_day / 2 ? "alert" : ""),
       stat("Normal before the conflict", h.normal_per_day.toFixed(0), `a day, ${fmtMonth(h.normal_from)} – ${fmtMonth(h.conflict_start)}`),
     );
 
