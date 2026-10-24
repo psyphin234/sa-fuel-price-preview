@@ -257,14 +257,6 @@
   "daily_series": {
     "petrol95": [
       {
-        "date": "2026-09-24",
-        "bfp": 1861.234,
-        "unit_over_under": -446.344,
-        "reference": 1414.89,
-        "cycle": "2026-10-07",
-        "source": "cef_official"
-      },
-      {
         "date": "2026-09-25",
         "bfp": 1839.882,
         "unit_over_under": -424.992,
@@ -529,14 +521,6 @@
       }
     ],
     "petrol93": [
-      {
-        "date": "2026-09-24",
-        "bfp": 1817.762,
-        "unit_over_under": -418.872,
-        "reference": 1398.89,
-        "cycle": "2026-10-07",
-        "source": "cef_official"
-      },
       {
         "date": "2026-09-25",
         "bfp": 1796.207,
@@ -803,14 +787,6 @@
     ],
     "diesel005": [
       {
-        "date": "2026-09-24",
-        "bfp": 2290.58,
-        "unit_over_under": -356.95,
-        "reference": 1933.63,
-        "cycle": "2026-10-07",
-        "source": "cef_official"
-      },
-      {
         "date": "2026-09-25",
         "bfp": 2249.957,
         "unit_over_under": -316.327,
@@ -1076,14 +1052,6 @@
     ],
     "diesel0005": [
       {
-        "date": "2026-09-24",
-        "bfp": 2373.539,
-        "unit_over_under": -395.509,
-        "reference": 1978.03,
-        "cycle": "2026-10-07",
-        "source": "cef_official"
-      },
-      {
         "date": "2026-09-25",
         "bfp": 2333.445,
         "unit_over_under": -355.415,
@@ -1348,14 +1316,6 @@
       }
     ],
     "illpar": [
-      {
-        "date": "2026-09-24",
-        "bfp": 2290.673,
-        "unit_over_under": -475.545,
-        "reference": 1815.128,
-        "cycle": "2026-10-07",
-        "source": "cef_official"
-      },
       {
         "date": "2026-09-25",
         "bfp": 2251.75,
@@ -1630,11 +1590,6 @@
   },
   "exchange_rate_series": [
     {
-      "date": "2026-09-24",
-      "rate": 16.243,
-      "source": "cef_official"
-    },
-    {
       "date": "2026-09-25",
       "rate": 16.315,
       "source": "cef_official"
@@ -1793,7 +1748,7 @@
   ],
   "review_period_close": "2026-10-29",
   "review_period_closed": false,
-  "days_until_next_price_change": 11,
+  "days_until_next_price_change": 10,
   "context": {
     "brent_futures": {
       "series": [
@@ -4703,5 +4658,5 @@
       ]
     }
   },
-  "generated_at": "2026-10-24T23:18:43.373113"
+  "generated_at": "2026-10-25T00:18:46.862060"
 }
