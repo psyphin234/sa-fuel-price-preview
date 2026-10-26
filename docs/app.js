@@ -645,14 +645,21 @@
     if (window.renderContext) window.renderContext(state.data.context);
   }
 
+  let loadedAt = 0;
+
+  async function fetchData() {
+    const resp = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
+    loadedAt = Date.now();
+    return resp.json();
+  }
+
   async function loadData() {
     $("#loading").hidden = false;
     $("#error-state").hidden = true;
     $("#content").hidden = true;
     try {
-      const resp = await fetch(`${DATA_URL}?t=${Date.now()}`, { cache: "no-store" });
-      if (!resp.ok) throw new Error(`Request failed (${resp.status})`);
-      state.data = await resp.json();
+      state.data = await fetchData();
       $("#loading").hidden = true;
       $("#content").hidden = false;
       render();
@@ -671,6 +678,26 @@
     btn.disabled = false;
     btn.textContent = "Check for update";
   });
+
+  // A tab left open, or one a phone brings back from memory, keeps showing what it
+  // drew when it was first opened (an old price step, for one). So fetch again when
+  // the page comes back into view after a while, and every so often while it's
+  // shown, and redraw in place if the bot has published since.
+  const STALE_MS = 10 * 60 * 1000;
+  async function refreshIfStale() {
+    if (document.hidden || !state.data || Date.now() - loadedAt < STALE_MS) return;
+    try {
+      const data = await fetchData();
+      if (data.generated_at === state.data.generated_at) return;
+      state.data = data;
+      render();
+    } catch {
+      // Keep what's on screen; "Check for update" still shows the error.
+    }
+  }
+  document.addEventListener("visibilitychange", refreshIfStale);
+  window.addEventListener("pageshow", (e) => { if (e.persisted) refreshIfStale(); });
+  setInterval(refreshIfStale, STALE_MS);
 
   loadData();
 })();
