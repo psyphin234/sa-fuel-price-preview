@@ -686,12 +686,20 @@
     if (window.renderContext) window.renderContext(state.data.context);
   }
 
+  let loadedAt = 0;
+
+  async function fetchData() {
+    const data = await api("/api/status");
+    loadedAt = Date.now();
+    return data;
+  }
+
   async function loadData() {
     $("#loading").hidden = false;
     $("#error-state").hidden = true;
     $("#content").hidden = true;
     try {
-      state.data = await api("/api/status");
+      state.data = await fetchData();
       $("#loading").hidden = true;
       $("#content").hidden = false;
       render();
@@ -735,6 +743,27 @@
       alert("Couldn't save: " + err.message);
     }
   });
+
+  // A tab left open keeps showing what it drew when it was first opened (an old
+  // price step, for one). So fetch again when the page comes back into view after
+  // a while, and every so often while it's shown, and redraw in place if anything
+  // changed. generated_at is the time of each request here, so it's left out.
+  const STALE_MS = 10 * 60 * 1000;
+  const withoutStamp = (d) => JSON.stringify({ ...d, generated_at: null });
+  async function refreshIfStale() {
+    if (document.hidden || !state.data || Date.now() - loadedAt < STALE_MS) return;
+    try {
+      const data = await fetchData();
+      if (withoutStamp(data) === withoutStamp(state.data)) return;
+      state.data = data;
+      render();
+    } catch {
+      // Keep what's on screen; "Refresh data" still shows the error.
+    }
+  }
+  document.addEventListener("visibilitychange", refreshIfStale);
+  window.addEventListener("pageshow", (e) => { if (e.persisted) refreshIfStale(); });
+  setInterval(refreshIfStale, STALE_MS);
 
   loadData();
 })();
