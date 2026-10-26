@@ -37,6 +37,7 @@ def business_days_between(start: dt.date, end: dt.date) -> int:
 
 
 def first_wednesday(year: int, month: int) -> dt.date:
+    """The first Wednesday of a month: the day South Africa's fuel prices change."""
     d = dt.date(year, month, 1)
     return d + dt.timedelta(days=(2 - d.weekday()) % 7)  # Wednesday = weekday 2
 
@@ -89,6 +90,7 @@ def business_days_after(after: dt.date, through: dt.date) -> list:
 
 @dataclass
 class DayEstimate:
+    """One day's figures, per fuel in c/l: CEF's, our estimate or a manual entry (source)."""
     date: dt.date
     source: str  # "cef_official" | "estimated" | "manual"
     bfp: dict
@@ -144,6 +146,16 @@ def nowcast_single_day(base: cef.DailyReport, target_date: dt.date, market: dict
 
 @dataclass
 class Prediction:
+    """The forecast for one fuel, as sent to the frontends (all in c/l).
+    official_*: CEF's own period-to-date average over/(under) recovery and its days.
+    blended_*: that average with the estimated and manual days since CEF's last
+    report added in.
+    projected_*: blended plus the rest of the period at the latest BFP. This is
+    what the forecast uses.
+    predicted_pump_price_change_c_per_l: minus projected_avg_over_under (an
+    under-recovery means the price must rise), Basic Fuel Price only: levy
+    changes are added by the frontends.
+    direction: "increase", "decrease" or "no change"."""
     fuel: str
     label: str
     official_avg_over_under: float

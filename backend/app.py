@@ -1,3 +1,20 @@
+"""
+The backend: builds the payload both frontends draw from, and serves the local
+dashboard.
+
+build_status_data() is the heart of it. It reads CEF's daily reports (cached in
+the local SQLite database by db.py, downloaded by cef_scraper.py when missing),
+estimates the days CEF hasn't published yet and projects the next price change
+(bfp_model.py, using nowcast.py), checks earlier estimates against CEF's real
+figures (accuracy.py), and adds the fuel levy schedule (fuel_levy.py) and the
+background section's data (context_data.py). The result is one dict, which is:
+- served as JSON at /api/status to the local dashboard (frontend/), and
+- written to docs/data/status.json by publish.py for the public site (docs/).
+
+The Flask app listens on 127.0.0.1 only; the public site never talks to it. Its
+other routes are the dashboard's: refresh, manual entries, prediction history,
+and the frontend's files. Start it with `python app.py` (port 5057).
+"""
 import datetime as dt
 import json
 from pathlib import Path
@@ -18,6 +35,8 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 app = Flask(__name__, static_folder=None)
 db.init_db()
 
+# In-memory caches, so a burst of page loads doesn't call Yahoo every time: the
+# live quotes (market_data.py) and the hourly series the estimates use (nowcast.py).
 _benchmark_cache = {"data": None, "fetched_at": None}
 BENCHMARK_TTL_SECONDS = 120
 _market_cache = {"data": None, "fetched_at": None}
@@ -28,6 +47,8 @@ HISTORY_BACKFILL_PER_RUN = 30  # keeps a cold start from making one run very slo
 
 
 def json_default(o):
+    """Lets json.dumps write dates (as ISO strings) and dataclasses or other objects
+    (as their fields)."""
     if isinstance(o, dt.date):
         return o.isoformat()
     if hasattr(o, "__dict__"):
@@ -36,6 +57,7 @@ def json_default(o):
 
 
 def dumps(obj, **kw):
+    """json.dumps that understands the payload's dates and dataclasses."""
     return json.dumps(obj, default=json_default, **kw)
 
 
@@ -47,12 +69,16 @@ class JSONResponse:
 
 
 def _report_from_cache(cached: dict) -> cef.DailyReport:
+    """Turns a cached report (dates stored as ISO strings) back into a cef.DailyReport."""
     for key in ("report_date", "period_start", "period_end", "reference_valid_from", "pump_price_effective"):
         cached[key] = dt.date.fromisoformat(cached[key])
     return cef.DailyReport(**cached)
 
 
 def get_report_cached(date: dt.date):
+    """CEF's report for `date`: from the local cache, or downloaded, parsed and cached
+    if it isn't there yet. None if CEF hasn't published one. Each check is noted in
+    the release log (db.note_report_*), which release_times.py reads."""
     cached = db.get_cached_report(date)
     if cached:
         return _report_from_cache(cached)
@@ -66,6 +92,7 @@ def get_report_cached(date: dt.date):
 
 
 def get_latest_report():
+    """The newest report CEF has published, looking back up to 10 days from today."""
     d = dt.date.today()
     for _ in range(10):
         rep = get_report_cached(d)
@@ -76,6 +103,7 @@ def get_latest_report():
 
 
 def get_period_reports(period_start: dt.date, period_end: dt.date):
+    """Every published report from period_start to period_end, oldest first."""
     reports = []
     d = period_start
     while d <= period_end:
@@ -87,6 +115,7 @@ def get_period_reports(period_start: dt.date, period_end: dt.date):
 
 
 def get_benchmarks(force=False):
+    """Live quotes (market_data.py), reused for BENCHMARK_TTL_SECONDS unless force."""
     now = dt.datetime.now()
     if (not force and _benchmark_cache["data"] and _benchmark_cache["fetched_at"]
             and (now - _benchmark_cache["fetched_at"]).total_seconds() < BENCHMARK_TTL_SECONDS):
@@ -98,6 +127,8 @@ def get_benchmarks(force=False):
 
 
 def get_market():
+    """Hourly market prices for the estimates (nowcast.fetch_market), reused for
+    MARKET_TTL_SECONDS."""
     now = dt.datetime.now()
     if (_market_cache["data"] and _market_cache["fetched_at"]
             and (now - _market_cache["fetched_at"]).total_seconds() < MARKET_TTL_SECONDS):
@@ -169,6 +200,7 @@ def get_announced_change(latest, today):
 
 
 def manual_overrides_dict():
+    """Manual entries from the dashboard: {date: {"bfp": {fuel: c/l}, "exchange_rate": ...}}."""
     raw = db.get_manual_overrides()
     return raw  # already {date: {"bfp": {...}, "exchange_rate": ...}}
 
@@ -299,6 +331,8 @@ def build_status_data():
         context = None
 
     return {
+        # The payload. When it's turned into JSON (json_default), dates become ISO
+        # strings and dataclasses plain objects. Prices are in cents a litre, per fuel key.
         "latest_official_report": latest,
         "benchmarks": benchmarks,
         "fuels": cef.FUEL_LABELS,
@@ -325,6 +359,7 @@ def build_status_data():
 
 @app.route("/api/status")
 def api_status():
+    """The whole payload, for the dashboard. 502 if no CEF report could be read."""
     data = build_status_data()
     if data is None:
         return JSONResponse.make({"error": "Could not reach CEF's site or parse any recent report."}, 502)
@@ -333,6 +368,9 @@ def api_status():
 
 @app.route("/api/refresh", methods=["POST"])
 def api_refresh():
+    """The dashboard's "Refresh data" button: refreshes the live quotes, downloads the
+    latest report again (replacing the cached copy) and fills any gaps in its review
+    period. The page then reloads /api/status."""
     get_benchmarks(force=True)
     latest = None
     d = dt.date.today()
@@ -359,6 +397,8 @@ def api_refresh():
 
 @app.route("/api/manual-override", methods=["POST"])
 def api_manual_override():
+    """Saves a manual entry. Body: {"date": "YYYY-MM-DD", "bfp": {fuel: c/l},
+    "exchange_rate": optional}. It replaces any entry already saved for that date."""
     body = request.get_json(force=True)
     try:
         date = dt.date.fromisoformat(body["date"])
@@ -375,6 +415,7 @@ def api_manual_override():
 
 @app.route("/api/manual-override/<date_str>", methods=["DELETE"])
 def api_delete_manual_override(date_str):
+    """Removes the manual entry for a date."""
     try:
         date = dt.date.fromisoformat(date_str)
     except ValueError:
@@ -385,18 +426,21 @@ def api_delete_manual_override(date_str):
 
 @app.route("/api/manual-overrides")
 def api_get_manual_overrides():
+    """All manual entries, keyed by ISO date."""
     overrides = manual_overrides_dict()
     return JSONResponse.make({d.isoformat(): v for d, v in overrides.items()})
 
 
 @app.route("/api/history")
 def api_history():
+    """The log of past forecasts (db.prediction_log), newest first; ?fuel= filters it."""
     fuel = request.args.get("fuel")
     return JSONResponse.make(db.get_prediction_history(fuel=fuel))
 
 
 @app.route("/")
 def index():
+    """The dashboard page and its files, from frontend/."""
     return send_from_directory(FRONTEND_DIR, "index.html")
 
 

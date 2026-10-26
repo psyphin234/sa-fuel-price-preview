@@ -9,6 +9,16 @@ from contextlib import contextmanager
 
 DB_PATH = Path(__file__).parent.parent / "data" / "bfp.db"
 
+# Tables (dates are stored as ISO text):
+# - manual_overrides: BFP figures typed into the dashboard, one row per date
+#   (bfp_json is {fuel: c/l}).
+# - cef_report_cache: every parsed CEF report, as JSON (cef_scraper.DailyReport's
+#   fields).
+# - prediction_log: each run's forecast per fuel, to look back at how it moved.
+# - estimate_log: estimates waiting for CEF's real figure (accuracy.py).
+# - accuracy_log: estimates checked against CEF's real figure.
+# - cef_release_log: when each report was first seen (release_times.py).
+# Every table is CREATE TABLE IF NOT EXISTS, so init_db() is safe on every start.
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS manual_overrides (
     date TEXT PRIMARY KEY,
@@ -62,6 +72,8 @@ CREATE TABLE IF NOT EXISTS accuracy_log (
 
 @contextmanager
 def get_conn():
+    """A connection that commits when the with-block finishes without an error, and
+    always closes."""
     DB_PATH.parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
@@ -73,11 +85,13 @@ def get_conn():
 
 
 def init_db():
+    """Creates any missing tables."""
     with get_conn() as conn:
         conn.executescript(SCHEMA)
 
 
 def set_manual_override(date: dt.date, bfp: dict, exchange_rate: float = None):
+    """Saves the manual entry for a date, replacing any already there."""
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO manual_overrides (date, bfp_json, exchange_rate, entered_at) "
@@ -89,6 +103,7 @@ def set_manual_override(date: dt.date, bfp: dict, exchange_rate: float = None):
 
 
 def delete_manual_override(date: dt.date):
+    """Removes the manual entry for a date, if there is one."""
     with get_conn() as conn:
         conn.execute("DELETE FROM manual_overrides WHERE date = ?", (date.isoformat(),))
 
@@ -109,6 +124,7 @@ def get_manual_overrides(start: dt.date = None, end: dt.date = None) -> dict:
 
 
 def cache_report(report_date: dt.date, report_dict: dict):
+    """Saves a parsed report (DailyReport's fields as a dict), replacing any older copy."""
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO cef_report_cache (report_date, report_json, cached_at) VALUES (?, ?, ?) "
@@ -128,6 +144,7 @@ def get_cached_reports(start: dt.date, end: dt.date) -> list:
 
 
 def get_cached_report(report_date: dt.date):
+    """The cached report dict for a date, or None (no fetching)."""
     with get_conn() as conn:
         row = conn.execute(
             "SELECT report_json FROM cef_report_cache WHERE report_date = ?", (report_date.isoformat(),)
@@ -137,6 +154,7 @@ def get_cached_report(report_date: dt.date):
 
 def log_prediction(period_start: dt.date, period_end: dt.date, fuel: str,
                     blended_avg_over_under: float, predicted_change: float):
+    """Adds one forecast to prediction_log."""
     with get_conn() as conn:
         conn.execute(
             "INSERT INTO prediction_log (recorded_at, period_start, period_end, fuel, "
@@ -147,6 +165,7 @@ def log_prediction(period_start: dt.date, period_end: dt.date, fuel: str,
 
 
 def get_prediction_history(fuel: str = None, limit: int = 200) -> list:
+    """The newest logged forecasts, for every fuel or one, newest first."""
     with get_conn() as conn:
         if fuel:
             rows = conn.execute(
@@ -187,6 +206,9 @@ def pop_estimate(date: dt.date, fuel: str):
 
 
 def log_accuracy(date: dt.date, fuel: str, estimated_bfp: float, official_bfp: float):
+    """Records how far an estimate was from CEF's figure. error = official - estimate
+    (positive: the estimate was too low); pct_error is that as a fraction of the
+    official figure. Only the first comparison for a day is kept."""
     error = official_bfp - estimated_bfp
     pct_error = (error / official_bfp) if official_bfp else None
     with get_conn() as conn:
@@ -207,6 +229,7 @@ def get_accuracy_by_date(start: dt.date, end: dt.date) -> dict:
 
 
 def get_accuracy_records(limit: int = 90) -> list:
+    """The most recent checked estimates, newest first."""
     with get_conn() as conn:
         rows = conn.execute(
             "SELECT * FROM accuracy_log ORDER BY date DESC LIMIT ?", (limit,)
@@ -237,6 +260,7 @@ def note_report_found(report_date: dt.date):
 
 
 def get_release_log() -> list:
+    """Every report whose first sighting is known, oldest first."""
     with get_conn() as conn:
         rows = conn.execute(
             "SELECT * FROM cef_release_log WHERE first_seen_at IS NOT NULL ORDER BY report_date"

@@ -35,6 +35,10 @@ YF_CHART_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}"
 CACHE_PATH = Path(__file__).parent.parent / "data" / "market_cache.json"
 CACHE_MAX_AGE_HOURS = 24
 
+# The model's inputs (Yahoo symbols): US petrol (RBOB), US diesel (heating oil)
+# and Brent futures, plus USD/ZAR for the exchange rate, each read at the London
+# hour given below. Weights are fitted on up to TRAIN_WINDOW pairs of consecutive
+# reports at most MAX_PAIR_GAP_DAYS apart, and only once there are MIN_TRAIN.
 FEATURES = {"rbob": "RB=F", "ho": "HO=F", "brent": "BZ=F"}
 FX_SYMBOL = "ZAR=X"
 PRODUCT_HOUR_LONDON = 15
@@ -45,11 +49,14 @@ MAX_PAIR_GAP_DAYS = 5
 
 
 def _last_sunday(year: int, month: int) -> dt.date:
+    """The last Sunday of a month (UK clocks change on the last Sundays of March and
+    October)."""
     d = dt.date(year + month // 12, month % 12 + 1, 1) - dt.timedelta(days=1)
     return d - dt.timedelta(days=(d.weekday() + 1) % 7)
 
 
 def london_to_utc(day: dt.date, hour: int) -> dt.datetime:
+    """UTC time of `hour`:00 London time on `day`, allowing for British Summer Time."""
     naive = dt.datetime.combine(day, dt.time(hour))
     bst = (dt.datetime.combine(_last_sunday(day.year, 3), dt.time(1)) <= naive
            < dt.datetime.combine(_last_sunday(day.year, 10), dt.time(1)))
@@ -88,6 +95,7 @@ def fetch_hourly_bars(symbol: str, range_: str = "2y") -> list:
 
 
 def _load_cache() -> dict:
+    """The saved copies of Yahoo's prices (CACHE_PATH), or {} if there are none."""
     try:
         return json.loads(CACHE_PATH.read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -95,6 +103,8 @@ def _load_cache() -> dict:
 
 
 def _save_cache(cache: dict):
+    """Saves the cache through a temp file, so a crash can't leave half a file.
+    Failing to save is ignored."""
     try:
         CACHE_PATH.parent.mkdir(parents=True, exist_ok=True)
         tmp = CACHE_PATH.with_suffix(".tmp")
@@ -137,11 +147,14 @@ def fetch_market() -> dict:
 
 
 def _log_move(series: HourlySeries, a: dt.datetime, b: dt.datetime):
+    """log(price at b / price at a), or None if either price is missing."""
     pa, pb = series.at(a), series.at(b)
     return math.log(pb / pa) if pa and pb else None
 
 
 def product_features(market: dict, from_day: dt.date, to_day: dt.date):
+    """The model's inputs for one step: each market's log move from 15:00 London on
+    from_day to 15:00 on to_day. None if any is missing."""
     if not all(name in market for name in FEATURES):
         return None
     a, b = london_to_utc(from_day, PRODUCT_HOUR_LONDON), london_to_utc(to_day, PRODUCT_HOUR_LONDON)
@@ -150,6 +163,7 @@ def product_features(market: dict, from_day: dt.date, to_day: dt.date):
 
 
 def fx_ratio(market: dict, from_day: dt.date, to_day: dt.date):
+    """USD/ZAR at 10:00 London on to_day divided by the same on from_day, or None."""
     if "usdzar" not in market:
         return None
     a, b = london_to_utc(from_day, FX_HOUR_LONDON), london_to_utc(to_day, FX_HOUR_LONDON)
@@ -175,9 +189,11 @@ def fit_weights(history: list, market: dict, fuels: list) -> dict:
             bp, bd = p.bfp.get(fuel), d.bfp.get(fuel)
             if bp and bd:
                 X.append(x)
+                # Target: the log move of the BFP's dollar part (BFP / CEF's exchange rate).
                 Y.append(math.log((bd / d.exchange_rate) / (bp / p.exchange_rate)))
         if len(Y) >= MIN_TRAIN:
             X, Y = np.array(X), np.array(Y)
+            # Ridge regression with no intercept: a flat market should mean a flat BFP.
             weights[fuel] = np.linalg.solve(X.T @ X + 1e-5 * np.eye(X.shape[1]), X.T @ Y)
     return weights
 
@@ -201,5 +217,6 @@ def estimate(base, target_day: dt.date, market: dict, weights: dict, fuels: list
             bfp[fuel] = round(b, 3)
             continue
         usd_move = float(np.dot(weights[fuel], x)) if (x is not None and fuel in weights) else 0.0
+        # The dollar part moved by the weighted market move, back in rand at the new rate.
         bfp[fuel] = round(b / fx * math.exp(usd_move) * fx_est, 3)
     return bfp, (round(fx_est, 4) if fx_est else None), fallback

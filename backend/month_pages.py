@@ -79,6 +79,7 @@ def slug(d: dt.date) -> str:
 
 
 def rand(c: float) -> str:
+    """Cents to rand: 1840.0 -> R18.40."""
     return f"R{c / 100:.2f}"
 
 
@@ -101,12 +102,14 @@ def about(c: float) -> str:
 
 
 def signed(c: float) -> str:
+    """A change with its sign: +R3.33, −28c, 0c."""
     if abs(c) < 0.5:
         return "0c"
     return ("+" if c > 0 else "−") + amount(c)
 
 
 def direction(c: float) -> str:
+    """The CSS class for a change, as on the main page."""
     return "flat" if abs(c) < 0.5 else ("increase" if c > 0 else "decrease")
 
 
@@ -202,10 +205,13 @@ def forecast_snapshot(status: dict):
 # ---------- page parts ----------
 
 def style_version() -> str:
+    """The ?v= cache-buster docs/index.html loads style.css with, so these pages ask
+    for the same copy."""
     m = re.search(r'style\.css\?v=(\d+)', (DOCS / "index.html").read_text(encoding="utf-8"))
     return m.group(1) if m else "1"
 
 
+# Styles only these pages need, in a <style> block after style.css.
 EXTRA_CSS = """
 .month-nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; margin: 0 0 20px; font-size: 14px; }
 .month-nav > :last-child { text-align: right; }
@@ -316,6 +322,7 @@ def hero(cards: list) -> str:
 
 
 def price_table(old: dict, new: dict, change: dict, new_head: str, approx: bool = False) -> str:
+    """Before, change and after for all five fuels; approx puts ~ before forecast prices."""
     rows = []
     for f in FUELS:
         cls = {"increase": "up", "decrease": "down"}.get(direction(change[f]), "")
@@ -396,6 +403,7 @@ def drivers(m: dict) -> str:
 
 
 def month_nav(prev_m, next_m) -> str:
+    """Links to the previous and next months and the index."""
     left = (f'<a href="/fuel-price/{slug(prev_m)}/">&larr; {month_name(prev_m)}</a>' if prev_m else "<span></span>")
     mid = '<a href="/fuel-price/">All months</a>'
     right = (f'<a href="/fuel-price/{slug(next_m)}/">{month_name(next_m)} &rarr;</a>' if next_m else "<span></span>")
@@ -403,6 +411,7 @@ def month_nav(prev_m, next_m) -> str:
 
 
 def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
+    """The page for a change already in CEF's reports: past, or announced and still ahead."""
     e = m["effective"]
     future = e > today
     ch, new = m["change"], m["new"]
@@ -455,6 +464,8 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
 
 
 def forecast_page(s: dict, prev_m) -> str:
+    """The page for the next change, from the forecast snapshot (the BFP forecast plus
+    any announced fuel levy change)."""
     e = dt.date.fromisoformat(s["effective"])
     report = dt.date.fromisoformat(s["report_date"])
     start = dt.date.fromisoformat(s["period_start"])
@@ -555,6 +566,7 @@ def price_chart(months: list) -> str:
 
 
 def index_page(months: list, snap) -> str:
+    """/fuel-price/: the price chart and every change, newest first, with the forecast on top."""
     rows = []
     if snap:
         e = dt.date.fromisoformat(snap["effective"])
@@ -608,6 +620,7 @@ def index_page(months: list, snap) -> str:
 # ---------- writing ----------
 
 def write_if_changed(path: Path, text: str) -> bool:
+    """Writes the file only if its text differs; returns whether it wrote."""
     try:
         if path.read_text(encoding="utf-8") == text:
             return False

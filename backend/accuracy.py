@@ -46,6 +46,10 @@ READY_THRESHOLD = 5  # comparisons needed before we call the average trustworthy
 
 
 def get_accuracy_summary(limit: int = 90) -> dict:
+    """The accuracy meter's figures, from the most recent `limit` checks: n, the mean
+    absolute error (c/l, and as a %), accuracy_pct = 100 minus the mean absolute %
+    error, and status: "collecting" (none yet), "warming_up" (fewer than
+    READY_THRESHOLD) or "ready"."""
     records = db.get_accuracy_records(limit=limit)
     n = len(records)
     if n == 0:

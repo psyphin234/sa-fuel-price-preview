@@ -18,6 +18,8 @@ SYMBOLS = {
 
 
 def _fetch_symbol(symbol: str, range_: str = "10d", interval: str = "1d") -> dict:
+    """Latest quote for one Yahoo symbol: price, previous close, and the change as a
+    fraction (0.01 = 1%)."""
     url = YF_CHART_URL.format(symbol=symbol)
     resp = requests.get(url, headers=HEADERS, params={"range": range_, "interval": interval}, timeout=15)
     resp.raise_for_status()

@@ -53,6 +53,8 @@ HORMUZ_EVENTS = [
 
 
 def _brent_futures() -> dict:
+    """Daily closes of Brent futures (Yahoo BZ=F) for the last BRENT_DAYS trading days,
+    dated in the exchange's own time zone."""
     resp = requests.get(YF_BRENT_URL, headers=HEADERS, params={"range": "6mo", "interval": "1d"}, timeout=30)
     resp.raise_for_status()
     result = resp.json()["chart"]["result"][0]
@@ -100,6 +102,10 @@ def _brent_spot() -> dict:
 
 
 def _hormuz() -> dict:
+    """PortWatch's daily Hormuz crossings from a year before the conflict to the latest
+    day: the series shown (from HORMUZ_FROM), the latest 7-day averages (all ships
+    and tankers) and the daily average in the year before the conflict. The feed
+    returns at most 2000 rows a request, so it pages through."""
     rows, offset = [], 0
     while True:
         resp = requests.get(PORTWATCH_URL, headers=HEADERS, timeout=60, params={
@@ -144,10 +150,14 @@ def _hormuz() -> dict:
     }
 
 
+# The section's three parts and what fetches each; get_context() caches them separately.
 PARTS = {"brent_futures": _brent_futures, "brent_spot": _brent_spot, "hormuz": _hormuz}
 
 
 def get_context() -> dict:
+    """{brent_futures, brent_spot, hormuz}, each that part's data or None. A part is
+    fetched again only when its cached copy is older than CACHE_TTL_HOURS; a failed
+    fetch keeps the old copy and isn't retried until the TTL has passed again."""
     try:
         cache = json.loads(CACHE_PATH.read_text(encoding="utf-8"))
     except (OSError, ValueError):

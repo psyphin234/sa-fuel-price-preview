@@ -1,4 +1,18 @@
 <!doctype html>
+<!--
+  SA Basic Fuel Price Preview, the public page (fuel.psyphin.co.za, served by
+  GitHub Pages from the docs/ folder).
+
+  This file is the page's skeleton: the elements app.js fills in (anything showing
+  "—" is a placeholder), plus the fixed text. The data comes from data/status.json,
+  which the backend rebuilds every hour. The local dashboard has its own copy of
+  this page (frontend/index.html) that differs on purpose: no search tags, no
+  Common questions or visitor counter, and a manual-entry form. Change shared
+  parts in both.
+
+  Always dark: data-theme="dark" picks the dark colours in style.css whatever the
+  visitor's system setting.
+-->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
@@ -8,6 +22,9 @@
 <link rel="icon" type="image/png" sizes="96x96" href="assets/favicon-96x96.png">
 <link rel="icon" type="image/png" sizes="192x192" href="assets/favicon-192x192.png">
 <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png">
+<!-- For search engines: what the site is. Keep "description" the same as the meta
+     description below, which is at most 155 characters (search results cut the
+     rest). The Open Graph tags are what link previews show when it's shared. -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -31,13 +48,21 @@
 <meta name="color-scheme" content="dark">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<!-- Fonts: Inter for text, Sora for headings and big figures. The ?v= numbers on
+     the local files below are cache-busters: raise one whenever its file changes,
+     so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css?v=20">
+<!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
+     version changes, the hash must change with it, or the browser refuses the
+     script and the charts disappear. -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js" integrity="sha512-WoViKhKD4qI2WruSZqv9+kvM4WfFhUMQCLN4QlDTt5aU56fLQy2gYoxWIqlEnXqJy/+Ac5q/hk1oWfqnMDhwMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 </head>
 <body>
+<!-- Header. fx.js draws the animated import-routes map on the canvas behind it. -->
 <header class="brand-bar brand-bar--hero">
   <canvas class="hero-fx" aria-hidden="true"></canvas>
+  <!-- Back to the Tools section of psyphin.co.za (the same pill as the other tools). -->
   <nav class="back-nav" aria-label="Site">
     <a href="https://psyphin.co.za/#tools" class="back-link"><span class="back-link-arrow" aria-hidden="true">&larr;</span> More PsyPhin tools <span class="back-link-domain">psyphin.co.za</span></a>
   </nav>
@@ -56,6 +81,8 @@
 
 <div class="page">
 
+  <!-- Filled in by app.js: when the data was built, and the countdown to the next
+       price change. -->
   <div class="status-bar">
     <span class="status-pill" id="last-updated-pill">
       <span class="status-dot"></span>
@@ -64,15 +91,22 @@
     <span class="status-pill countdown-pill" id="countdown-pill">—</span>
   </div>
 
+  <!-- The fuel tabs (built by app.js) and the fuel levy relief banner, shown only
+       while relief is announced or in force. -->
   <nav class="fuel-tabs" id="fuel-tabs" role="tablist" aria-label="Fuel type"></nav>
   <aside class="levy-banner" id="levy-banner" hidden></aside>
 
+  <!-- #loading shows until the data arrives; then app.js shows #content (or
+       #error-state if the data couldn't be read). -->
   <main id="app-root">
     <div id="loading" class="loading-state">Loading CEF review-period data…</div>
     <div id="error-state" class="error-state" hidden></div>
 
     <section id="content" hidden>
 
+      <!-- Headline cards, one set or the other. These two show between a new price
+           being announced and taking effect: the announced change, and an early look
+           at the one after. -->
       <section class="hero hero--announced" id="hero-announced" aria-live="polite" hidden>
         <div class="hero-card hero-card--predicted">
           <div class="hero-label" id="ann-title">Announced price change</div>
@@ -89,6 +123,7 @@
         </div>
       </section>
 
+      <!-- The usual three: the price now, the predicted change, the predicted new price. -->
       <section class="hero" id="hero-forecast" aria-live="polite">
         <div class="hero-card">
           <div class="hero-label" id="hero-current-title">Current price</div>
@@ -110,6 +145,7 @@
         </div>
       </section>
 
+      <!-- How close past estimates were to CEF's figures (backend/accuracy.py). -->
       <section class="panel accuracy-panel">
         <div class="panel-head">
           <h2>How reliable are the estimated days?</h2>
@@ -132,6 +168,7 @@
           <p class="muted small">The blue line is each day's real import cost. The orange line is the cost that was priced into the pump price on that day. It's fixed when each month's price is set, and steps up or down on the price-change date. The gap between them is the daily over/under-recovery below.</p>
           <p class="muted small">Last 30 days. Current review period: <span id="period-range">—</span>. The dashed vertical line marks where the previous one ended. Solid = CEF official. Dashed / hollow marker = estimated for a day CEF hasn't published yet.</p>
         </div>
+        <!-- Chart.js canvases take their size from .chart-wrap in style.css. -->
         <div class="chart-wrap"><canvas id="chart-bfp" height="110"></canvas></div>
       </section>
 
@@ -161,6 +198,7 @@
           <p class="muted small">Dates with a dashed underline were estimated before CEF published them. Hover (or tap) the date to compare our estimate with CEF's official figure.</p>
         </div>
         <div class="table-wrap">
+          <!-- Rows are added by app.js renderTable(), newest first; footnotes go in #table-notes. -->
           <table id="daily-table">
             <thead>
               <tr><th>Date</th><th>Source</th><th class="num">Basic Fuel Price (c/l)</th><th class="num">Unit over/(under) recovery (c/l)</th></tr>
@@ -171,6 +209,9 @@
         <div id="table-notes" class="table-notes"></div>
       </section>
 
+      <!-- Background section, drawn by context.js and hidden until it has data. It never
+           feeds the prediction. The caveat below quotes other trackers' figures with
+           their dates: refresh them, or take them out, when newer reporting appears. -->
       <section class="panel context-panel" id="context-panel" hidden>
         <div class="tanker-art" id="tanker-art" aria-hidden="true"></div>
         <div class="panel-head">
@@ -199,6 +240,8 @@
         </div>
       </section>
 
+      <!-- How it works. Keep its facts (method, accuracy) the same as the Common
+           questions on the public page. -->
       <footer class="disclaimer panel">
         <h2>How this works, and what to trust</h2>
         <p>Every day already published by CEF (<a href="https://cefgroup.co.za/daily-basic-fuel-price/" target="_blank" rel="noopener">cefgroup.co.za</a>) is read directly from their own daily report, so that part matches CEF exactly. The one or two most recent days CEF hasn't published yet are <strong>estimated</strong> from US petrol (RBOB), diesel (heating oil) and Brent crude futures read at 15:00 London (just before the London Platts assessment that CEF's figures are built from), plus the USD/ZAR rate. How much each market counts for each fuel is re-learned every hour from how CEF's own figures have tracked them over the past year. Tested against 16 months of CEF history, this is typically within about 1.3% of CEF's real figure. It is still a proxy, not the real Mediterranean Platts assessment, so it can miss on days when European prices move differently from US markets. The predicted price move is the average over/under recovery for the whole review period: the days so far, plus the rest of the period assuming the BFP stays where it is now, each measured against the price CEF will compare it with (early in a period, the first few days still use the previous month's price). The actual government announcement (effective the first Wednesday of the month) can differ because it also folds in separate slate-levy and fuel-levy decisions. The slate levy adjusts itself every month, usually by a few cents a litre. Fuel-levy changes are announced by the Minister of Finance, usually in the budget; once one is announced for the coming change, the forecast adds it and says so.</p>
@@ -207,6 +250,9 @@
 
     </section>
 
+    <!-- Common questions: static text, so search engines can read it without running
+         the script. Outside #content, so it shows even before the data loads. It
+         repeats "How this works": keep the two in step. -->
     <section class="panel disclaimer faq-panel" aria-labelledby="faq-title">
       <h2 id="faq-title">Common questions</h2>
       <details>
@@ -235,6 +281,10 @@
 
 <footer class="site-footer">PsyPhin &middot; Source data: Central Energy Fund (CEF) daily Basic Fuel Price reports &middot; <a href="fuel-price/">Fuel price history</a> &middot; Thinking of an electric car? <a href="https://evcost.psyphin.co.za/">EV vs Fuel Cost</a></footer>
 
+<!-- Scripts, in this order: circuit.js (the circuit board behind the page, the
+     same file on every PsyPhin site), fx.js (needs Chart.js already loaded so its
+     glow applies to every chart), context.js (defines window.renderContext), and
+     app.js last, which uses them all. -->
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=3"></script>

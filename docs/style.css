@@ -1,3 +1,23 @@
+/* SA Basic Fuel Price Preview: the stylesheet.
+
+   Identical in docs/ (the public site) and frontend/ (the local dashboard): change
+   one, copy it to the other. The monthly pages under docs/fuel-price/ load it too
+   (backend/month_pages.py adds a few rules of its own). After changing it, bump
+   the ?v= number where docs/index.html loads it, so visitors don't keep a cached
+   copy.
+
+   Colours are CSS variables ("tokens") defined here at the top and used
+   everywhere else, including by the charts: app.js and context.js read them with
+   getComputedStyle, so a colour changed here changes the charts too.
+
+   Order: theme tokens, page background, header, buttons, glass surfaces, status
+   strip, fuel tabs, headline cards, levy tag and banner, panels, table, manual
+   form (dashboard only), accuracy meter, exchange-rate card, disclaimer, FAQ,
+   footer, animations, phone layout, the estimate tooltip, table footnotes, and the
+   oil and Hormuz background section with its tanker drawing. */
+
+/* Light theme. Not shown at the moment: both index.html files force the dark
+   theme (data-theme="dark"). Kept so a light option could come back. */
 :root {
   color-scheme: light;
   --page-plane:     #f3f5f8;
@@ -81,6 +101,9 @@
     --header-accent:  #4cc9ff;
   }
 }
+/* The same dark tokens again, for <html data-theme="dark">, which both index.html
+   files set: this is what makes the site dark whatever the visitor's system
+   setting. Keep this block and the one above the same. */
 :root[data-theme="dark"] {
   color-scheme: dark;
   --page-plane:     #040817;
@@ -179,6 +202,7 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
 
 ::selection { background: rgba(76,201,255,0.35); color: #fff; }
 
+/* The centred content column under the header. */
 .page {
   max-width: 1120px;
   margin: 0 auto;
@@ -411,6 +435,7 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
   box-shadow: var(--shadow);
   color: var(--text-primary);
 }
+/* The green "live" dot in the "Data updated" pill, with a ring pinging out. */
 .status-dot {
   position: relative;
   width: 8px;
@@ -513,6 +538,8 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
   box-shadow: var(--shadow), 0 0 32px -10px rgba(76,201,255,0.45);
   transform: translateY(-2px);
 }
+/* Registering --spin as an angle lets the predicted card's border light (below)
+   turn smoothly; a plain custom property can't be animated. */
 @property --spin {
   syntax: "<angle>";
   inherits: false;
@@ -570,6 +597,8 @@ a:hover { text-shadow: 0 0 12px var(--glow); }
   font-variant-numeric: tabular-nums;
   margin-bottom: 10px;
 }
+/* Big figures: neutral ones get a white-to-cyan gradient; a rise is red and a fall
+   green (.increase / .decrease, set by app.js). */
 .hero-value:not(.increase):not(.decrease) {
   background: linear-gradient(100deg, #ffffff 10%, #a6e3ff 70%, #7fb5ff);
   -webkit-background-clip: text;
@@ -690,6 +719,8 @@ tbody tr:hover td { background: rgba(76,201,255,0.07); }
 tbody tr:hover td:first-child { box-shadow: inset 2px 0 0 var(--brand); }
 td.num, th.num { text-align: right; }
 
+/* Where each table row's figure came from: CEF official (blue), our estimate
+   (amber), typed in by hand on the dashboard (green), or no report (grey). */
 .src-badge {
   display: inline-block;
   font-size: 12px;
@@ -703,6 +734,7 @@ td.num, th.num { text-align: right; }
 .src-badge.manual { background: color-mix(in srgb, var(--status-good) 14%, transparent); color: var(--delta-up-good); }
 
 /* ---- manual form ---- */
+/* Local dashboard only: the form for typing in a day's BFP, and the saved entries. */
 .manual-form {
   display: flex;
   flex-wrap: wrap;
@@ -854,6 +886,7 @@ td.num, th.num { text-align: right; }
 @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
 
 @media (max-width: 760px) {
+  /* Phones and narrow windows: one column, smaller header and charts. */
   .hero { grid-template-columns: 1fr; }
   .hero-value { font-size: 30px; }
   .brand-inner { padding: 16px; gap: 14px 18px; }
@@ -992,6 +1025,7 @@ td.num, th.num { text-align: right; }
   0%, 100% { transform: translateY(0) rotate(-0.8deg); }
   50% { transform: translateY(2.5px) rotate(0.8deg); }
 }
+/* The ship's parts (classes from context.js drawTanker). */
 .tanker-art .ta-hull { fill: #3a4656; }
 .tanker-art .ta-boot { fill: #a8352f; }
 .tanker-art .ta-deck { fill: none; stroke: #c9d1db; stroke-width: 1.5; }
@@ -1019,6 +1053,8 @@ td.num, th.num { text-align: right; }
 .tanker-art .ta-far-ship { fill: color-mix(in srgb, var(--series-blue) 30%, var(--surface-1)); animation: ta-far 70s linear infinite; }
 @keyframes ta-far { from { transform: translate(-60px, 93px); } to { transform: translate(1060px, 93px); } }
 
+/* Visitors who ask their system for less motion: every looping animation stops.
+   (fx.js skips the scroll fade-ins and draws the header map still.) */
 @media (prefers-reduced-motion: reduce) {
   .tanker-art *, .tanker-art .ta-smoke circle { animation: none !important; }
   .tanker-art .ta-far-ship { transform: translate(120px, 93px); }
@@ -1028,6 +1064,7 @@ td.num, th.num { text-align: right; }
 }
 
 @media (max-width: 760px) {
+  /* Phones: the two background blocks stack. */
   .context-grid { grid-template-columns: 1fr; }
   .context-block { padding: 14px; }
   .tanker-art { margin: -18px -16px 12px; }

@@ -19,12 +19,15 @@ URL = "https://cefgroup.co.za/wp-content/uploads/{y}/{m:02d}/Daily-{d:02d}-{mo:0
 
 
 def candidate_urls(date: dt.date):
+    """The report's URL in its own month's upload folder, then in the next month's
+    (month-end reports are uploaded there)."""
     nxt = (date.replace(day=1) + dt.timedelta(days=32)).replace(day=1)
     for folder in (date, nxt):
         yield URL.format(y=folder.year, m=folder.month, d=date.day, mo=date.month, yr=date.year)
 
 
 def fetch(date: dt.date):
+    """(date, report or None, its URL or why there's no report)."""
     for url in candidate_urls(date):
         try:
             resp = requests.get(url, headers=cef.HEADERS, timeout=30)
@@ -42,6 +45,8 @@ def fetch(date: dt.date):
 
 
 def main(start: dt.date, end: dt.date):
+    """Fetches every day from start to end that isn't in the file yet, six at a time,
+    and saves. Weekdays without a report, and errors, are recorded as missing."""
     existing = json.loads(OUT.read_text()) if OUT.exists() else {}
     dates = []
     d = start

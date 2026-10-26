@@ -17,8 +17,11 @@ Add an entry when a new change is announced; old ones can stay.
 """
 import datetime as dt
 
+# Which levy rate each fuel pays. Paraffin isn't listed: it carries no fuel levy.
 LEVY_FUELS = {"petrol95": "petrol", "petrol93": "petrol", "diesel005": "diesel", "diesel0005": "diesel"}
 
+# The relief periods: cents a litre off the levy for petrol and diesel, dates
+# inclusive, with when and where it was announced.
 RELIEF = [
     {"start": dt.date(2026, 11, 4), "end": dt.date(2026, 12, 1), "petrol": 150, "diesel": 300,
      "announced": dt.date(2026, 10, 21), "source": "MTBPS"},

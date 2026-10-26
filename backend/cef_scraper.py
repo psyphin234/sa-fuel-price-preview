@@ -12,6 +12,9 @@ from typing import Optional
 import requests
 import pdfplumber
 
+# The five fuels, in the order of the report's columns: petrol 95, petrol 93,
+# diesel 0.05% sulphur, diesel 0.005% sulphur, illuminating paraffin. Every
+# per-fuel dict in the project uses these keys.
 FUELS = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"]
 FUEL_LABELS = {
     "petrol95": "Petrol 95 ULP",
@@ -24,10 +27,13 @@ FUEL_LABELS = {
 BASE_URL = "https://cefgroup.co.za/wp-content/uploads/{folder_year}/{folder_month:02d}/Daily-{day:02d}-{month:02d}-{year}.pdf"
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) BFP-preview-tool/1.0"}
 
+# A number as printed in the report: 1,784.304, negative in brackets (12.345),
+# or "-" where a fuel has no figure.
 NUM = r"\(?-?[\d,]+\.\d+\)?|-"
 
 
 def _num(token: str) -> Optional[float]:
+    """One NUM token as a float (brackets mean negative); "-" or nothing is None."""
     token = token.strip()
     if token == "-" or token == "":
         return None
@@ -84,6 +90,11 @@ def fetch_pdf_bytes(date: dt.date) -> Optional[bytes]:
 
 
 def parse_pdf(pdf_bytes: bytes) -> Optional[DailyReport]:
+    """Reads the figures off page 1 of a daily report. Each row is found by its label,
+    which carries the dates it applies to (the report date, the review period, the
+    reference price's date range), and the numbers after the label are the five
+    fuels in column order. Returns None if a required row is missing, for example
+    if CEF changes the layout."""
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
         text = pdf.pages[0].extract_text() or ""
 
@@ -116,6 +127,7 @@ def parse_pdf(pdf_bytes: bytes) -> Optional[DailyReport]:
     avg_bfp_vals = _extract_row(text, rf"AVERAGE BASIC FUEL PRICE {date_re} - {date_re}")
     avg_unit_vals = _extract_row(text, rf"AVERAGE UNIT OVER/\(UNDER\) RECOVERY {date_re} - {date_re}")
 
+    # The exchange rate: looked for with spaces removed first, then as printed.
     fx_m = re.search(r"R/\$EXCHANGE RATE - \(R/\$([\d.]+) - " + date_re + r"\)", text.replace(" ", ""))
     if not fx_m:
         fx_m = re.search(r"R/\$\s*([\d.]+)\s*-\s*" + date_re, text)
@@ -155,6 +167,7 @@ def parse_pdf(pdf_bytes: bytes) -> Optional[DailyReport]:
 
 
 def fetch_and_parse(date: dt.date) -> Optional[DailyReport]:
+    """The report for `date`, or None if CEF hasn't published it (or it can't be read)."""
     raw = fetch_pdf_bytes(date)
     if raw is None:
         return None
@@ -184,6 +197,7 @@ def backfill_period(period_start: dt.date, period_end: dt.date) -> list:
     return reports
 
 
+# By hand: `python cef_scraper.py` prints the latest report, to check the parsing.
 if __name__ == "__main__":
     import json
     latest = find_latest_report()

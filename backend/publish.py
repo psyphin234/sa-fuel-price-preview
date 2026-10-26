@@ -34,12 +34,14 @@ def build_status() -> dict:
 
 
 def write_json(data: dict):
+    """Writes the payload to docs/data/status.json, dates as ISO strings."""
     OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_PATH, "w", encoding="utf-8") as f:
         json.dump(data, f, default=backend.json_default, indent=2)
 
 
 def run_git(*args) -> subprocess.CompletedProcess:
+    """Runs a git command in the repo and returns the result; never raises."""
     return subprocess.run(["git", *args], cwd=REPO_ROOT, capture_output=True, text=True)
 
 
@@ -61,6 +63,9 @@ GENERATED = ["docs/fuel-price", "docs/sitemap.xml"]
 
 
 def git_publish():
+    """Stages status.json and the generated pages, then commits and pushes if any of
+    them changed. Only those paths are staged here, but `git commit` takes
+    everything staged, so nothing else should be left staged in this working copy."""
     paths = ["docs/data/status.json"] + [p for p in GENERATED if (REPO_ROOT / p).exists()]
     add = run_git("add", "--", *paths)
     if add.returncode != 0:

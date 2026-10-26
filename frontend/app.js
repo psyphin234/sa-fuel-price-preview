@@ -1,13 +1,45 @@
+/* SA Basic Fuel Price Preview: the local dashboard's script (frontend/, served by
+   backend/app.py at http://127.0.0.1:5057).
+
+   It gets the payload from the Flask API (/api/status) and draws the page from
+   it: the levy banner, the status strip, the three headline cards, the accuracy
+   meter, the exchange-rate card, the two price charts, the day-by-day table, the
+   manual-entry form and, through context.js, the oil and Hormuz background panel.
+   All the sums (the estimates for days CEF hasn't published, the projected price
+   change) are done by the Python backend (backend/app.py build_status_data). This
+   file only formats and draws what it's given.
+
+   Its twin is docs/app.js, the public site, which reads the same payload from a
+   static data/status.json instead and has no manual-entry form. The two are kept
+   in step by hand: change shared code in both.
+
+   Conventions used throughout:
+   - Prices in the payload are in cents per litre (c/l); the page shows rand.
+   - Dates are ISO "YYYY-MM-DD" strings, so they compare correctly as text.
+   - Every daily figure has a `source`: "cef_official" (from CEF's published
+     report), "estimated" (the backend's estimate for a day CEF hasn't published
+     yet) or "manual" (typed into the form below). Estimates must always look
+     different from official figures: hollow points, dashed lines, badges.
+   - Fuel keys: petrol95, petrol93, diesel005, diesel0005, illpar (paraffin).
+
+   Loaded last, after Chart.js, circuit.js, fx.js and context.js (see index.html).
+   Everything is inside one function so nothing leaks into the global scope. */
 (() => {
   "use strict";
 
+  // Defaults for every chart on the page. fx.js also styles the tooltips and adds
+  // the glow to the lines.
   Chart.defaults.font.family = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
   Chart.defaults.font.size = 13;
   Chart.defaults.plugins.tooltip.padding = 10;
   Chart.defaults.plugins.tooltip.cornerRadius = 8;
   Chart.defaults.plugins.tooltip.boxPadding = 4;
 
+  // The five fuels in CEF's reports, in tab order (the keys used all through the payload).
   const FUEL_ORDER = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"];
+  // Which kind of price the "current price" is for each fuel. Petrol is regulated at
+  // the pump (CEF reports the Gauteng figure); diesel only at wholesale, since
+  // retailers set its pump price; paraffin has a single national maximum retail price.
   const PRICE_ROW_LABEL = {
     petrol95: "Gauteng pump price",
     petrol93: "Gauteng pump price",
@@ -16,11 +48,17 @@
     illpar: "Single national max retail price",
   };
 
+  // state.fuel is the selected tab, state.data the whole payload. Every render
+  // function reads only these two, so a tab change is just: set state.fuel, render().
+  // The charts are kept so they can be destroyed before being drawn again.
   let state = { fuel: "petrol95", data: null };
   let chartBfp = null, chartRecovery = null, chartFx = null;
 
+  // Small helpers. cssVar reads a colour token from style.css, so the charts use
+  // the same colours as the rest of the page.
   const $ = (sel) => document.querySelector(sel);
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  // Formatting. The payload is in cents per litre; a missing value shows as a dash.
   const centsToRand = (c) => (c === null || c === undefined) ? null : c / 100;
   const fmtRand = (c) => c === null || c === undefined ? "—" : `R${centsToRand(c).toFixed(2)}/l`;
   const fmtRandDelta = (c) => {
@@ -29,6 +67,9 @@
     return `${sign}R${centsToRand(Math.abs(c)).toFixed(2)}/l`;
   };
   const fmtCents = (c) => c === null || c === undefined ? "—" : c.toFixed(2);
+  // Compares one of our estimates with CEF's figure for the same day, once CEF has
+  // published it. error_c_per_l is official minus estimate (backend/db.py
+  // log_accuracy), so a positive error means the estimate was too low.
   const describeEstimate = (est, official) => {
     const diff = est.error_c_per_l;
     const off = Math.abs(diff).toFixed(2);
@@ -36,8 +77,12 @@
     const verdict = Math.abs(diff) < 0.005 ? "spot on" : `${off} c/l too ${diff > 0 ? "low" : "high"}${pct}`;
     return { estimate: fmtCents(est.bfp), official: fmtCents(official), verdict };
   };
+  // "T00:00:00" without a time zone is read as local midnight, so the date shown is
+  // the date in the data whatever the visitor's time zone.
   const fmtDate = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { day: "2-digit", month: "short", year: "numeric" });
 
+  // Calls the local Flask API (backend/app.py). Throws with the server's own error
+  // message when the request fails.
   async function api(path, opts) {
     const resp = await fetch(path, opts);
     const body = await resp.json();
@@ -45,6 +90,7 @@
     return body;
   }
 
+  // The fuel tabs. Clicking one changes state.fuel and redraws the whole page.
   function buildTabs() {
     const nav = $("#fuel-tabs");
     nav.innerHTML = "";
@@ -63,6 +109,7 @@
     });
   }
 
+  // CSS class for a price change: red for a rise, green for a fall (style.css).
   const dirClass = (c) => c > 0 ? "increase" : c < 0 ? "decrease" : "";
 
   // An announced fuel levy change on the forecast date (backend/fuel_levy.py). The
@@ -75,6 +122,8 @@
   // have it built in (they go back up when it ends).
   const reliefOn = (iso, fuel) =>
     (state.data.levy_relief || []).find((r) => iso && r.start <= iso && iso <= r.end && r.relief[fuel]);
+  // Shows the cyan "Includes R…/l fuel levy relief" tag next to a price whose date
+  // falls in a relief period, and hides it otherwise.
   function setLevyTag(sel, iso) {
     const el = $(sel);
     const r = reliefOn(iso, state.fuel);
@@ -109,6 +158,9 @@
       "Paraffin has no fuel levy.");
   }
 
+  // The small print under a forecast when an announced fuel levy change falls on
+  // the forecast date: how much of the forecast is the levy, and what the Basic
+  // Fuel Price alone would do. Empty when no levy change applies.
   function levyNote(fuel, bfpChange) {
     const levy = levyFor(fuel);
     const lc = state.data.levy_change;
@@ -161,6 +213,11 @@
     return true;
   }
 
+  // The three headline cards for the selected fuel: the price in force (or just
+  // announced), the predicted change on the next price-change date, and the
+  // predicted new price, with how many days of the review period are official,
+  // estimated or manual. While a change is announced but not yet in force,
+  // renderAnnounced() shows that instead of the forecast.
   function renderHero() {
     $("#period-range").textContent =
       `${fmtDate(state.data.latest_official_report.period_start)} – ${fmtDate(state.data.latest_official_report.period_end)} (to date)`;
@@ -267,6 +324,15 @@
     return opts;
   }
 
+  // The two main charts for the selected fuel, over the last 30 days:
+  // 1. Daily BFP (blue) against the BFP built into the pump price (orange, the
+  //    "reference"). The reference is fixed for a month and steps on the
+  //    price-change date.
+  // 2. The daily over/(under) recovery: reference minus BFP. Negative (red) means
+  //    fuel cost more to import than the price allows for, which pushes the next
+  //    price up. The review period's average of this sets the next change.
+  // Days CEF hasn't published yet get hollow points and dashed line segments.
+  // Both charts are destroyed and rebuilt on every render.
   function renderCharts() {
     const series = [...state.data.daily_series[state.fuel]].sort((a, b) => a.date.localeCompare(b.date));
     const refPrice = state.data.predictions[state.fuel] ? null : null;
@@ -274,8 +340,11 @@
 
     const labels = series.map((d) => fmtDate(d.date));
     const bfpValues = series.map((d) => d.bfp);
+    // A day without its own reference falls back to the latest report's.
     const refValues = series.map((d) => d.reference ?? referenceValue);
     const isEstimated = series.map((d) => d.source !== "cef_official");
+    // For days CEF has since published: what we had estimated for them, drawn as
+    // hollow diamonds so the estimate can be compared with the real figure.
     const priorEstimates = series.map((d) => d.estimate ? d.estimate.bfp : null);
     const hasPriorEstimates = priorEstimates.some((v) => v !== null);
 
@@ -339,6 +408,7 @@
       plugins: [cycleDivider(series)],
     });
 
+    // Recovery chart: the line and its fill are blue above zero and red below.
     const overUnder = series.map((d) => d.unit_over_under);
     const zeroLine = series.map(() => 0);
     const segColor = (ctx) => {
@@ -402,6 +472,9 @@
     });
   }
 
+  // The rand/dollar card. The big figure is the live USD/ZAR rate when the data was
+  // built (Yahoo Finance); the chart is the rate in each of CEF's daily reports,
+  // plus the backend's estimate for days CEF hasn't published.
   function renderFx() {
     const series = [...state.data.exchange_rate_series].sort((a, b) => a.date.localeCompare(b.date));
     const current = state.data.current_exchange_rate;
@@ -459,6 +532,9 @@
     });
   }
 
+  // "How reliable are the estimated days?" Each estimate is checked against CEF's
+  // figure once published (backend/accuracy.py); this shows 100% minus the average
+  // % error over the most recent checks, coloured green, amber or red.
   function renderAccuracy() {
     const acc = state.data.accuracy;
     const fill = $("#accuracy-fill");
@@ -481,6 +557,8 @@
     sub.textContent = `Based on ${acc.n} estimated day${acc.n === 1 ? "" : "s"} checked against CEF's real figures so far: typically about ${acc.mean_abs_error_c_per_l} c/l (${acc.mean_abs_pct_error}%) off${warmup}.`;
   }
 
+  // Options shared by every chart in this file. The tooltip skips empty points and,
+  // on the "Our estimate" diamonds, says how far that estimate was from CEF.
   function chartOptions(grid, textSec, unit) {
     return {
       responsive: true,
@@ -514,11 +592,13 @@
     };
   }
 
+  // Adds days to an ISO date. Done in UTC so daylight saving can't skip or repeat a day.
   const shiftIsoDate = (iso, days) => {
     const [y, m, d] = iso.split("-").map(Number);
     return new Date(Date.UTC(y, m - 1, d + days)).toISOString().slice(0, 10);
   };
 
+  // Footnotes for table rows without a CEF report, and which one a date gets.
   const NO_DATA_NOTES = {
     "*": "Weekend. CEF only publishes on weekdays.",
     "**": "CEF didn't publish a report for this weekday (rare). Any figure shown is an estimate for reference only and isn't counted in the prediction.",
@@ -530,6 +610,10 @@
     return { badge: "No report", mark: "**" };
   }
 
+  // The day-by-day table for the current review period, newest first. Every
+  // calendar day gets a row: published and estimated days show their figures;
+  // weekends and the odd weekday CEF skipped get a row saying why, with the
+  // backend's indicative estimate if it made one (shown for reference only).
   function renderTable() {
     const byDate = new Map(state.data.daily_series[state.fuel].map((d) => [d.date, d]));
     const indicative = new Map(((state.data.indicative_days || {})[state.fuel] || []).map((d) => [d.date, d]));
@@ -538,6 +622,8 @@
     const generated = state.data.generated_at.slice(0, 10);
     let end = generated > lastSeries ? generated : lastSeries;
     const close = state.data.review_period_close;
+    // Runs to today, but stops at the period's last day once the period has closed
+    // (days after it belong to the next price change).
     if (close && end > close && lastSeries <= close) end = close;
     const tbody = $("#daily-table tbody");
     tbody.innerHTML = "";
@@ -578,6 +664,9 @@
       .join("");
   }
 
+  // The manual-entry form: a Basic Fuel Price for a day CEF hasn't published yet
+  // (for example from a paid Platts feed). It's stored in the local database, used
+  // in the prediction instead of the estimate for that day, and shown as "manual".
   function renderManualForm() {
     $("#mf-fuel-label").textContent = state.data.fuels[state.fuel];
     const min = state.data.latest_official_report.period_start;
@@ -586,6 +675,7 @@
     if (!dateInput.value) dateInput.value = new Date().toISOString().slice(0, 10);
   }
 
+  // The saved manual entries, newest first, each with a Remove button.
   async function renderManualList() {
     const overrides = await api("/api/manual-overrides");
     const container = $("#manual-list");
@@ -612,6 +702,8 @@
     });
   }
 
+  // The strip above the tabs: when the data was built, and the countdown to the next
+  // price change (amber in the last three days).
   function renderStatusBar() {
     const generated = new Date(state.data.generated_at);
     $("#last-updated").textContent =
@@ -632,6 +724,9 @@
     pill.className = "status-pill countdown-pill" + (days <= 3 ? " urgent" : "");
   }
 
+  // Tooltip on table dates that were estimated first: our estimate against CEF's
+  // figure. One shared element, shown on hover or keyboard focus, placed above the
+  // date (or below it if there's no room) and hidden on scroll.
   const compareTip = document.createElement("div");
   compareTip.className = "compare-tip";
   compareTip.setAttribute("role", "tooltip");
@@ -672,6 +767,7 @@
   document.addEventListener("focusout", (e) => { if (e.target.closest(".has-compare")) hideCompareTip(); });
   window.addEventListener("scroll", hideCompareTip, { passive: true });
 
+  // Redraws the whole page from state. Called after every load and on every tab change.
   function render() {
     buildTabs();
     renderLevyBanner();
@@ -686,6 +782,7 @@
     if (window.renderContext) window.renderContext(state.data.context);
   }
 
+  // When the data was last downloaded (ms), for refreshIfStale() below.
   let loadedAt = 0;
 
   async function fetchData() {
@@ -694,6 +791,8 @@
     return data;
   }
 
+  // First load, and the button in the header: shows the loading message, then the
+  // page, or an error if the data couldn't be read.
   async function loadData() {
     $("#loading").hidden = false;
     $("#error-state").hidden = true;
@@ -710,6 +809,8 @@
     }
   }
 
+  // "Refresh data": the backend downloads CEF's latest reports and market prices
+  // again (POST /api/refresh), then the page reloads the payload.
   $("#refresh-btn").addEventListener("click", async () => {
     const btn = $("#refresh-btn");
     btn.disabled = true;
@@ -725,6 +826,7 @@
     }
   });
 
+  // Saves a manual entry for the selected fuel, then reloads so the prediction uses it.
   $("#manual-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const date = $("#mf-date").value;

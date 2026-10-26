@@ -9,10 +9,15 @@
 (() => {
   "use strict";
 
+  // Visitors who ask their system for less motion get still versions of everything.
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ------------------------------------------------------------ chart glow
   if (window.Chart) {
+    // Registered globally, so it applies to every chart app.js and context.js make:
+    // each line dataset is drawn with a soft shadow in its own colour, and the
+    // tooltips match the dark glass panels. Point-only datasets (showLine: false)
+    // are left alone.
     Chart.defaults.font.family = '"Inter", system-ui, -apple-system, "Segoe UI", sans-serif';
     Object.assign(Chart.defaults.plugins.tooltip, {
       backgroundColor: "rgba(8,14,38,0.94)",
@@ -42,6 +47,10 @@
   }
 
   // --------------------------------------------------------- scroll reveal
+  // Panels and headline cards start faded and slightly lower (.fx-reveal in
+  // style.css) and ease into place the first time they scroll into view. The class
+  // is only added when IntersectionObserver exists, so nothing stays hidden in a
+  // browser without it.
   function setUpReveal() {
     if (reduceMotion || !("IntersectionObserver" in window)) return;
     document.documentElement.classList.add("fx-reveal");
@@ -69,6 +78,9 @@
   const EUROPE = [[-9.5,38.7],[-8.9,37],[-6,36.2],[-5.4,36.1],[-2,36.7],[0,38.7],[-0.3,39.5],[3.2,41.9],[3,43],[5,43.3],[8.8,44.4],[10.5,43],[12,41.8],[14.2,40.8],[15.7,40],[16,38],[17,39],[18.5,40.1],[16,41.5],[13.5,43.6],[12.3,45.4],[13.8,45.6],[15.5,43.5],[19,42],[19.5,40.5],[21,38.5],[21.7,36.8],[23,36.4],[24,38],[22.9,40.6],[26,40.8],[28.5,41.2],[28.5,48],[-9.5,48]];
   const SICILY = [[12.4,38.1],[15.6,38.3],[15.1,36.7],[12.4,37.8]];
 
+  // The three tanker lanes, as (lon, lat) waypoints that smooth() turns into a curve.
+  // label/at: the lane's name and where it's written; ships: how many tankers sail
+  // it at once; secs: how long one takes from end to end.
   const ROUTES = [
     { label: "Mediterranean", at: [5, 40.2], ships: 3, secs: 22,
       path: [[17,34],[12,36],[6,37.8],[0,37.2],[-3.5,36],[-5.6,35.95],[-8.5,35.4],[-12,32],[-15.5,27],[-19,21],[-19.5,14.5],[-15,7],[-7,2.5],[3,-1],[7,-7],[10,-14],[11.5,-21],[13,-27],[15.8,-32],[17.6,-34.4],[18.4,-33.95]] },
@@ -77,12 +89,15 @@
     { label: "Asia", at: [58.5, -9.5], ships: 2, secs: 16,
       path: [[64,-11],[57,-22],[51,-28],[42,-31],[35,-31],[31,-29.9]] },
   ];
+  // The two import harbours, with where their labels sit relative to the beacon.
   const PORTS = [
     { name: "Durban", lon: 31, lat: -29.9, dx: 12, dy: 4, align: "left" },
     { name: "Cape Town", lon: 18.4, lat: -33.95, dx: -10, dy: 16, align: "right" },
   ];
+  // The part of the globe the map shows (degrees).
   const LON0 = -21, LON1 = 63, LAT0 = -37.5, LAT1 = 42;
 
+  // Whether point (x, y) is inside a polygon (ray casting: count edge crossings).
   const inPoly = (x, y, poly) => {
     let inside = false;
     for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -106,6 +121,10 @@
     return out;
   }
 
+  // Draws the map on canvas.hero-fx, which fills the header behind its content.
+  // Everything is worked out once (dots, lanes) and re-projected on resize; each
+  // frame only draws. The animation runs only while the header is on screen and
+  // the tab is visible, and under prefers-reduced-motion one still frame is drawn.
   function setUpRouteMap() {
     const canvas = document.querySelector(".hero-fx");
     if (!canvas || !canvas.getContext) return;
@@ -141,10 +160,17 @@
     sg.fillStyle = grad;
     sg.fillRect(0, 0, 32, 32);
 
+    // Layout, set by resize(): canvas size (w, h), pixels per degree (s), where the
+    // map's top-left corner sits (x0, y0), overall opacity (fade) and whether the
+    // labels fit. mx/my is the pointer position, tx/ty the eased parallax offset.
+    // P(lon, lat) turns a map position into canvas pixels (a simple flat projection).
     let w = 0, h = 0, s = 1, x0 = 0, y0 = 0, fade = 1, labels = true;
     let mx = 0, my = 0, tx = 0, ty = 0;
     const P = (lon, lat) => [x0 + (lon - LON0) * s, y0 + (LAT1 - lat) * s];
 
+    // Fits the canvas to the header (sharp on high-density screens, capped at 2x)
+    // and places the map, then re-projects the dots, lanes and ports. Each lane also
+    // gets its running length (cum), so ships can be placed by distance travelled.
     function resize() {
       const rect = header.getBoundingClientRect();
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -189,6 +215,8 @@
       return [r.px[lo][0] + (r.px[hi][0] - r.px[lo][0]) * f, r.px[lo][1] + (r.px[hi][1] - r.px[lo][1]) * f];
     }
 
+    // One frame at time t (ms). Drawn back to front: dust, the glow over southern
+    // Africa, the land dots, the lanes, the tankers, the ports, then the labels.
     function frame(t) {
       const time = t / 1000;
       ctx.clearRect(0, 0, w, h);
@@ -300,6 +328,8 @@
       ctx.globalAlpha = 1;
     }
 
+    // Start and stop the animation loop as the header scrolls in and out of view or
+    // the tab is hidden. still() draws a single frame for when it isn't running.
     let running = false, visible = true, raf = 0;
     const loop = (t) => { frame(t); raf = requestAnimationFrame(loop); };
     const update = () => {
@@ -326,6 +356,7 @@
     update();
   }
 
+  // Wait for the page's HTML before touching it (the script may load before the body).
   const start = () => { setUpReveal(); setUpRouteMap(); };
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
   else start();

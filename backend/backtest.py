@@ -19,6 +19,9 @@ import numpy as np
 
 DATA = Path(__file__).parent.parent / "data" / "backtest"
 FUELS = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"]
+# The one market each fuel follows most closely, for the single-proxy models.
+# LONDON_HOURS: the snapshot hours tried. TRAIN_WINDOW/MIN_TRAIN: the default
+# training window and the fewest pairs a fitted model needs before it's scored.
 PROXY = {"petrol95": "rbob", "petrol93": "rbob", "diesel005": "ho", "diesel0005": "ho", "illpar": "ho"}
 LONDON_HOURS = list(range(8, 23))
 TRAIN_WINDOW = 60
@@ -92,6 +95,8 @@ class Series:
 
 
 def load_market():
+    """Hourly bars per market from data/backtest/market.json ({name}_1h: {"bars":
+    [[unix time, open, close], ...]}), for rbob, ho, brent, wti and usdzar."""
     m = json.loads((DATA / "market.json").read_text())
     # roll-gap removal tested worse (1.367% vs 1.346%), so it's off
     return {name: Series(m[f"{name}_1h"]["bars"], name, detect_rolls=False)
@@ -100,6 +105,8 @@ def load_market():
 
 # ---------- CEF data ----------
 def load_cef():
+    """CEF's reports from backtest_fetch.py, keeping days with every fuel's BFP and an
+    exchange rate. Also returns the raw file, for calendar_report()."""
     raw = json.loads((DATA / "cef_reports.json").read_text())
     reports = {}
     for d, r in raw.items():
@@ -113,6 +120,8 @@ def load_cef():
 
 # ---------- analysis ----------
 def calendar_report(raw):
+    """Prints the weekdays CEF skipped, any weekend reports, and how many reports
+    were only in the next month's upload folder."""
     missing = sorted(dt.date.fromisoformat(d) for d, r in raw.items()
                      if "missing" in r and dt.date.fromisoformat(d).weekday() < 5)
     print(f"\n=== Weekdays with no CEF report ({len(missing)}) ===")
@@ -125,6 +134,7 @@ def calendar_report(raw):
 
 
 def fx_fixing(reports, mk):
+    """Finds the London hour at which Yahoo's USD/ZAR best matches CEF's exchange rate."""
     print("\n=== CEF exchange rate vs Yahoo USD/ZAR by London hour (mean abs % diff) ===")
     zar = mk["usdzar"]
     best = None
@@ -143,6 +153,9 @@ def fx_fixing(reports, mk):
 
 
 def evaluate(reports, mk, fx_hour):
+    """Scores every candidate on consecutive-report pairs (P, D): each estimates D's
+    BFP from P, and fitted models learn only from pairs before D. Returns
+    ((errors in c/l, errors in %, each day's estimates), FX errors, pairs)."""
     days = sorted(reports)
     pairs = [(p, d) for p, d in zip(days, days[1:]) if (d - p).days <= 5]
 
@@ -227,6 +240,8 @@ def evaluate(reports, mk, fx_hour):
 
 
 def fitted_models(fuel, window):
+    """The fitted candidates for one training window: {label: feature keys}, a key
+    being (market, London hour, days of lag)."""
     models = {}
     for h in (14, 15, 16, 17):
         core = [("rbob", h, 0), ("ho", h, 0), ("brent", h, 0)]
@@ -245,6 +260,8 @@ def ridge(X, Y, lam=1e-5):
 
 
 def main():
+    """Runs everything and prints the ranking: lowest mean absolute % error first, plus
+    the A to C baselines."""
     reports, raw = load_cef()
     mk = load_market()
     print(f"CEF reports: {len(reports)}  ({min(reports)} -> {max(reports)})")

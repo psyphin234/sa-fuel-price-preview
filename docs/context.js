@@ -6,6 +6,8 @@
 (() => {
   "use strict";
 
+  // Helpers. Dates arrive as ISO strings; "T00:00:00" without a zone keeps the day
+  // as written whatever the visitor's time zone. narrow() is a phone-width screen.
   const $ = (sel) => document.querySelector(sel);
   const cssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const fmtDay = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { day: "numeric", month: "short" });
@@ -61,6 +63,7 @@
   }
 
   // ---------------------------------------------------------------- charts
+  // Chart.js options shared by both charts; unit is the y-axis title.
   function baseOptions(unit) {
     const grid = cssVar("--gridline");
     const textSec = cssVar("--text-secondary");
@@ -82,6 +85,11 @@
     };
   }
 
+  // "Oil: futures vs physical cargoes". Futures (Yahoo BZ=F) are the price in the
+  // news, for oil delivered in a couple of months; Dated Brent (EIA) is what
+  // physical cargoes sell for now. A wide gap between them (flagged from $5) shows a
+  // squeeze on oil available today. fut/spot: {series: [[iso date, $]], data_to},
+  // either may be null.
   function renderBrent(fut, spot) {
     const block = $("#ctx-brent");
     if (!fut && !spot) { block.hidden = true; return; }
@@ -182,12 +190,18 @@
     },
   });
 
+  // "Strait of Hormuz": ships crossing each day as bars, their 7-day average as a
+  // line, and the pre-conflict normal as a dashed line. h: {series: [[iso date,
+  // ships, tankers]], avg_7d, normal_per_day, normal_from, conflict_start, data_to,
+  // events}. The counts only include ships broadcasting on AIS, so the page's
+  // caveat box explains the undercount.
   function renderHormuz(h) {
     const block = $("#ctx-hormuz");
     if (!h) { block.hidden = true; return; }
     block.hidden = false;
 
     const s = h.series;
+    // Trailing 7-day average; empty for the first six days.
     const avg = s.map((_, i) => {
       if (i < 6) return null;
       let sum = 0;
@@ -250,6 +264,7 @@
     $("#ctx-hormuz-asof").textContent = `Data to ${fmtDate(h.data_to)}. PortWatch publishes a few days late and revises recent days.`;
   }
 
+  // One figure box: label, big value, small print. mod "alert" colours it.
   function stat(label, value, sub, mod) {
     const box = document.createElement("div");
     box.className = "ctx-stat" + (mod ? " ctx-stat--" + mod : "");
@@ -260,6 +275,8 @@
     return box;
   }
 
+  // Called by app.js at the end of every render with data.context. The whole panel
+  // hides when there's nothing to show; the tanker art is drawn only once.
   window.renderContext = function (context) {
     const panel = $("#context-panel");
     if (!panel) return;
