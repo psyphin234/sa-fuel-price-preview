@@ -41,6 +41,17 @@
 
   // The five fuels in CEF's reports, in tab order (the keys used all through the payload).
   const FUEL_ORDER = ["petrol95", "petrol93", "diesel005", "diesel0005", "illpar"];
+  // The selected tab is remembered in this browser, so a refresh stays on the same
+  // fuel. localStorage can be blocked (private windows), hence the try/catch.
+  const FUEL_KEY = "bfp-fuel";
+  const savedFuel = () => {
+    try {
+      const f = localStorage.getItem(FUEL_KEY);
+      return FUEL_ORDER.includes(f) ? f : "petrol95";
+    } catch {
+      return "petrol95";
+    }
+  };
   // Which kind of price the "current price" is for each fuel. Petrol is regulated at
   // the pump (CEF reports the Gauteng figure); diesel only at wholesale, since
   // retailers set its pump price; paraffin has a single national maximum retail price.
@@ -55,7 +66,7 @@
   // state.fuel is the selected tab, state.data the whole payload. Every render
   // function reads only these two, so a tab change is just: set state.fuel, render().
   // The charts are kept so they can be destroyed before being drawn again.
-  let state = { fuel: "petrol95", data: null };
+  let state = { fuel: savedFuel(), data: null };
   let chartBfp = null, chartRecovery = null, chartFx = null;
 
   // Small helpers. cssVar reads a colour token from style.css, so the charts use
@@ -98,6 +109,7 @@
       btn.textContent = state.data.fuels[fuel] || fuel;
       btn.addEventListener("click", () => {
         state.fuel = fuel;
+        try { localStorage.setItem(FUEL_KEY, fuel); } catch { /* not remembered, still works */ }
         render();
       });
       nav.appendChild(btn);
@@ -721,9 +733,18 @@
   document.addEventListener("focusout", (e) => { if (e.target.closest(".has-compare")) hideCompareTip(); });
   window.addEventListener("scroll", hideCompareTip, { passive: true });
 
+  // The small fuel name above each per-fuel chart and the day-by-day table, so a
+  // chart (or a screenshot of one) always says which fuel it is.
+  function renderFuelLabels() {
+    document.querySelectorAll(".chart-fuel").forEach((el) => {
+      el.textContent = state.data.fuels[state.fuel] || state.fuel;
+    });
+  }
+
   // Redraws the whole page from state. Called after every load and on every tab change.
   function render() {
     buildTabs();
+    renderFuelLabels();
     renderLevyBanner();
     renderStatusBar();
     renderHero();
