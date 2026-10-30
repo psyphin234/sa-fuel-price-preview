@@ -227,14 +227,25 @@ td.down { color: var(--delta-up-good); }
 .chart-key { display: flex; gap: 4px 18px; font-size: 13px; color: var(--text-secondary); margin-top: 8px; }
 .chart-key { flex-wrap: wrap; }
 .chart-key span::before { content: ""; display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; background: currentColor; }
+.live-cta { display: inline-flex; flex-direction: column; align-items: center; gap: 2px; padding: 14px 34px; font-size: 19px; line-height: 1.3; text-align: center; text-decoration: none; }
+.live-cta:hover { color: #031022; text-shadow: none; }
+.live-cta-sub { font-size: 13px; font-weight: 500; }
+.live-cta-end { margin: 28px 0 8px; text-align: center; }
 @media (min-width: 761px) { .hero { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 600px) {
+  .live-cta { display: flex; }
   .month-table th, .month-table td { padding: 9px 6px; font-size: 13px; }
   .month-table th { font-size: 11px; letter-spacing: 0.02em; }
   .month-table td:first-child { white-space: normal; }
   .price-chart text { font-size: 26px; }
 }
 """
+
+# The way to the main site, at the top and bottom of every page.
+LIVE_CTA = """<a href="/" class="btn btn-primary live-cta">
+      <span>See the live fuel price forecast <span aria-hidden="true">&rarr;</span></span>
+      <span class="live-cta-sub">Updated every hour, with charts &middot; fuel.psyphin.co.za</span>
+    </a>"""
 
 
 def page(path: str, title: str, desc: str, h1: str, eyebrow: str, subtitle: str, body: str,
@@ -281,7 +292,7 @@ def page(path: str, title: str, desc: str, h1: str, eyebrow: str, subtitle: str,
 <body>
 <header class="brand-bar">
   <nav class="back-nav" aria-label="Site">
-    <a href="/" class="back-link"><span class="back-link-arrow" aria-hidden="true">&larr;</span> Live fuel price forecast <span class="back-link-domain">fuel.psyphin.co.za</span></a>
+    {LIVE_CTA}
   </nav>
   <div class="brand-inner">
     <img src="/assets/logo.jpg" alt="PsyPhin" class="brand-logo" width="560" height="501">
@@ -296,6 +307,9 @@ def page(path: str, title: str, desc: str, h1: str, eyebrow: str, subtitle: str,
 <div class="page">
 <main>
 {body}
+<div class="live-cta-end">
+    {LIVE_CTA}
+</div>
 </main>
 </div>
 
