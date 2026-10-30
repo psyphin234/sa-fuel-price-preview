@@ -1610,7 +1610,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.7073,
+  "current_exchange_rate": 16.7075,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.16,
@@ -4608,5 +4608,5 @@
       ]
     }
   },
-  "generated_at": "2026-10-31T00:19:00.756107"
+  "generated_at": "2026-10-31T01:18:47.337146"
 }
