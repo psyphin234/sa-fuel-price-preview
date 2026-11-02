@@ -1495,7 +1495,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.5926,
+  "current_exchange_rate": 16.6378,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.16,
@@ -1548,7 +1548,7 @@
   ],
   "review_period_close": "2026-10-29",
   "review_period_closed": true,
-  "days_until_next_price_change": 2,
+  "days_until_next_price_change": 1,
   "context": {
     "brent_futures": {
       "series": [
@@ -4493,5 +4493,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-02T23:18:54.486962"
+  "generated_at": "2026-11-03T00:18:57.973046"
 }
