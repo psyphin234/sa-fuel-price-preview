@@ -176,8 +176,11 @@ def forecast_snapshot(status: dict):
     levy_change = status.get("levy_change")
     if levy_change and levy_change["effective"] != status["predicted_change_date"]:
         levy_change = None
+    slate_change = status.get("slate_change")
+    if slate_change and slate_change["effective"] != status["predicted_change_date"]:
+        slate_change = None
     key = [status["latest_official_report"]["report_date"], status["predicted_change_date"],
-           status["review_period_closed"], levy_change]
+           status["review_period_closed"], levy_change] + ([slate_change] if slate_change else [])
     try:
         saved = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
         if saved.get("key") == key:
@@ -196,6 +199,7 @@ def forecast_snapshot(status: dict):
         "current": {f: preds[f]["current_price_c_per_l"] for f in FUELS},
         "change": {f: preds[f]["predicted_pump_price_change_c_per_l"] for f in FUELS},
         "levy": levy_change,  # announced fuel levy change on that date (fuel_levy.py), or None
+        "slate": slate_change,  # announced slate levy change on that date (fuel_levy.py), or None
     }
     SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_PATH.write_text(json.dumps(snap, indent=2), encoding="utf-8")
@@ -360,6 +364,7 @@ def drivers(m: dict) -> str:
     the announced change, for petrol 95 and diesel 0.05%."""
     paras = []
     levy = fuel_levy.levy_change(m["prev_effective"], m["effective"], FUELS)
+    slate = fuel_levy.slate_change(m["prev_effective"], m["effective"], FUELS)
     period = f"from {d_long(m['period_start'])} to {d_long(m['period_end'])}"
     paras.append(
         f"<p>Each month's change is set by the <strong>review period</strong> before it, here {period}. "
@@ -381,17 +386,22 @@ def drivers(m: dict) -> str:
         bfp = m["avg_bfp"].get(f)
         bfp_txt = f" Its import cost averaged {rand(bfp)} a litre." if bfp else ""
         step = levy["change"][f] if levy else 0
-        expected = market + step
+        sstep = slate["change"][f] if slate else 0
+        expected = market + step + sstep
         diff = actual - expected
         verdict = f"On its own that called for a change of {signed(market)}."
         if step:
             what = "The temporary fuel levy cut" if step < 0 else "The fuel levy going back up as the temporary relief winds down"
             verdict += (f" {what}, announced in the {esc(levy['source'])} on "
                         f"{d_long(levy['announced'])}, {'took' if step < 0 else 'added'} {amount(step)}"
-                        f"{' off' if step < 0 else ''}, for {signed(expected)}.")
+                        f"{' off' if step < 0 else ''}" + ("." if sstep else f", for {signed(expected)}."))
+        if sstep:
+            verdict += (f" The slate levy, which recovers past under-recoveries, went {'up' if sstep > 0 else 'down'} "
+                        f"{amount(sstep)} to {amount(slate['to'])} a litre (announced by the {esc(slate['source'])} on "
+                        f"{d_long(slate['announced'])}), for {signed(expected)}.")
         if abs(diff) < 9.5:
-            verdict += f" The official change, {signed(actual)}, was within a few cents of {'that' if step else 'it'}."
-        elif step:
+            verdict += f" The official change, {signed(actual)}, was within a few cents of {'that' if step or sstep else 'it'}."
+        elif step or sstep:
             verdict += (f" The official change was {signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: "
                         f"the rest comes from other decisions outside the Basic Fuel Price, such as the slate levy.")
         else:
@@ -477,6 +487,17 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
                        (f"Fuel price {name}", f"/fuel-price/{slug(e)}/")])
 
 
+def table_levy_note(levy, slate, levies: str) -> str:
+    """Which levy changes the forecast table includes."""
+    if levy and slate:
+        return "Includes the announced fuel levy and slate levy changes"
+    if slate:
+        return f"Before any {levies} (the announced slate levy change is included)"
+    if levy:
+        return f"Before any {levies} (the announced fuel levy change is included)"
+    return f"Before any {levies}"
+
+
 def forecast_page(s: dict, prev_m) -> str:
     """The page for the next change, from the forecast snapshot (the BFP forecast plus
     any announced fuel levy change)."""
@@ -484,8 +505,9 @@ def forecast_page(s: dict, prev_m) -> str:
     report = dt.date.fromisoformat(s["report_date"])
     start = dt.date.fromisoformat(s["period_start"])
     close = dt.date.fromisoformat(s["period_close"])
-    levy = s.get("levy")
-    ch = {f: s["change"][f] + (levy["change"].get(f, 0) if levy else 0) for f in FUELS}
+    levy, slate = s.get("levy"), s.get("slate")
+    ch = {f: s["change"][f] + (levy["change"].get(f, 0) if levy else 0) + (slate["change"].get(f, 0) if slate else 0)
+          for f in FUELS}
     cur = s["current"]
     new = {f: cur[f] + ch[f] for f in FUELS}
     p95, d05 = ch["petrol95"], ch["diesel005"]
@@ -495,8 +517,11 @@ def forecast_page(s: dict, prev_m) -> str:
     desc = trim_desc(
         f"Forecast of South Africa's fuel price change on {d_short(e)}: petrol 95 {about(p95)}, "
         f"diesel {about(d05)}, from CEF's daily data. Updated every weekday.")
-    levies = "slate-levy change" if levy else "slate-levy or fuel-levy change"
-    if s["closed"]:
+    levies = " or ".join(w for w, known in (("slate-levy", slate), ("fuel-levy", levy)) if not known) + " change"
+    if s["closed"] and slate:
+        sure = (f"The review period closed on {d_long(close)}, so CEF's figures for the whole period are in or "
+                f"nearly in, and the announced slate levy is included, so this should be close to the official change.")
+    elif s["closed"]:
         sure = (f"The review period closed on {d_long(close)}, so CEF's figures for the whole period are in or "
                 f"nearly in. The official announcement can still differ by any {levies}.")
     else:
@@ -513,6 +538,12 @@ def forecast_page(s: dict, prev_m) -> str:
                   f"{esc(d_long(dt.date.fromisoformat(levy['announced'])))}. Paraffin carries no fuel levy. On the Basic Fuel "
                   f"Price alone, petrol 95 is heading for {signed(s['change']['petrol95'])} and diesel for "
                   f"{signed(s['change']['diesel005'])} a litre.</p>")
+    if slate:
+        sl = slate["change"]["petrol95"]
+        levy_p += (f"\n<p>They also include the slate levy going {'up' if sl > 0 else 'down'} by {amount(sl)} a litre on "
+                   f"petrol and diesel, to {amount(slate['to'])}, announced by the {esc(slate['source'])} on "
+                   f"{esc(d_long(dt.date.fromisoformat(slate['announced'])))}. The slate levy recovers past "
+                   f"under-recoveries; paraffin doesn't pay it.</p>")
     body = f"""{month_nav(prev_m, None)}
 {hero([
     ("Petrol 95, forecast", p95, f"About {rand(new['petrol95'])} a litre (Gauteng)"),
@@ -525,7 +556,7 @@ def forecast_page(s: dict, prev_m) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>All fuels, forecast for {esc(d_short(e))}</h2>
-<p class="muted small">Before any {levies}{' (the announced fuel levy change is included)' if levy else ''}. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
+<p class="muted small">{table_levy_note(levy, slate, levies)}. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
 {price_table(cur, new, ch, 'Forecast', approx=True)}
 </section>"""
     return page(f"/fuel-price/{slug(e)}/", title, desc, f"Fuel price {name}: forecast",
@@ -579,13 +610,26 @@ def price_chart(months: list) -> str:
 <div class="chart-key"><span style="color:var(--series-blue)">Petrol 95 (Gauteng pump price)</span><span style="color:var(--series-orange)">Diesel 0.05% (wholesale)</span></div>"""
 
 
+def index_forecast_note(snap) -> str:
+    """What the index table's forecast row includes."""
+    levy, slate = (snap.get("levy"), snap.get("slate")) if snap else (None, None)
+    if levy and slate:
+        return "The forecast includes the announced fuel levy and slate levy changes."
+    if slate:
+        return "The forecast includes the announced slate levy change but leaves out any fuel-levy change."
+    if levy:
+        return "The forecast leaves out any slate-levy change but includes the announced fuel levy change."
+    return "The forecast leaves out any slate-levy or fuel-levy change."
+
+
 def index_page(months: list, snap) -> str:
     """/fuel-price/: the price chart and every change, newest first, with the forecast on top."""
     rows = []
     if snap:
         e = dt.date.fromisoformat(snap["effective"])
-        levy = snap.get("levy")
-        ch = {f: snap["change"][f] + (levy["change"].get(f, 0) if levy else 0) for f in FUELS}
+        levy, slate = snap.get("levy"), snap.get("slate")
+        ch = {f: snap["change"][f] + (levy["change"].get(f, 0) if levy else 0) + (slate["change"].get(f, 0) if slate else 0)
+              for f in FUELS}
         rows.append(
             f'<tr><td><a href="/fuel-price/{slug(e)}/">{month_name(e)}</a><br><span class="muted small">Forecast</span></td>'
             f'<td class="num">{signed(ch["petrol95"])}<br><span class="muted small">~{rand(snap["current"]["petrol95"] + ch["petrol95"])}</span></td>'
@@ -611,7 +655,7 @@ def index_page(months: list, snap) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>Every change</h2>
-<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price, and diesel 0.05% sulphur is CEF's wholesale price row. The forecast leaves out any slate-levy change{' but includes the announced fuel levy change' if snap and snap.get('levy') else ' or fuel-levy change'}.</p></div>
+<p class="muted small">The change per litre, with the new price under it. Petrol 95 is the Gauteng pump price, and diesel 0.05% sulphur is CEF's wholesale price row. {index_forecast_note(snap)}</p></div>
 <div class="table-wrap">
 <table class="month-table">
 <thead><tr><th>Month</th><th class="num">Petrol 95</th><th class="num">Diesel 0.05%</th></tr></thead>

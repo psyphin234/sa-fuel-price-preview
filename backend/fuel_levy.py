@@ -14,6 +14,15 @@ a litre from `start` to `end` (inclusive). Paraffin carries no fuel levy.
   stated. Not yet gazetted when added; check the DMPR price announcement.
 
 Add an entry when a new change is announced; old ones can stay.
+
+The slate levy (SLATE below) is kept here too. It recovers the slate, the running
+total of past under-recoveries, and the DMPR changes it in its monthly price
+announcement, usually a day or two before the change. The model can't foresee it,
+so enter it once announced; the forecast for that date then matches the official
+figure. Petrol and diesel only, like the fuel levy.
+
+- DMPR, 3 Nov 2026 (reported by BusinessTech that day): slate levy up 48.18c/l,
+  from 87.66c to 135.84c, from 4 Nov 2026 (slate -R15.876bn at end Sept).
 """
 import datetime as dt
 
@@ -27,6 +36,14 @@ RELIEF = [
      "announced": dt.date(2026, 10, 21), "source": "MTBPS"},
     {"start": dt.date(2026, 12, 2), "end": dt.date(2027, 1, 5), "petrol": 100, "diesel": 150,
      "announced": dt.date(2026, 10, 21), "source": "MTBPS"},
+]
+
+
+# Slate levy changes, in cents a litre on petrol and diesel, with the date the new
+# level takes effect and when and where it was announced.
+SLATE = [
+    {"effective": dt.date(2026, 11, 4), "from": 87.66, "to": 135.84,
+     "announced": dt.date(2026, 11, 3), "source": "DMPR"},
 ]
 
 
@@ -66,3 +83,21 @@ def schedule(fuels: list) -> list:
     return [{"start": r["start"], "end": r["end"], "announced": r["announced"], "source": r["source"],
              "relief": {f: r.get(LEVY_FUELS.get(f), 0) for f in fuels}}
             for r in RELIEF]
+
+
+def slate_change(previous_effective: dt.date, new_effective: dt.date, fuels: list):
+    """The announced slate levy change between the price in force from
+    `previous_effective` and the one from `new_effective`, in cents a litre per fuel
+    (positive = the price rises), with the levy before and after. None if none."""
+    steps = [s for s in SLATE if previous_effective < s["effective"] <= new_effective]
+    if not steps:
+        return None
+    step = round(sum(s["to"] - s["from"] for s in steps), 2)
+    return {
+        "effective": new_effective,
+        "change": {f: step if f in LEVY_FUELS else 0 for f in fuels},
+        "from": steps[0]["from"],
+        "to": steps[-1]["to"],
+        "announced": steps[-1]["announced"],
+        "source": steps[-1]["source"],
+    }

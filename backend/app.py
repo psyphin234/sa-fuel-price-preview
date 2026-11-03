@@ -6,7 +6,7 @@ build_status_data() is the heart of it. It reads CEF's daily reports (cached in
 the local SQLite database by db.py, downloaded by cef_scraper.py when missing),
 estimates the days CEF hasn't published yet and projects the next price change
 (bfp_model.py, using nowcast.py), checks earlier estimates against CEF's real
-figures (accuracy.py), and adds the fuel levy schedule (fuel_levy.py) and the
+figures (accuracy.py), and adds the fuel and slate levy schedules (fuel_levy.py) and the
 background section's data (context_data.py). The result is one dict, which is:
 - served as JSON at /api/status to the local dashboard (frontend/), and
 - written to docs/data/status.json by publish.py for the public site (docs/).
@@ -348,6 +348,9 @@ def build_status_data():
         # announced fuel levy change on that date, on top of the BFP forecast (or None)
         "levy_change": fuel_levy.levy_change(latest.pump_price_effective,
                                              bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
+        # announced slate levy change on that date, also on top of the forecast (or None)
+        "slate_change": fuel_levy.slate_change(latest.pump_price_effective,
+                                               bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
         "levy_relief": fuel_levy.schedule(cef.FUELS),  # temporary levy cuts, to mark prices that include one
         "review_period_close": period_close,
         "review_period_closed": today > period_close,

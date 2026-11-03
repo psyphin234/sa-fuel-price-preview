@@ -124,11 +124,13 @@
   // CSS class for a price change: red for a rise, green for a fall (style.css).
   const dirClass = (c) => c > 0 ? "increase" : c < 0 ? "decrease" : "";
 
-  // An announced fuel levy change on the forecast date (backend/fuel_levy.py). The
-  // model only forecasts the Basic Fuel Price part, so this is added on top.
+  // Announced fuel levy and slate levy changes on the forecast date
+  // (backend/fuel_levy.py). The model only forecasts the Basic Fuel Price part, so
+  // these are added on top.
+  const onForecastDate = (c) => c && c.effective === state.data.predicted_change_date ? c : null;
   const levyFor = (fuel) => {
-    const lc = state.data.levy_change;
-    return lc && lc.effective === state.data.predicted_change_date ? (lc.change[fuel] || 0) : 0;
+    const lc = onForecastDate(state.data.levy_change), sc = onForecastDate(state.data.slate_change);
+    return (lc ? lc.change[fuel] || 0 : 0) + (sc ? sc.change[fuel] || 0 : 0);
   };
   // A temporary levy cut in force on a price-change date, for marking prices that
   // have it built in (they go back up when it ends).
@@ -170,22 +172,31 @@
       "Paraffin has no fuel levy.");
   }
 
-  // The small print under a forecast when an announced fuel levy change falls on
-  // the forecast date: how much of the forecast is the levy, and what the Basic
-  // Fuel Price alone would do. Empty when no levy change applies.
+  // The small print under a forecast when an announced fuel levy or slate levy
+  // change falls on the forecast date: what's included, and what the Basic Fuel
+  // Price alone would do. Empty when neither applies.
   function levyNote(fuel, bfpChange) {
-    const levy = levyFor(fuel);
-    const lc = state.data.levy_change;
-    if (!levy) {
-      return lc && lc.effective === state.data.predicted_change_date
-        ? "Paraffin carries no fuel levy, so the announced levy change doesn't apply. Before any slate-levy change."
+    const lc = onForecastDate(state.data.levy_change), sc = onForecastDate(state.data.slate_change);
+    const amount = (c) => fmtRand(Math.abs(c)).replace("/l", "");
+    const parts = [];
+    const levy = lc ? lc.change[fuel] || 0 : 0;
+    if (levy) {
+      parts.push(levy < 0
+        ? `the ${amount(levy)} fuel levy cut announced in the ${lc.source} on ${fmtDate(lc.announced)}`
+        : `the fuel levy going back up by ${amount(levy)} as the ${lc.source} relief winds down`);
+    }
+    const slate = sc ? sc.change[fuel] || 0 : 0;
+    if (slate) {
+      parts.push(`the slate levy going ${slate > 0 ? "up" : "down"} by ${amount(slate)} ` +
+        `(to ${amount(sc.to)}), announced by the ${sc.source} on ${fmtDate(sc.announced)}`);
+    }
+    const noSlate = sc ? "" : " Before any slate-levy change.";
+    if (!parts.length) {
+      return lc || sc
+        ? "Paraffin carries no fuel or slate levy, so the announced levy changes don't apply." + noSlate
         : "";
     }
-    const amount = fmtRand(Math.abs(levy)).replace("/l", "");
-    const what = levy < 0
-      ? `the ${amount} fuel levy cut announced in the ${lc.source} on ${fmtDate(lc.announced)}`
-      : `the fuel levy going back up by ${amount} as the ${lc.source} relief winds down`;
-    return `Includes ${what}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.`;
+    return `Includes ${parts.join(" and ")}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.` + noSlate;
   }
 
   // Until an announced change takes effect it leads, and the next cycle's
