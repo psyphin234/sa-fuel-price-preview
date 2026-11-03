@@ -1495,7 +1495,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 16.6471,
+  "current_exchange_rate": 16.652,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.16,
@@ -1517,6 +1517,20 @@
     },
     "announced": "2026-10-21",
     "source": "MTBPS"
+  },
+  "slate_change": {
+    "effective": "2026-11-04",
+    "change": {
+      "petrol95": 48.18,
+      "petrol93": 48.18,
+      "diesel005": 48.18,
+      "diesel0005": 48.18,
+      "illpar": 0
+    },
+    "from": 87.66,
+    "to": 135.84,
+    "announced": "2026-11-03",
+    "source": "DMPR"
   },
   "levy_relief": [
     {
@@ -2030,7 +2044,7 @@
         ],
         [
           "2026-11-03",
-          106.72
+          106.07
         ]
       ],
       "data_to": "2026-11-03"
@@ -4493,5 +4507,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-03T12:18:51.858238"
+  "generated_at": "2026-11-03T13:18:54.364923"
 }
