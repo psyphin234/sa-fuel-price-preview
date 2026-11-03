@@ -197,6 +197,10 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   date matches the official figure (in Nov 2026 the +48.18c slate rise was the
   whole gap between the forecast and the official change).
   `predicted_pump_price_change_c_per_l` itself stays BFP-only.
+- Petrol 93's forecast change is petrol 95's (`FOLLOWS` in `bfp_model.py`):
+  the DMPR usually gives inland 93 the same change as 95 (11 of 16 changes
+  from Jul 2025 to Nov 2026), not its own over/under-recovery. 93's own
+  figures still show in the charts and table.
 - A review period runs from the Friday before one price change (first
   Wednesday of the month) to the Thursday before the next one's Friday, i.e.
   it closes about six days before the change (the Thursday when that Friday is

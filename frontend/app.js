@@ -199,6 +199,13 @@
     return `Includes ${parts.join(" and ")}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.` + noSlate;
   }
 
+  // Under a forecast that takes another fuel's change (petrol 93 follows 95; see
+  // FOLLOWS in backend/bfp_model.py), the line saying so. Empty otherwise.
+  const followNote = (pred) => pred.follows
+    ? `Same as ${state.data.predictions[pred.follows].label}: the official change for 93 usually matches 95's.`
+    : "";
+  const joinNotes = (...notes) => notes.filter(Boolean).join(" ");
+
   // Until an announced change takes effect it leads, and the next cycle's
   // prediction (only a few days in, so still uncertain) is a smaller early look.
   function renderAnnounced() {
@@ -229,7 +236,7 @@
     earlyEl.className = "hero-value " + dirClass(early);
     setLevyTag("#early-levy", state.data.predicted_change_date);
     const days = pred.blended_days_count;
-    const note = levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l);
+    const note = joinNotes(followNote(pred), levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l));
     $("#early-sub").textContent =
       `About ${fmtRand(pred.predicted_new_price_c_per_l + levy)}. Only ${days} day${days === 1 ? "" : "s"} of the review period so far, so this can still move a lot.` +
       (note ? " " + note : "");
@@ -272,7 +279,8 @@
     badge.className = "hero-badge " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "flat");
     badge.textContent = `${icon} ${label}`;
     $("#hero-change-note").textContent =
-      levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l) || "Before any slate-levy or fuel-levy change";
+      joinNotes(followNote(pred),
+        levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l) || "Before any slate-levy or fuel-levy change.");
 
     $("#hero-newprice").textContent = fmtRand(pred.predicted_new_price_c_per_l + levy);
     setLevyTag("#hero-newprice-levy", changeDate);

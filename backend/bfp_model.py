@@ -12,7 +12,7 @@ from the proxy model is tagged source="estimated" so the UI can flag it clearly,
 as distinct from source="cef_official" or source="manual".
 """
 import datetime as dt
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field, asdict, replace
 from typing import Optional
 
 import cef_scraper as cef
@@ -155,7 +155,9 @@ class Prediction:
     predicted_pump_price_change_c_per_l: minus projected_avg_over_under (an
     under-recovery means the price must rise), Basic Fuel Price only: levy
     changes are added by the frontends.
-    direction: "increase", "decrease" or "no change"."""
+    direction: "increase", "decrease" or "no change".
+    follows: the fuel whose forecast change this one takes (see FOLLOWS), or None.
+    Its own over/(under) recovery figures above are kept as they are."""
     fuel: str
     label: str
     official_avg_over_under: float
@@ -171,6 +173,32 @@ class Prediction:
     predicted_new_price_c_per_l: Optional[float]
     direction: str
     note: str
+    follows: Optional[str] = None
+
+
+# The DMPR usually gives inland petrol 93 the same change as petrol 95 rather than
+# its own over/(under) recovery: 11 of the 16 changes from Jul 2025 to Nov 2026
+# (Nov 2026: 95's figures called for -1c, 93's own for +15c; both got -1c). So the
+# forecast change for 93 is 95's.
+FOLLOWS = {"petrol93": "petrol95"}
+
+
+def apply_follows(predictions: dict) -> dict:
+    """The predictions with each fuel in FOLLOWS taking its leader's forecast change
+    (and so its direction); the new price is its own current price plus that."""
+    out = dict(predictions)
+    for fuel, leader in FOLLOWS.items():
+        p, lead = predictions.get(fuel), predictions.get(leader)
+        if p is None or lead is None:
+            continue
+        change = lead.predicted_pump_price_change_c_per_l
+        new_price = round(p.current_price_c_per_l + change, 2) if p.current_price_c_per_l is not None else None
+        out[fuel] = replace(
+            p, predicted_pump_price_change_c_per_l=change, predicted_new_price_c_per_l=new_price,
+            direction=lead.direction, follows=leader,
+            note=p.note + f" The official {p.label} change usually matches {lead.label}'s, so this "
+                          f"forecast uses {lead.label}'s rather than {p.label}'s own over/under-recovery.")
+    return out
 
 
 def build_prediction(fuel: str, latest: cef.DailyReport, market: dict, weights: dict,

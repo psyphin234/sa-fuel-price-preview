@@ -223,9 +223,10 @@ def build_status_data():
 
     predictions = {}
     for fuel in cef.FUELS:
-        pred = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides, today=today,
-                                   next_reference=next_reference)
-        predictions[fuel] = pred
+        predictions[fuel] = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides,
+                                                today=today, next_reference=next_reference)
+    predictions = bm.apply_follows(predictions)  # petrol 93 takes petrol 95's forecast change
+    for fuel, pred in predictions.items():
         db.log_prediction(latest.period_start, latest.period_end, fuel,
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
 
