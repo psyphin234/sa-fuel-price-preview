@@ -32,6 +32,7 @@ import fuel_levy
 import forecast_range
 import price_drivers
 import track_record
+import news
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -353,6 +354,14 @@ def build_status_data():
         latest.period_start, period_close, latest.period_end,
         [d["date"] for d in lead.estimated_days], [d["date"] for d in lead.manual_days])
 
+    # Fuel price headlines from SA news sites' RSS feeds (news.py); extra, so a
+    # failure never stops the payload.
+    try:
+        headlines = news.get_news()
+    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
+        print(f"news failed (the payload still goes out): {e}")
+        headlines = None
+
     # Background section (Brent futures vs spot, Hormuz traffic); never allowed
     # to stop the payload, since the model doesn't use it.
     try:
@@ -387,6 +396,7 @@ def build_status_data():
         "forecast_range": likely,  # likely range half-widths per fuel (c/l), or None
         "drivers": drivers,  # each forecast split into fuel prices abroad and the rand, or None
         "track_record": record,  # past forecasts against what happened, per fuel, or None
+        "news": headlines,  # fuel price headlines: title, link, source, published (UTC); or None
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
         "context": context,

@@ -1074,6 +1074,34 @@
     $("#track-notes").innerHTML = notes.map((t) => `<p>${t}</p>`).join("");
   }
 
+  // "In the news" (backend/news.py): fuel price headlines from SA publishers' RSS
+  // feeds, linking to the stories. Headlines come from outside, so they only ever go
+  // in as text, and only http(s) links are used. Hidden when there are none.
+  function renderNews() {
+    const items = (state.data.news || []).filter((n) => /^https?:\/\//.test(n.link));
+    $("#news-panel").hidden = !items.length;
+    if (!items.length) return;
+    const today = state.data.generated_at.slice(0, 10);
+    const daysAgo = (iso) => {
+      const day = new Date(iso).toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
+      const n = Math.round((Date.parse(today) - Date.parse(day)) / 86400000);
+      return n <= 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
+    };
+    $("#news-list").replaceChildren(...items.map((n) => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = n.link;
+      a.target = "_blank";
+      a.rel = "noopener nofollow";
+      a.textContent = n.title;
+      const meta = document.createElement("span");
+      meta.className = "news-meta";
+      meta.textContent = `${n.source} · ${daysAgo(n.published)}`;
+      li.append(a, meta);
+      return li;
+    }));
+  }
+
   // Options shared by every chart in this file. The tooltip skips empty points and,
   // on the "Our estimate" diamonds, says how far that estimate was from CEF.
   function chartOptions(grid, textSec, unit) {
@@ -1268,6 +1296,7 @@
     renderFx();
     renderCharts();
     renderTable();
+    renderNews();
     if (window.renderContext) window.renderContext(state.data.context);
   }
 

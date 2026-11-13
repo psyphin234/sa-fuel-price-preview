@@ -87,6 +87,8 @@ backend/
                        and the rand, the DMPR's way (live and month pages)
   track_record.py    - past forecasts (10 and 5 days to go) against the final
                        BFP part and the official change, last 12 changes
+  news.py            - fuel price headlines (title, link, source, date only)
+                       from SA publishers' RSS feeds, cached an hour
   backtest_fetch.py  - downloads CEF's historical reports for backtesting
   backtest.py        - scores candidate estimation models against that history
   release_times.py   - prints when CEF's reports tend to come out
@@ -239,6 +241,13 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   with `forecast_range.replay` and shown italic with a †. The logged figures
   are what the site showed, so they can differ from a replay (Oct 2026, 5 days
   to go: 311.4 logged vs 330.0 replayed, from before the projection fix).
+- **"In the news"** (`news.py`, `renderNews` in both `app.js`, panel before
+  the oil and Hormuz background) lists up to 8 fuel stories from the last 14
+  days, from the RSS feeds of BusinessTech (energy), The Citizen (business),
+  Moneyweb, SABC News (business) and Daily Maverick, kept if the headline or
+  summary mentions petrol, diesel, the fuel or slate levy, Brent, crude, OPEC
+  or Hormuz. Only the headline, source, date and link are kept, never the
+  story's text. A broad filter, so the odd loosely related story gets in.
 - The **"How the forecast adds up"** panel (`renderBreakdown` in both
   `app.js`) shows the period's days (official / estimated / to come), CEF's
   latest official average in words (the figure people quote), and a waterfall

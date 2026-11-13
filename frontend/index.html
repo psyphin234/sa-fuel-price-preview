@@ -30,7 +30,7 @@
      the local files below are cache-busters: raise one whenever its file changes,
      so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=17">
+<link rel="stylesheet" href="style.css?v=18">
 <!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
      version changes, the hash must change with it, or the browser refuses the
      script and the charts disappear. -->
@@ -276,6 +276,16 @@
         <div id="manual-list" class="manual-list"></div>
       </section>
 
+      <!-- Fuel price headlines (renderNews in app.js, backend/news.py): titles and links
+           only, from the publishers' own RSS feeds. -->
+      <section class="panel news-panel" id="news-panel" hidden>
+        <div class="panel-head">
+          <h2>In the news</h2>
+          <p class="muted small">The latest fuel price headlines from South African news sites, checked every hour. Each link opens the story on the publisher's site.</p>
+        </div>
+        <ul class="news-list" id="news-list"></ul>
+      </section>
+
       <!-- Background section, drawn by context.js and hidden until it has data. It never
            feeds the prediction. The caveat below quotes other trackers' figures with
            their dates: refresh them, or take them out, when newer reporting appears. -->
@@ -327,6 +337,6 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=2"></script>
-<script src="app.js?v=17"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>
