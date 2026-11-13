@@ -1004,31 +1004,104 @@
   }
 
   // "In the news" (backend/news.py): fuel price headlines from SA publishers' RSS
-  // feeds, linking to the stories. Headlines come from outside, so they only ever go
-  // in as text, and only http(s) links are used. Hidden when there are none.
+  // feeds, linking to the stories, as a one-line ticker. Headlines come from outside,
+  // so they only ever go in as text, and only http(s) links are used. Hidden when
+  // there are none.
+  //
+  // One headline shows at a time. The progress line under it runs for a few seconds
+  // (style.css) and the ticker moves on when it ends, so whatever pauses the line
+  // (hover, focus, the pause button) pauses the ticker too. With
+  // prefers-reduced-motion nothing moves on its own; the arrows still work.
+  const ticker = { key: "", index: 0, paused: false };
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+  function restartNewsProgress() {
+    const bar = $("#news-progress");
+    bar.classList.remove("run");
+    if (reducedMotion.matches || $("#news-list").children.length < 2) return;
+    void bar.offsetWidth;  // so the animation starts again from empty
+    bar.classList.add("run");
+  }
+
+  // Brings headline `i` in, from below when moving forward (dir 1) or from above.
+  function showHeadline(i, dir = 1) {
+    const items = [...$("#news-list").children];
+    if (!items.length) return;
+    const next = (i + items.length) % items.length;
+    const prev = items[ticker.index];
+    const li = items[next];
+    if (prev && prev !== li) {
+      prev.classList.remove("is-active");
+      prev.classList.add(dir > 0 ? "leave-up" : "leave-down");
+      prev.setAttribute("aria-hidden", "true");
+    }
+    li.classList.remove("leave-up", "leave-down", "is-active");
+    li.classList.add(dir > 0 ? "enter-below" : "enter-above");
+    void li.offsetWidth;  // start from there, then slide in
+    li.classList.remove("enter-below", "enter-above");
+    li.classList.add("is-active");
+    li.removeAttribute("aria-hidden");
+    ticker.index = next;
+    $("#news-count").textContent = `${next + 1} / ${items.length}`;
+    restartNewsProgress();
+  }
+
+  const NEWS_PAUSE_ICON = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="1" width="2.5" height="8" rx="0.6" fill="currentColor"/><rect x="6" y="1" width="2.5" height="8" rx="0.6" fill="currentColor"/></svg>';
+  const NEWS_PLAY_ICON = '<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path d="M2.5 1.2v7.6a.5.5 0 0 0 .76.43l6-3.8a.5.5 0 0 0 0-.86l-6-3.8a.5.5 0 0 0-.76.43z" fill="currentColor"/></svg>';
+  function setNewsPaused(paused) {
+    ticker.paused = paused;
+    const btn = $("#news-pause");
+    $("#news-panel").classList.toggle("is-paused", paused);
+    btn.setAttribute("aria-pressed", String(paused));
+    btn.setAttribute("aria-label", paused ? "Play the headlines" : "Pause the headlines");
+    btn.innerHTML = paused ? NEWS_PLAY_ICON : NEWS_PAUSE_ICON;
+  }
+
+  $("#news-progress").addEventListener("animationend", () => showHeadline(ticker.index + 1, 1));
+  $("#news-next").addEventListener("click", () => showHeadline(ticker.index + 1, 1));
+  $("#news-prev").addEventListener("click", () => showHeadline(ticker.index - 1, -1));
+  $("#news-pause").addEventListener("click", () => setNewsPaused(!ticker.paused));
+  reducedMotion.addEventListener("change", restartNewsProgress);
+
   function renderNews() {
     const items = (state.data.news || []).filter((n) => /^https?:\/\//.test(n.link));
     $("#news-panel").hidden = !items.length;
     if (!items.length) return;
+    // A refresh with the same headlines leaves the ticker where it is.
+    const key = items.map((n) => n.link).join("\n");
     const today = state.data.generated_at.slice(0, 10);
     const daysAgo = (iso) => {
       const day = new Date(iso).toLocaleDateString("en-CA", { timeZone: "Africa/Johannesburg" });
       const n = Math.round((Date.parse(today) - Date.parse(day)) / 86400000);
       return n <= 0 ? "today" : n === 1 ? "yesterday" : `${n} days ago`;
     };
+    if (key === ticker.key) {
+      [...$("#news-list").children].forEach((li, k) => {
+        li.querySelector(".news-meta").textContent = `${items[k].source} · ${daysAgo(items[k].published)}`;
+      });
+      return;
+    }
+    ticker.key = key;
+    ticker.index = 0;
     $("#news-list").replaceChildren(...items.map((n) => {
       const li = document.createElement("li");
+      li.setAttribute("aria-hidden", "true");
       const a = document.createElement("a");
       a.href = n.link;
       a.target = "_blank";
       a.rel = "noopener nofollow";
       a.textContent = n.title;
+      a.title = n.title;
       const meta = document.createElement("span");
       meta.className = "news-meta";
       meta.textContent = `${n.source} · ${daysAgo(n.published)}`;
       li.append(a, meta);
       return li;
     }));
+    const several = items.length > 1;
+    ["#news-prev", "#news-next", "#news-count"].forEach((sel) => { $(sel).hidden = !several; });
+    $("#news-pause").hidden = !several || reducedMotion.matches;
+    showHeadline(0, 1);
   }
 
   // Options shared by every chart in this file. The tooltip skips empty points and,

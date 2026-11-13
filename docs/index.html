@@ -52,7 +52,7 @@
      the local files below are cache-busters: raise one whenever its file changes,
      so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=26">
+<link rel="stylesheet" href="style.css?v=27">
 <!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
      version changes, the hash must change with it, or the browser refuses the
      script and the charts disappear. -->
@@ -264,13 +264,24 @@
       </section>
 
       <!-- Fuel price headlines (renderNews in app.js, backend/news.py): titles and links
-           only, from the publishers' own RSS feeds. -->
-      <section class="panel news-panel" id="news-panel" hidden>
-        <div class="panel-head">
-          <h2>In the news</h2>
-          <p class="muted small">The latest fuel price headlines from South African news sites, checked every hour. Each link opens the story on the publisher's site.</p>
+           only, from the publishers' own RSS feeds. A one-line ticker: one headline at a
+           time, moving on every few seconds (not under prefers-reduced-motion), paused on
+           hover, focus or the pause button. -->
+      <section class="panel news-panel" id="news-panel" aria-labelledby="news-title" hidden>
+        <div class="news-head">
+          <h2 id="news-title">In the news</h2>
+          <span class="news-sub">Fuel price headlines from SA news sites</span>
+          <div class="news-controls">
+            <span class="news-count" id="news-count" aria-hidden="true"></span>
+            <button type="button" class="news-btn" id="news-prev" aria-label="Previous headline">&lsaquo;</button>
+            <button type="button" class="news-btn" id="news-pause" aria-label="Pause the headlines" aria-pressed="false"><svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="1.5" y="1" width="2.5" height="8" rx="0.6" fill="currentColor"/><rect x="6" y="1" width="2.5" height="8" rx="0.6" fill="currentColor"/></svg></button>
+            <button type="button" class="news-btn" id="news-next" aria-label="Next headline">&rsaquo;</button>
+          </div>
         </div>
-        <ul class="news-list" id="news-list"></ul>
+        <div class="news-viewport" id="news-viewport">
+          <ul class="news-list" id="news-list"></ul>
+        </div>
+        <div class="news-progress" aria-hidden="true"><span id="news-progress"></span></div>
       </section>
 
       <!-- Background section, drawn by context.js and hidden until it has data. It never
@@ -352,7 +363,7 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=3"></script>
-<script src="app.js?v=27"></script>
+<script src="app.js?v=28"></script>
 <!-- GoatCounter is shared with psyphin.co.za; prefix paths with the host so this site's "/" is counted separately -->
 <script>window.goatcounter = { path: function (p) { return location.host + p; } };</script>
 <script data-goatcounter="https://psyphin.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>

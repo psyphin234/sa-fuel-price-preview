@@ -871,14 +871,100 @@ td.num, th.num { text-align: right; }
 .track-table .miss { display: block; margin-top: 2px; font-size: 12px; color: var(--text-muted); }
 .track-table .replayed { font-style: italic; color: var(--text-secondary); }
 
-/* "In the news": fuel price headlines, linking to the publishers. */
+/* "In the news": a one-line ticker of fuel price headlines. One headline shows at a
+   time; the next slides up into place, sharpening from a slight blur, and a light
+   glints across it. The line underneath fills up until the next one (app.js moves
+   on when it's full), and stops while the headline is hovered or focused, or the
+   ticker is paused. */
 .news-panel[hidden] { display: none; }
+.news-panel { padding: 16px 20px 14px; }
+.news-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; margin-bottom: 10px; }
+.news-head h2 { margin: 0; font-family: var(--font-display); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.news-sub { font-size: 12.5px; color: var(--text-muted); }
+.news-controls { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.news-count { font-size: 12px; color: var(--text-muted); font-variant-numeric: tabular-nums; margin-right: 4px; }
+.news-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.news-btn:hover, .news-btn:focus-visible { color: var(--brand); border-color: color-mix(in srgb, var(--brand) 50%, transparent); outline: none; }
+.news-btn[hidden] { display: none; }
+.news-viewport { position: relative; height: 64px; overflow: hidden; }
 .news-list { list-style: none; margin: 0; padding: 0; }
-.news-list li { padding: 12px 0; border-top: 1px solid var(--gridline); }
-.news-list li:first-child { padding-top: 0; border-top: none; }
-.news-list a { color: var(--text-primary); font-weight: 600; line-height: 1.4; text-decoration: none; }
-.news-list a:hover, .news-list a:focus-visible { color: var(--brand); text-decoration: underline; }
+.news-list li {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  filter: blur(4px);
+  transform: translateY(100%);
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .6s ease, filter .6s ease, visibility 0s linear .7s;
+}
+.news-list li.is-active {
+  opacity: 1;
+  visibility: visible;
+  filter: none;
+  transform: none;
+  transition: transform .7s cubic-bezier(.2, .8, .2, 1), opacity .6s ease, filter .6s ease, visibility 0s;
+}
+.news-list li.leave-up { transform: translateY(-100%); }
+.news-list li.leave-down { transform: translateY(100%); }
+.news-list li.enter-below { transform: translateY(100%); transition: none; }
+.news-list li.enter-above { transform: translateY(-100%); transition: none; }
+.news-list a {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.4;
+  text-decoration: none;
+  color: var(--text-primary);
+  background: linear-gradient(100deg, var(--text-primary) 42%, #ffffff 48%, var(--brand) 50%, #ffffff 52%, var(--text-primary) 58%);
+  background-size: 260% 100%;
+  background-position: 0 0;
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.news-list li.is-active a { animation: news-glint 1.6s .35s ease-out both; }
+@keyframes news-glint { from { background-position: 100% 0; } to { background-position: 0 0; } }
+.news-list a:hover, .news-list a:focus-visible { -webkit-text-fill-color: var(--brand); text-decoration: underline; outline: none; }
 .news-meta { display: block; margin-top: 3px; font-size: 12.5px; color: var(--text-muted); }
+.news-progress { height: 2px; margin-top: 10px; border-radius: 2px; background: var(--gridline); overflow: hidden; }
+.news-progress span {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left;
+  background: linear-gradient(90deg, var(--brand), var(--accent-2));
+  box-shadow: 0 0 8px var(--brand);
+}
+.news-progress span.run { animation: news-progress 7s linear forwards; }
+@keyframes news-progress { to { transform: scaleX(1); } }
+.news-viewport:hover ~ .news-progress span, .news-viewport:focus-within ~ .news-progress span,
+.news-panel.is-paused .news-progress span { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  /* Nothing moves on its own; the arrows still step through. */
+  .news-list li, .news-list li.is-active { transition: none; filter: none; }
+  .news-list li.is-active a { animation: none; }
+  .news-progress { display: none; }
+}
 
 /* Read by screen readers, not shown (the waterfall's table view). */
 .sr-only {

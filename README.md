@@ -247,6 +247,10 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   summary mentions petrol, diesel, the fuel or slate levy, Brent, crude, OPEC
   or Hormuz. Only the headline, source, date and link are kept, never the
   story's text. A broad filter, so the odd loosely related story gets in.
+  It's a one-line ticker: one headline at a time, moving on every 7 seconds
+  (the progress line's CSS animation; `animationend` advances it), with a
+  slide, blur and glint, paused on hover, focus or the pause button, and
+  still under prefers-reduced-motion (the arrows still work).
 - The **"How the forecast adds up"** panel (`renderBreakdown` in both
   `app.js`) shows the period's days (official / estimated / to come), CEF's
   latest official average in words (the figure people quote), and a waterfall
