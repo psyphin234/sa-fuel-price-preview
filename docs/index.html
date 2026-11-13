@@ -52,7 +52,7 @@
      the local files below are cache-busters: raise one whenever its file changes,
      so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=22">
+<link rel="stylesheet" href="style.css?v=23">
 <!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
      version changes, the hash must change with it, or the browser refuses the
      script and the charts disappear. -->
@@ -176,6 +176,19 @@
           </table>
         </div>
         <p class="muted small breakdown-note" id="breakdown-note"></p>
+      </section>
+
+      <!-- What's moving it (renderDrivers in app.js, backend/price_drivers.py): the
+           forecast's Basic Fuel Price part split into fuel prices abroad and the rand. -->
+      <section class="panel drivers-panel" id="drivers-panel" hidden>
+        <div class="panel-head">
+          <div class="hero-label chart-fuel">—</div>
+          <h2>What's moving it: fuel prices abroad, or the rand?</h2>
+          <p class="muted small">The Basic Fuel Price part of the forecast, split the way the DMPR splits it in its monthly announcement: how much comes from fuel prices on world markets (in dollars), and how much from the rand's exchange rate.</p>
+        </div>
+        <div class="driver-rows" id="driver-rows"></div>
+        <ul class="driver-facts" id="driver-facts"></ul>
+        <p class="muted small" id="drivers-note"></p>
       </section>
 
       <!-- How close past estimates were to CEF's figures (backend/accuracy.py). -->
@@ -324,7 +337,7 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=3"></script>
-<script src="app.js?v=23"></script>
+<script src="app.js?v=24"></script>
 <!-- GoatCounter is shared with psyphin.co.za; prefix paths with the host so this site's "/" is counted separately -->
 <script>window.goatcounter = { path: function (p) { return location.host + p; } };</script>
 <script data-goatcounter="https://psyphin.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>

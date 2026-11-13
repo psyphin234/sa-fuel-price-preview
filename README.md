@@ -83,6 +83,8 @@ backend/
                        the same forecast missed at the same stage of the last
                        12 review periods; and the period's days for the
                        progress strip
+  price_drivers.py   - splits the BFP part of a change into fuel prices abroad
+                       and the rand, the DMPR's way (live and month pages)
   backtest_fetch.py  - downloads CEF's historical reports for backtesting
   backtest.py        - scores candidate estimation models against that history
   release_times.py   - prints when CEF's reports tend to come out
@@ -216,6 +218,16 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   part only, not a slate-levy change. It's widest early in a period (about
   ±R1 for petrol, ±R2.50 for diesel with 18 days to come) and narrows to a few
   cents in the last days.
+- **"What's moving it"** (`price_drivers.py`, `renderDrivers` in both
+  `app.js`, and a sentence on each month page) splits the BFP part of the
+  change the way the DMPR does: rand part = the period's average BFP ×
+  (1 − last period's average R/$ ÷ this period's), product part = the rest.
+  The averages are per review period, of CEF's daily exchange rate. It
+  reproduced every figure in the DMPR's November 2026 statement to the cent,
+  for the grade each was quoted for (the DMPR's "petrol" took its product
+  figure from 93 and its rand figure from 95). Live, it counts the estimated
+  days and the rest of the period at the latest BFP and rate, like the
+  forecast.
 - The **"How the forecast adds up"** panel (`renderBreakdown` in both
   `app.js`) shows the period's days (official / estimated / to come), CEF's
   latest official average in words (the figure people quote), and a waterfall

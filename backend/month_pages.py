@@ -23,6 +23,7 @@ from pathlib import Path
 import bfp_model as bm
 import db
 import fuel_levy
+import price_drivers
 
 REPO_ROOT = Path(__file__).parent.parent
 DOCS = REPO_ROOT / "docs"
@@ -125,9 +126,8 @@ def trim_desc(text: str) -> str:
 def load_cycles() -> list:
     """CEF's cached reports grouped by the pump price in force (oldest first).
     Each cycle: effective date, the last report with every price (CEF sometimes
-    corrects a price in a later report, so the last one wins), the last report
-    (its period average is final once the next cycle exists) and the exchange
-    rates seen, if the cache holds the whole review period."""
+    corrects a price in a later report, so the last one wins) and the last report
+    (its period average is final once the next cycle exists)."""
     reports = db.get_cached_reports(dt.date(2000, 1, 1), dt.date.today())
     groups = OrderedDict()
     for r in reports:
@@ -137,13 +137,11 @@ def load_cycles() -> list:
         priced = [r for r in rs if all(r.get("current_price", {}).get(f) is not None for f in FUELS)]
         if not priced:
             continue
-        rates = [r["exchange_rate"] for r in rs if r.get("exchange_rate")]
         cycles.append({
             "effective": dt.date.fromisoformat(eff),
             "prices": priced[-1]["current_price"],
             "last": rs[-1],
             "complete": rs[0]["report_date"] == rs[0]["period_start"],
-            "avg_rate": sum(rates) / len(rates) if rates else None,
         })
     return cycles
 
@@ -163,11 +161,19 @@ def build_months(cycles: list) -> list:
             "avg_over_under": closing["avg_over_under"],
             "avg_bfp": closing["avg_bfp"],
             "prev_effective": prev["effective"],
-            "avg_rate": prev["avg_rate"] if prev["complete"] else None,
         })
-    for older, m in zip([None] + months, months):
-        m["prev_rate"] = older["avg_rate"] if older else None
     return months
+
+
+def add_period_rates(months: list, reports: list):
+    """Each month's average R/$ over its review period and the one before
+    (price_drivers.period_rates), as the DMPR compares them; None where the cache
+    doesn't hold the whole period."""
+    rates = price_drivers.period_rates(reports)
+    for m in months:
+        m["avg_rate"] = rates.get(m["period_start"])
+        earlier = [start for start in rates if start < m["period_start"]]
+        m["prev_rate"] = rates[max(earlier)] if earlier else None
 
 
 def forecast_snapshot(status: dict):
@@ -409,6 +415,12 @@ def drivers(m: dict) -> str:
                        f"{signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: the rest comes from "
                        f"decisions outside the Basic Fuel Price, such as slate-levy and fuel-levy changes, which "
                        f"the government's announcement sets out.")
+        parts = price_drivers.split(market, bfp, m["prev_rate"], m["avg_rate"])
+        if parts:
+            first = f"On its own that called for a change of {signed(market)}."
+            verdict = verdict.replace(first, first + (
+                f" Of that, fuel prices abroad accounted for {signed(parts['product'])} and the rand for "
+                f"{signed(parts['rand'])}."), 1)
         paras.append(f"<p><strong>{name}</strong> {gap}.{bfp_txt} {verdict}</p>")
     if m["avg_rate"]:
         rate = f"The rand averaged R{m['avg_rate']:.2f} to the US dollar over the period"
@@ -422,7 +434,9 @@ def drivers(m: dict) -> str:
         paras.append(f"<p>{rate}.</p>")
     paras.append(f'<p class="muted small">Figures from CEF\'s daily Basic Fuel Price reports '
                  f'(<a href="{CEF_URL}" target="_blank" rel="noopener">cefgroup.co.za</a>): prices from its '
-                 f'pump, wholesale and maximum retail price rows, the averages from the last report of the period.</p>')
+                 f'pump, wholesale and maximum retail price rows, the averages from the last report of the period. '
+                 f'The split between fuel prices abroad and the rand is worked out the way the DMPR does it in '
+                 f'its monthly announcement.</p>')
     return "\n".join(paras)
 
 
@@ -714,6 +728,7 @@ def build(today: dt.date = None) -> list:
     today = today or dt.date.today()
     status = json.loads(STATUS_PATH.read_text(encoding="utf-8"))
     months = build_months(load_cycles())
+    add_period_rates(months, db.get_cached_reports(dt.date(2000, 1, 1), today))
     if not months:
         print("month_pages: no complete months in the report cache; nothing written.")
         return []

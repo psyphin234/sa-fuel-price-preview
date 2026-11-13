@@ -953,6 +953,77 @@
       (sc ? "" : " A slate-levy change, if there is one, comes on top. It's only known when the DMPR announces the prices, a day or two before the change.");
   }
 
+  // Fuel names as they read mid-sentence.
+  const FUEL_IN_TEXT = {
+    petrol95: "petrol 95", petrol93: "petrol 93", diesel005: "diesel 0.05%", diesel0005: "diesel 0.005%", illpar: "paraffin",
+  };
+
+  // "What's moving it": the forecast's Basic Fuel Price part split into fuel prices
+  // abroad and the rand (backend/price_drivers.py, the DMPR's method), as signed
+  // bars out from a centre line, with the two facts behind them in words. Hidden
+  // when there's no split for the fuel.
+  function renderDrivers() {
+    const dr = state.data.drivers;
+    const d = dr && dr.fuels ? dr.fuels[state.fuel] : null;
+    $("#drivers-panel").hidden = !d;
+    if (!d) return;
+    const rows = [
+      { label: "Fuel prices abroad", sub: "world prices, in dollars", value: d.product },
+      { label: "The rand", sub: "its exchange rate to the dollar", value: d.rand },
+      { label: "Basic Fuel Price part", sub: "of the forecast, before levies", value: d.total, total: true },
+    ];
+    const max = Math.max(...rows.map((r) => Math.abs(r.value)), 1);
+    $("#driver-rows").replaceChildren(...rows.map((r) => {
+      const row = document.createElement("div");
+      row.className = "driver-row" + (r.total ? " driver-row--total" : "");
+      const label = document.createElement("div");
+      label.className = "driver-label";
+      const sub = document.createElement("span");
+      sub.textContent = r.sub;
+      label.append(r.label, sub);
+      const track = document.createElement("div");
+      track.className = "driver-track";
+      track.setAttribute("aria-hidden", "true");
+      const bar = document.createElement("div");
+      bar.className = "driver-bar " + (r.total ? "total" : r.value > 0 ? "up" : "down");
+      const width = (Math.abs(r.value) / max) * 50;
+      bar.style.width = `${width}%`;
+      bar.style.left = r.value >= 0 ? "50%" : `${50 - width}%`;
+      track.append(bar);
+      const value = document.createElement("div");
+      value.className = "driver-value";
+      value.textContent = fmtRandBare(r.value);
+      row.append(label, track, value);
+      return row;
+    }));
+
+    const name = FUEL_IN_TEXT[d.follows || state.fuel];
+    const facts = [];
+    if (d.usd_prev) {
+      const pct = (d.usd_cur / d.usd_prev - 1) * 100;
+      facts.push(Math.abs(pct) < 0.5
+        ? `In dollars, ${name} costs about the same to import as in the last review period.`
+        : `In dollars, ${name} costs about ${Math.abs(pct).toFixed(0)}% ${pct < 0 ? "less" : "more"} to import than ` +
+          `in the last review period. That accounts for ${fmtRandBare(d.product)}.`);
+    }
+    const fxMove = dr.fx_cur - dr.fx_prev;
+    facts.push(Math.abs(fxMove) < 0.005
+      ? `The rand is averaging R${dr.fx_cur.toFixed(2)} to the dollar, the same as in the last review period.`
+      : `The rand is averaging R${dr.fx_cur.toFixed(2)} to the dollar this period, against R${dr.fx_prev.toFixed(2)} in ` +
+        `the last: ${fxMove > 0 ? "weaker, which pushes prices up" : "stronger, which pulls prices down"} ` +
+        `(${fmtRandBare(d.rand)}).`);
+    $("#driver-facts").replaceChildren(...facts.map((text) => {
+      const li = document.createElement("li");
+      li.textContent = text;
+      return li;
+    }));
+    $("#drivers-note").textContent =
+      (d.follows ? "Petrol 93's forecast follows petrol 95, so this is petrol 95's split. " : "") +
+      "Worked out the way the DMPR does it, which matched its November 2026 figures to the cent. Like the forecast, " +
+      "it counts this tool's estimates for days CEF hasn't published and the rest of the period at today's level, " +
+      "so it moves as the period fills in.";
+  }
+
   // Options shared by every chart in this file. The tooltip skips empty points and,
   // on the "Our estimate" diamonds, says how far that estimate was from CEF.
   function chartOptions(grid, textSec, unit) {
@@ -1179,6 +1250,7 @@
     renderStatusBar();
     renderHero();
     renderBreakdown();
+    renderDrivers();
     renderAccuracy();
     renderFx();
     renderCharts();
