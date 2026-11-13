@@ -84,7 +84,7 @@ backend/
                        12 review periods; and the period's days for the
                        progress strip
   price_drivers.py   - splits the BFP part of a change into fuel prices abroad
-                       and the rand, the DMPR's way (live and month pages)
+                       and the rand, the DMPR's way (month pages)
   track_record.py    - past forecasts (10 and 5 days to go) against the final
                        BFP part and the official change, last 12 changes
   news.py            - fuel price headlines (title, link, source, date only)
@@ -222,18 +222,17 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   part only, not a slate-levy change. It's widest early in a period (about
   ±R1 for petrol, ±R2.50 for diesel with 18 days to come) and narrows to a few
   cents in the last days.
-- **"What's moving it"** (`price_drivers.py`, `renderDrivers` in both
-  `app.js`, and a sentence on each month page) splits the BFP part of the
-  change the way the DMPR does: rand part = the period's average BFP ×
-  (1 − last period's average R/$ ÷ this period's), product part = the rest.
-  The averages are per review period, of CEF's daily exchange rate. It
-  reproduced every figure in the DMPR's November 2026 statement to the cent,
-  for the grade each was quoted for (the DMPR's "petrol" took its product
-  figure from 93 and its rand figure from 95). Live, it counts the estimated
-  days and the rest of the period at the latest BFP and rate, like the
-  forecast.
+- Each month page's "what moved it" splits the BFP part of the change into
+  fuel prices abroad and the rand (`price_drivers.py`), the way the DMPR
+  does: rand part = the period's average BFP × (1 − last period's average R/$
+  ÷ this period's), product part = the rest, with per-review-period averages
+  of CEF's daily exchange rate. It reproduced every figure in the DMPR's
+  November 2026 statement to the cent, for the grade each was quoted for (the
+  DMPR's "petrol" took its product figure from 93 and its rand figure from
+  95). The main page had a live panel with the same split for one evening
+  (13 Nov 2026); it was taken out at the owner's request.
 - The **track record** (`track_record.py`, `renderTrackRecord` in both
-  `app.js`, panel after the accuracy meter) compares, for each of the last 12
+  `app.js`, panel after the Daily breakdown table) compares, for each of the last 12
   price changes, the forecast with 10 and with 5 review days still to come
   against CEF's final average (the BFP part) and the official change. Logged
   forecasts (`prediction_log`, from 22 Sep 2026; the last one made with CEF's

@@ -862,48 +862,6 @@ td.num, th.num { text-align: right; }
 .chart-wrap--waterfall { height: 320px; }
 .breakdown-note { margin: 12px 0 0; max-width: 80ch; }
 
-/* "What's moving it": the forecast's Basic Fuel Price part split into fuel prices
-   abroad and the rand, as signed bars out from a centre line. */
-.drivers-panel[hidden] { display: none; }
-.driver-rows { display: grid; gap: 14px; margin-bottom: 18px; }
-.driver-row {
-  display: grid;
-  grid-template-columns: minmax(170px, 1.1fr) 3fr 84px;
-  align-items: center;
-  gap: 6px 16px;
-}
-.driver-row--total { padding-top: 14px; border-top: 1px solid var(--gridline); }
-.driver-label { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
-.driver-label span { display: block; font-size: 12.5px; font-weight: 400; color: var(--text-secondary); }
-.driver-track { position: relative; height: 22px; }
-.driver-track::before {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: -4px;
-  bottom: -4px;
-  width: 1px;
-  background: var(--baseline);
-}
-.driver-bar { position: absolute; top: 3px; bottom: 3px; min-width: 2px; border-radius: 4px; }
-.driver-bar.up { background: color-mix(in srgb, var(--status-critical) 80%, transparent); box-shadow: 0 0 12px -4px var(--status-critical); }
-.driver-bar.down { background: color-mix(in srgb, var(--status-good) 80%, transparent); box-shadow: 0 0 12px -4px var(--status-good); }
-.driver-bar.total { background: color-mix(in srgb, var(--brand) 70%, transparent); box-shadow: 0 0 12px -4px var(--brand); }
-.driver-value {
-  font-family: var(--font-display);
-  font-size: 16px;
-  font-weight: 600;
-  text-align: right;
-  font-variant-numeric: tabular-nums;
-}
-.driver-facts { margin: 0 0 10px; padding-left: 18px; color: var(--text-secondary); font-size: 14px; line-height: 1.55; max-width: 80ch; }
-.driver-facts li + li { margin-top: 4px; }
-@media (max-width: 560px) {
-  /* Phones: name and value on one line, the bar under them. */
-  .driver-row { grid-template-columns: 1fr auto; }
-  .driver-track { grid-column: 1 / -1; grid-row: 2; }
-}
-
 /* Track record: past forecasts against what happened. Replayed forecasts (worked
    out afterwards) are italic with a footnote mark, so they don't pass for ones the
    site showed at the time. */

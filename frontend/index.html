@@ -30,7 +30,7 @@
      the local files below are cache-busters: raise one whenever its file changes,
      so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=18">
+<link rel="stylesheet" href="style.css?v=19">
 <!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
      version changes, the hash must change with it, or the browser refuses the
      script and the charts disappear. -->
@@ -152,19 +152,6 @@
         <p class="muted small breakdown-note" id="breakdown-note"></p>
       </section>
 
-      <!-- What's moving it (renderDrivers in app.js, backend/price_drivers.py): the
-           forecast's Basic Fuel Price part split into fuel prices abroad and the rand. -->
-      <section class="panel drivers-panel" id="drivers-panel" hidden>
-        <div class="panel-head">
-          <div class="hero-label chart-fuel">—</div>
-          <h2>What's moving it: fuel prices abroad, or the rand?</h2>
-          <p class="muted small">The Basic Fuel Price part of the forecast, split the way the DMPR splits it in its monthly announcement: how much comes from fuel prices on world markets (in dollars), and how much from the rand's exchange rate.</p>
-        </div>
-        <div class="driver-rows" id="driver-rows"></div>
-        <ul class="driver-facts" id="driver-facts"></ul>
-        <p class="muted small" id="drivers-note"></p>
-      </section>
-
       <!-- How close past estimates were to CEF's figures (backend/accuracy.py). -->
       <section class="panel accuracy-panel">
         <div class="panel-head">
@@ -180,24 +167,6 @@
             <div class="muted small" id="accuracy-sub">—</div>
           </div>
         </div>
-      </section>
-
-      <!-- Track record (renderTrackRecord in app.js, backend/track_record.py): past
-           forecasts against what happened. -->
-      <section class="panel track-panel" id="track-panel" hidden>
-        <div class="panel-head">
-          <div class="hero-label chart-fuel">—</div>
-          <h2>Track record: how close were past forecasts?</h2>
-          <p class="muted small">Each forecast is the Basic Fuel Price part of the change, as the site showed it with 10 and with 5 of the review period's days still to come. The final figure is CEF's average for the whole period, what the forecast aims at. The official change also includes government decisions on the fuel levy and the slate levy, shown separately.</p>
-        </div>
-        <p class="track-summary" id="track-summary"></p>
-        <div class="table-wrap">
-          <table class="track-table" id="track-table">
-            <thead><tr><th>Price change</th><th class="num">Forecast, 10 days to go</th><th class="num">5 days to go</th><th class="num">Final BFP part</th><th class="num">Levies &amp; other</th><th class="num">Official change</th></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class="table-notes" id="track-notes"></div>
       </section>
 
       <section class="panel">
@@ -248,6 +217,24 @@
           </table>
         </div>
         <div id="table-notes" class="table-notes"></div>
+      </section>
+
+      <!-- Track record (renderTrackRecord in app.js, backend/track_record.py): past
+           forecasts against what happened. -->
+      <section class="panel track-panel" id="track-panel" hidden>
+        <div class="panel-head">
+          <div class="hero-label chart-fuel">—</div>
+          <h2>Track record: how close were past forecasts?</h2>
+          <p class="muted small">Each forecast is the Basic Fuel Price part of the change, as the site showed it with 10 and with 5 of the review period's days still to come. The final figure is CEF's average for the whole period, what the forecast aims at. The official change also includes government decisions on the fuel levy and the slate levy, shown separately.</p>
+        </div>
+        <p class="track-summary" id="track-summary"></p>
+        <div class="table-wrap">
+          <table class="track-table" id="track-table">
+            <thead><tr><th>Price change</th><th class="num">Forecast, 10 days to go</th><th class="num">5 days to go</th><th class="num">Final BFP part</th><th class="num">Levies &amp; other</th><th class="num">Official change</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-notes" id="track-notes"></div>
       </section>
 
       <section class="panel">
@@ -337,6 +324,6 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=2"></script>
-<script src="app.js?v=18"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>

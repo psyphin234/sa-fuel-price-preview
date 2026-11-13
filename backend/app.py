@@ -30,7 +30,6 @@ import nowcast
 import context_data
 import fuel_levy
 import forecast_range
-import price_drivers
 import track_record
 import news
 
@@ -338,12 +337,6 @@ def build_status_data():
     except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
         print(f"forecast_range failed (the payload still goes out): {e}")
         likely = None
-    # Fuel prices abroad or the rand: the split of each forecast (price_drivers.py).
-    try:
-        drivers = price_drivers.live(period_reports, predictions, history, latest.period_start, cef.FUELS, bm.FOLLOWS)
-    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
-        print(f"price_drivers failed (the payload still goes out): {e}")
-        drivers = None
     # How close past forecasts were (track_record.py).
     try:
         record = track_record.build(history, db.get_logged_forecasts(), latest.period_start, cef.FUELS, bm.FOLLOWS)
@@ -394,7 +387,6 @@ def build_status_data():
         "review_period_close": period_close,
         "review_days": review_days,  # each business day of the period: official/estimated/manual/to_come
         "forecast_range": likely,  # likely range half-widths per fuel (c/l), or None
-        "drivers": drivers,  # each forecast split into fuel prices abroad and the rand, or None
         "track_record": record,  # past forecasts against what happened, per fuel, or None
         "news": headlines,  # fuel price headlines: title, link, source, published (UTC); or None
         "review_period_closed": today > period_close,
