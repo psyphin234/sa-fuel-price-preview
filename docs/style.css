@@ -810,6 +810,71 @@ td.num, th.num { text-align: right; }
 .accuracy-text { flex: 2 1 260px; }
 .accuracy-headline { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin-bottom: 2px; }
 
+/* ---- likely range and "How the forecast adds up" ---- */
+/* The likely range under a forecast (backend/forecast_range.py, set by app.js). */
+.hero-range {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  cursor: help;
+}
+.hero-range[hidden] { display: none; }
+.hero-badge + .hero-range { margin-top: 10px; }
+.hero-range + .hero-sub { margin-top: 10px; }
+.hero-range + .levy-tag { margin-top: 8px; }
+
+/* The review period's days, one cell each: official, estimated, by hand, to come.
+   The same fills mark the key below it. */
+.period-progress { margin-bottom: 18px; }
+.pp-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; margin-bottom: 10px; }
+.pp-head strong { font-family: var(--font-display); font-size: 18px; font-weight: 600; }
+.pp-cells { display: flex; gap: 3px; list-style: none; margin: 0; padding: 0; }
+.pp-cells li { flex: 1 1 0; min-width: 0; height: 14px; border-radius: 4px; }
+.pp-cells li.week-start { margin-left: 6px; }
+.pp-legend { display: flex; flex-wrap: wrap; gap: 6px 18px; list-style: none; margin: 10px 0 0; padding: 0; }
+.pp-legend li { display: inline-flex; align-items: center; gap: 7px; }
+.pp-legend li[hidden] { display: none; }
+.pp-key { display: inline-block; width: 16px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.pp-cells .official, .pp-key.official { background: var(--series-blue); box-shadow: 0 0 10px -3px var(--series-blue); }
+.pp-cells .estimated, .pp-key.estimated {
+  background: repeating-linear-gradient(135deg,
+    color-mix(in srgb, var(--status-warning) 75%, transparent) 0 2px,
+    color-mix(in srgb, var(--status-warning) 18%, transparent) 2px 5px);
+  box-shadow: inset 0 0 0 1px var(--status-warning);
+}
+.pp-cells .manual, .pp-key.manual { background: var(--status-good); }
+.pp-cells .to_come, .pp-key.to_come { background: transparent; box-shadow: inset 0 0 0 1px var(--baseline); }
+
+/* CEF's latest official average, the figure people quote. */
+.cef-latest {
+  margin: 0 0 16px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--series-blue) 30%, transparent);
+  background: color-mix(in srgb, var(--series-blue) 7%, transparent);
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+.cef-latest strong { color: var(--text-primary); }
+/* app.js sets the height to suit the number of steps. */
+.chart-wrap--waterfall { height: 320px; }
+.breakdown-note { margin: 12px 0 0; max-width: 80ch; }
+
+/* Read by screen readers, not shown (the waterfall's table view). */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* ---- fx panel ---- */
 .fx-current { display: flex; flex-wrap: wrap; align-items: baseline; gap: 12px; margin-bottom: 16px; }
 .fx-value {

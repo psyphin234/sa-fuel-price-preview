@@ -29,6 +29,7 @@ import accuracy
 import nowcast
 import context_data
 import fuel_levy
+import forecast_range
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -324,6 +325,20 @@ def build_status_data():
 
     next_change = bm.upcoming_price_change(latest.pump_price_effective, today)
 
+    # How sure the forecast is (forecast_range.py): the likely range, from how far
+    # the same forecast missed at this stage of past review periods, and the period's
+    # days for the progress strip. Extra, so a failure here never stops the payload.
+    lead = predictions[cef.FUELS[0]]
+    remaining = lead.blended_days_count + lead.projected_days_count - lead.official_days_count
+    try:
+        likely = forecast_range.likely_range(history, latest.period_start, remaining, cef.FUELS, bm.FOLLOWS)
+    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
+        print(f"forecast_range failed (the payload still goes out): {e}")
+        likely = None
+    review_days = forecast_range.review_days(
+        latest.period_start, period_close, latest.period_end,
+        [d["date"] for d in lead.estimated_days], [d["date"] for d in lead.manual_days])
+
     # Background section (Brent futures vs spot, Hormuz traffic); never allowed
     # to stop the payload, since the model doesn't use it.
     try:
@@ -354,6 +369,8 @@ def build_status_data():
                                                bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
         "levy_relief": fuel_levy.schedule(cef.FUELS),  # temporary levy cuts, to mark prices that include one
         "review_period_close": period_close,
+        "review_days": review_days,  # each business day of the period: official/estimated/manual/to_come
+        "forecast_range": likely,  # likely range half-widths per fuel (c/l), or None
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
         "context": context,

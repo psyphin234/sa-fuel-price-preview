@@ -229,6 +229,7 @@
     const early = pred.predicted_pump_price_change_c_per_l + levy;
     earlyEl.textContent = fmtRandDelta(early);
     earlyEl.className = "hero-value " + dirClass(early);
+    setRange("#early-range", state.fuel, early);
     setLevyTag("#early-levy", state.data.predicted_change_date);
     const days = pred.blended_days_count;
     const note = joinNotes(followNote(pred), levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l));
@@ -273,6 +274,7 @@
     const label = dir === "increase" ? "Price expected to rise" : dir === "decrease" ? "Price expected to fall" : "Little change expected";
     badge.className = "hero-badge " + (dir === "increase" ? "increase" : dir === "decrease" ? "decrease" : "flat");
     badge.textContent = `${icon} ${label}`;
+    setRange("#hero-range", state.fuel, change);
     $("#hero-change-note").textContent =
       joinNotes(followNote(pred),
         levyNote(state.fuel, pred.predicted_pump_price_change_c_per_l) || "Before any slate-levy or fuel-levy change.");
@@ -580,6 +582,369 @@
     sub.textContent = `Based on ${acc.n} estimated day${acc.n === 1 ? "" : "s"} checked against CEF's real figures so far: typically about ${acc.mean_abs_error_c_per_l} c/l (${acc.mean_abs_pct_error}%) off${warmup}.`;
   }
 
+  // ---- How sure the forecast is, and how it adds up ----
+
+  // A change without the "/l": −R3.24.
+  const fmtRandBare = (c) => fmtRandDelta(c).replace("/l", "");
+  // An average over/(under) recovery in words: "R3.24/l over-recovery".
+  const fmtOverUnder = (avg) => `${fmtRand(Math.abs(avg))} ${avg >= 0 ? "over" : "under"}-recovery`;
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+
+  // The likely range around a forecast change (backend/forecast_range.py): the
+  // forecast plus or minus how far forecasts at the same stage of the last dozen
+  // review periods missed, about 4 times in 5. Rounded outwards to 10c so it doesn't
+  // look more exact than it is. null when there's no range (too little history, or
+  // CEF has published every day of the period).
+  function likelyRange(fuel, change) {
+    const fr = state.data.forecast_range;
+    const h = fr && fr.half_width ? fr.half_width[fuel] : undefined;
+    if (h === undefined || h === null || h < 0.5) return null;
+    return { lo: Math.floor((change - h) / 10) * 10, hi: Math.ceil((change + h) / 10) * 10, fr };
+  }
+  const rangeExplainer = (fr) =>
+    `With ${plural(fr.remaining_days, "day")} of the review period still to come, forecasts in the last ` +
+    `${fr.periods} review periods landed this close to the final figure about 4 times in 5. ` +
+    "It covers the Basic Fuel Price only, not a slate-levy change.";
+
+  // "Likely between −R3.50 and −R2.80" under a forecast; hidden when there's no range.
+  function setRange(sel, fuel, change) {
+    const el = $(sel);
+    const r = likelyRange(fuel, change);
+    el.hidden = !r;
+    if (!r) return;
+    el.textContent = `Likely between ${fmtRandBare(r.lo)} and ${fmtRandBare(r.hi)}`;
+    el.title = rangeExplainer(r.fr);
+  }
+
+  // The review period's days as a row of cells (official, estimated, by hand, to
+  // come), with a gap between weeks, and the count above it.
+  function renderProgress() {
+    const days = state.data.review_days || [];
+    const count = { official: 0, estimated: 0, manual: 0, to_come: 0 };
+    days.forEach((d) => { count[d.status] = (count[d.status] || 0) + 1; });
+    const n = days.length;
+    const close = state.data.review_period_close;
+    const unpublished = count.estimated + count.manual;
+    let headline, detail;
+    if (count.to_come) {
+      headline = `Day ${n - count.to_come} of ${n}`;
+      detail = [`${count.official} official`, unpublished && `${unpublished} estimated`,
+        `${count.to_come} to come`, `closes ${fmtShortDate(close)}`].filter(Boolean).join(" · ");
+    } else if (unpublished) {
+      headline = `Closed ${fmtShortDate(close)}`;
+      detail = `${count.official} of ${n} days official, ${plural(unpublished, "day")} still to come from CEF`;
+    } else {
+      headline = `All ${n} days in`;
+      detail = `Every day to ${fmtShortDate(close)} is CEF official`;
+    }
+    $("#pp-headline").textContent = headline;
+    $("#pp-detail").textContent = detail;
+    const words = { official: "CEF official", estimated: "estimated", manual: "entered by hand", to_come: "still to come" };
+    const ol = $("#pp-cells");
+    ol.replaceChildren(...days.map((d, i) => {
+      const li = document.createElement("li");
+      const monday = new Date(d.date + "T00:00:00Z").getUTCDay() === 1;
+      li.className = d.status + (monday && i > 0 ? " week-start" : "");
+      li.title = `${fmtDate(d.date)}: ${words[d.status]}`;
+      li.setAttribute("aria-hidden", "true");
+      return li;
+    }));
+    ol.setAttribute("role", "img");
+    ol.setAttribute("aria-label", `${headline}: ${detail}`);
+    $("#pp-legend-manual").hidden = !count.manual;
+  }
+
+  // The steps from CEF's average so far to the forecast change for `fuel`, in c/l of
+  // price change (positive = up). They add up to the forecast exactly.
+  function breakdownSteps(fuel) {
+    const pred = state.data.predictions[fuel];
+    const report = state.data.latest_official_report;
+    const close = state.data.review_period_close;
+    const steps = [];
+    const official = -pred.official_avg_over_under;
+    steps.push({
+      label: "CEF's average so far", sub: `${pred.official_days_count} official days`, value: official, kind: "official",
+      tip: `CEF's average for the ${pred.official_days_count} days it has published (${fmtShortDate(report.period_start)} ` +
+        `to ${fmtShortDate(report.period_end)}) is a ${fmtOverUnder(pred.official_avg_over_under)}. If the review period ` +
+        `ended today, that alone would move the price by ${fmtRandBare(official)}.`,
+    });
+    const extra = pred.estimated_days.length + pred.manual_days.length;
+    if (extra) {
+      const v = -(pred.blended_avg_over_under - pred.official_avg_over_under);
+      steps.push({
+        label: "Days CEF hasn't published", sub: `${plural(extra, "day")}, estimated`, value: v, kind: "estimate",
+        tip: `This tool's figures for ${plural(extra, "day")} CEF hasn't published yet move the average by ${fmtRandBare(v)}.`,
+      });
+    }
+    if (pred.projected_days_count) {
+      const v = -(pred.projected_avg_over_under - pred.blended_avg_over_under);
+      steps.push({
+        label: "Rest of the period", sub: `${plural(pred.projected_days_count, "day")} at today's price`, value: v, kind: "estimate",
+        tip: `The other ${plural(pred.projected_days_count, "day")} to ${fmtShortDate(close)} are assumed to stay at the ` +
+          `latest Basic Fuel Price, which moves the average by ${fmtRandBare(v)}. This is the part most likely to change.`,
+      });
+    }
+    if (pred.follows) {
+      const own = -pred.projected_avg_over_under;
+      const v = pred.predicted_pump_price_change_c_per_l - own;
+      steps.push({
+        label: "Matched to petrol 95", sub: "93 usually moves with 95", value: v, kind: "estimate",
+        tip: `The official change for petrol 93 usually matches petrol 95's, so the forecast uses 95's. ` +
+          `On its own figures, 93 would be at ${fmtRandBare(own)}.`,
+      });
+    }
+    const lc = onForecastDate(state.data.levy_change), sc = onForecastDate(state.data.slate_change);
+    if (lc && lc.change[fuel]) {
+      const v = lc.change[fuel];
+      steps.push({
+        label: v < 0 ? "Fuel levy cut" : "Fuel levy back up", sub: `announced in the ${lc.source}`, value: v, kind: "announced",
+        tip: v < 0 ? `The fuel levy cut announced in the ${lc.source} on ${fmtDate(lc.announced)}.`
+          : `The fuel levy going back up as the ${lc.source} relief (announced ${fmtDate(lc.announced)}) winds down.`,
+      });
+    }
+    if (sc && sc.change[fuel]) {
+      const v = sc.change[fuel];
+      steps.push({
+        label: `Slate levy ${v > 0 ? "up" : "down"}`, sub: `announced by the ${sc.source}`, value: v, kind: "announced",
+        tip: `The slate levy going ${v > 0 ? "up" : "down"} to ${fmtRand(sc.to).replace("/l", "")} a litre, announced by the ` +
+          `${sc.source} on ${fmtDate(sc.announced)}.`,
+      });
+    }
+    return steps;
+  }
+
+  // A diagonal hatch in `color` (6-digit hex), for the bars that are estimates. The
+  // progress strip's estimated days use the same idea in style.css.
+  function hatch(color) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 8;
+    const g = c.getContext("2d");
+    g.fillStyle = color + "2e";
+    g.fillRect(0, 0, 8, 8);
+    g.strokeStyle = color + "c0";
+    g.lineWidth = 2;
+    g.beginPath();
+    for (const o of [-8, 0, 8]) { g.moveTo(o, 8); g.lineTo(o + 8, 0); }
+    g.stroke();
+    return g.createPattern(c, "repeat");
+  }
+
+  // Splits a tooltip sentence into lines of about `width` characters.
+  function wrapText(text, width = 46) {
+    const lines = [];
+    let line = "";
+    for (const word of text.split(" ")) {
+      if (line && (line + " " + word).length > width) { lines.push(line); line = word; }
+      else line = line ? line + " " + word : word;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+
+  // Draws on the waterfall: dashed connectors from each step's end to the next bar,
+  // each step's signed value beyond the end it moves to, and the likely range as a
+  // bracket across the forecast bar.
+  function waterfallMarks(bars, range, narrow) {
+    return {
+      id: "waterfallMarks",
+      afterDatasetsDraw(chart) {
+        const ctx = chart.ctx;
+        const xs = chart.scales.x, meta = chart.getDatasetMeta(0);
+        const text = cssVar("--text-primary"), muted = cssVar("--text-muted");
+        const font = getComputedStyle(document.body).fontFamily;
+        ctx.save();
+        ctx.strokeStyle = muted;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([3, 3]);
+        for (let i = 0; i < bars.length - 1; i++) {
+          const x = xs.getPixelForValue(bars[i].end);
+          const a = meta.data[i], b = meta.data[i + 1];
+          ctx.beginPath();
+          ctx.moveTo(x, a.y + a.height / 2);
+          ctx.lineTo(x, b.y - b.height / 2);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        if (range) {
+          const el = meta.data[bars.length - 1];
+          const x0 = xs.getPixelForValue(range.lo), x1 = xs.getPixelForValue(range.hi);
+          const cap = el.height / 2 + 4;
+          ctx.strokeStyle = text;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(x0, el.y); ctx.lineTo(x1, el.y);
+          ctx.moveTo(x0, el.y - cap); ctx.lineTo(x0, el.y + cap);
+          ctx.moveTo(x1, el.y - cap); ctx.lineTo(x1, el.y + cap);
+          ctx.stroke();
+        }
+        if (narrow) {
+          // No room beside the bars on a phone, so each step's name goes above its
+          // bar, on a patch of background so the connectors don't run through it.
+          ctx.font = `12px ${font}`;
+          ctx.textAlign = "left";
+          ctx.textBaseline = "bottom";
+          bars.forEach((bar, i) => {
+            const el = meta.data[i];
+            const name = `${bar.label} · ${bar.sub}`, y = el.y - el.height / 2 - 5;
+            ctx.fillStyle = cssVar("--surface-1") + "e6";
+            ctx.fillRect(chart.chartArea.left - 2, y - 15, ctx.measureText(name).width + 6, 16);
+            ctx.fillStyle = cssVar("--text-secondary");
+            ctx.fillText(name, chart.chartArea.left, y);
+          });
+        }
+        ctx.font = `600 13px ${font}`;
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = text;
+        bars.forEach((bar, i) => {
+          const el = meta.data[i];
+          let lo = Math.min(bar.start, bar.end), hi = Math.max(bar.start, bar.end);
+          if (range && bar.kind === "total") { lo = Math.min(lo, range.lo); hi = Math.max(hi, range.hi); }
+          const left = bar.value < 0;
+          ctx.textAlign = left ? "right" : "left";
+          ctx.fillText(fmtRandBare(bar.value), xs.getPixelForValue(left ? lo : hi) + (left ? -8 : 8), el.y);
+        });
+        ctx.restore();
+      },
+    };
+  }
+
+  // "How the forecast adds up": the period's progress, CEF's latest official
+  // average in words, and the waterfall from it to the forecast (hatched = estimate),
+  // with a table of the same steps for screen readers.
+  let chartWaterfall = null, waterfallNarrow = null;
+  // The waterfall is laid out differently on narrow screens, so redraw it when the
+  // width crosses that line (a phone turned sideways, say).
+  let waterfallResize = 0;
+  window.addEventListener("resize", () => {
+    clearTimeout(waterfallResize);
+    waterfallResize = setTimeout(() => {
+      if (state.data && waterfallNarrow !== null && ($("#waterfall-wrap").clientWidth < 560) !== waterfallNarrow) renderBreakdown();
+    }, 200);
+  });
+  function renderBreakdown() {
+    const fuel = state.fuel;
+    const pred = state.data.predictions[fuel];
+    const report = state.data.latest_official_report;
+    const changeDate = state.data.predicted_change_date;
+    renderProgress();
+
+    $("#breakdown-title").textContent = `How the ${fmtShortDate(changeDate)} forecast adds up`;
+    const avg = pred.official_avg_over_under;
+    const asChange = fmtRand(Math.abs(avg)).replace("/l", "");
+    $("#cef-latest").innerHTML =
+      `<strong>CEF's latest official figure</strong> (its report for ${fmtShortDate(report.report_date)}, ` +
+      `${pred.official_days_count} days into the period): an average <strong>${fmtOverUnder(avg)}</strong>. ` +
+      `If the period ended today, that alone would mean ${avg >= 0 ? "a" : "an"} <strong>${asChange} ` +
+      `${avg >= 0 ? "cut" : "increase"}</strong>.`;
+
+    const steps = breakdownSteps(fuel);
+    const estimates = steps.some((s) => s.kind === "estimate");
+    $("#cef-latest").insertAdjacentText("beforeend", estimates
+      ? " The rest of the forecast is this tool's estimate."
+      : " That covers the whole review period, so only announced levy changes come on top.");
+    let run = 0;
+    const bars = steps.map((s) => { const start = run; run += s.value; return { ...s, start, end: run }; });
+    const total = pred.predicted_pump_price_change_c_per_l + levyFor(fuel);
+    const range = likelyRange(fuel, total);
+    bars.push({
+      label: "Forecast change", sub: fmtShortDate(changeDate), start: 0, end: total, value: total, kind: "total",
+      tip: `The forecast change on ${fmtDate(changeDate)}: ${fmtRandBare(total)}.` +
+        (range ? ` Likely between ${fmtRandBare(range.lo)} and ${fmtRandBare(range.hi)}.` : "") +
+        (onForecastDate(state.data.slate_change) ? "" : " Before any slate-levy change."),
+    });
+
+    const up = cssVar("--status-critical"), down = cssVar("--status-good"), brand = cssVar("--brand");
+    const muted = cssVar("--text-muted"), grid = cssVar("--gridline"), textSec = cssVar("--text-secondary");
+    const tone = (b) => b.kind === "total" ? brand : Math.abs(b.value) < 0.5 ? muted : b.value > 0 ? up : down;
+    const fill = (b) => b.kind === "estimate" ? hatch(tone(b)) : tone(b) + (b.kind === "total" ? "a6" : "bf");
+
+    const wrap = $("#waterfall-wrap");
+    const narrow = wrap.clientWidth < 560;
+    waterfallNarrow = narrow;
+    wrap.style.height = `${bars.length * (narrow ? 62 : 52) + 48}px`;
+    const canvas = $("#chart-waterfall");
+    canvas.setAttribute("aria-label",
+      `How the ${fmtShortDate(changeDate)} forecast adds up: ` +
+      bars.map((b) => `${b.label} ${fmtRandBare(b.value)}`).join(", ") + ". The table below has the same figures.");
+    $("#waterfall-table tbody").replaceChildren(...bars.map((b) => {
+      const tr = document.createElement("tr");
+      const th = document.createElement("th");
+      th.scope = "row";
+      th.textContent = `${b.label} (${b.sub})`;
+      const td = document.createElement("td");
+      td.textContent = fmtRandBare(b.value) + (b.kind === "total" && range
+        ? `, likely between ${fmtRandBare(range.lo)} and ${fmtRandBare(range.hi)}` : "");
+      tr.append(th, td);
+      return tr;
+    }));
+
+    // The axis runs past the bars on the side each value label sits, and ends on a
+    // round 50c, R1 or R2 (whichever keeps it to about eight ticks), so its ticks are round too.
+    const ends = bars.flatMap((b) => [b.start, b.end]).concat(range ? [range.lo, range.hi] : []);
+    const dataMin = Math.min(0, ...ends), dataMax = Math.max(0, ...ends);
+    const span = dataMax - dataMin || 100;
+    const room = span * 0.24;  // about a label's width
+    let needMin = dataMin, needMax = dataMax;
+    bars.forEach((b) => {
+      let lo = Math.min(b.start, b.end), hi = Math.max(b.start, b.end);
+      if (range && b.kind === "total") { lo = Math.min(lo, range.lo); hi = Math.max(hi, range.hi); }
+      if (b.value < 0) needMin = Math.min(needMin, lo - room); else needMax = Math.max(needMax, hi + room);
+    });
+    const step = span <= 200 ? 50 : span <= 450 ? 100 : 200;
+    const axisMin = Math.floor(needMin / step) * step, axisMax = Math.ceil(needMax / step) * step;
+    if (chartWaterfall) chartWaterfall.destroy();
+    chartWaterfall = new Chart(canvas, {
+      type: "bar",
+      data: {
+        labels: bars.map((b) => [b.label, b.sub]),
+        datasets: [{
+          data: bars.map((b) => [b.start, b.end]),
+          backgroundColor: bars.map(fill),
+          borderColor: bars.map(tone),
+          borderWidth: 1.5,
+          borderSkipped: false,
+          borderRadius: 4,
+          maxBarThickness: narrow ? 18 : 26,
+        }],
+      },
+      options: {
+        indexAxis: "y",
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 500 },
+        layout: { padding: { top: narrow ? 18 : 4 } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              title: (items) => bars[items[0].dataIndex].label,
+              label: (ctx) => wrapText(bars[ctx.dataIndex].tip),
+            },
+          },
+        },
+        scales: {
+          x: {
+            min: axisMin,
+            max: axisMax,
+            grid: { color: grid },
+            ticks: { color: textSec, stepSize: step, maxRotation: 0, autoSkipPadding: 10, callback: (v) => fmtRandBare(v) },
+            title: { display: true, text: "Change per litre", color: textSec },
+          },
+          y: { grid: { display: false }, ticks: { display: !narrow, color: textSec, font: { size: 12 } } },
+        },
+      },
+      plugins: [waterfallMarks(bars, range, narrow)],
+    });
+
+    const sc = onForecastDate(state.data.slate_change);
+    $("#breakdown-note").textContent =
+      "Solid bars are CEF's official figure and announced levy changes." +
+      (estimates ? " Hatched bars are this tool's estimates: days CEF hasn't published yet and the rest of the period " +
+        "held at the latest price" + (pred.follows ? ", plus matching petrol 95's change." : ".") : "") +
+      (range ? ` The bracket on the forecast bar is the likely range. ${rangeExplainer(range.fr)}` : "") +
+      (sc ? "" : " A slate-levy change, if there is one, comes on top. It's only known when the DMPR announces the prices, a day or two before the change.");
+  }
+
   // Options shared by every chart in this file. The tooltip skips empty points and,
   // on the "Our estimate" diamonds, says how far that estimate was from CEF.
   function chartOptions(grid, textSec, unit) {
@@ -767,6 +1132,7 @@
     renderLevyBanner();
     renderStatusBar();
     renderHero();
+    renderBreakdown();
     renderAccuracy();
     renderFx();
     renderCharts();

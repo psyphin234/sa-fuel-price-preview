@@ -79,6 +79,10 @@ backend/
                        hand (e.g. the MTBPS relief of Nov 2026 - Jan 2027, the
                        slate levy rise to 135.84c of Nov 2026); added on top of
                        the BFP forecast for the price change they fall on
+  forecast_range.py  - the "likely range" around the forecast, from how far
+                       the same forecast missed at the same stage of the last
+                       12 review periods; and the period's days for the
+                       progress strip
   backtest_fetch.py  - downloads CEF's historical reports for backtesting
   backtest.py        - scores candidate estimation models against that history
   release_times.py   - prints when CEF's reports tend to come out
@@ -201,6 +205,25 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   the DMPR usually gives inland 93 the same change as 95 (11 of 16 changes
   from Jul 2025 to Nov 2026), not its own over/under-recovery. 93's own
   figures still show in the charts and table.
+- The **likely range** under each forecast ("Likely between −R3.40 and
+  −R2.60") comes from `backend/forecast_range.py`. For each of the last 12
+  finished review periods in the report cache it replays the forecast with
+  the same number of days still to come (CEF's figures only, the rest held at
+  that day's BFP against the reference CEF used), pooled with the stage either
+  side, and takes the miss 80% of them stayed within. Checked walk-forward
+  (each period's range built only from earlier ones, Mar - Oct 2026), that
+  caught 78% of outcomes, so the site says "about 4 in 5". It covers the BFP
+  part only, not a slate-levy change. It's widest early in a period (about
+  ±R1 for petrol, ±R2.50 for diesel with 18 days to come) and narrows to a few
+  cents in the last days.
+- The **"How the forecast adds up"** panel (`renderBreakdown` in both
+  `app.js`) shows the period's days (official / estimated / to come), CEF's
+  latest official average in words (the figure people quote), and a waterfall
+  from that average to the forecast: estimated days, the rest of the period,
+  petrol 93 matching 95, then announced fuel and slate levy changes. Hatched
+  bars are estimates; the steps add up to the forecast exactly. A hidden table
+  gives screen readers the same figures. On screens under 560px the step names
+  go above the bars.
 - A review period runs from the Friday before one price change (first
   Wednesday of the month) to the Thursday before the next one's Friday, i.e.
   it closes about six days before the change (the Thursday when that Friday is
