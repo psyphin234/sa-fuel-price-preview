@@ -904,6 +904,15 @@ td.num, th.num { text-align: right; }
   .driver-track { grid-column: 1 / -1; grid-row: 2; }
 }
 
+/* Track record: past forecasts against what happened. Replayed forecasts (worked
+   out afterwards) are italic with a footnote mark, so they don't pass for ones the
+   site showed at the time. */
+.track-panel[hidden] { display: none; }
+.track-summary { margin: 0 0 14px; font-size: 15px; line-height: 1.55; color: var(--text-primary); max-width: 80ch; }
+.track-table td.num { vertical-align: top; }
+.track-table .miss { display: block; margin-top: 2px; font-size: 12px; color: var(--text-muted); }
+.track-table .replayed { font-style: italic; color: var(--text-secondary); }
+
 /* Read by screen readers, not shown (the waterfall's table view). */
 .sr-only {
   position: absolute;

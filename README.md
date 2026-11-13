@@ -85,6 +85,8 @@ backend/
                        progress strip
   price_drivers.py   - splits the BFP part of a change into fuel prices abroad
                        and the rand, the DMPR's way (live and month pages)
+  track_record.py    - past forecasts (10 and 5 days to go) against the final
+                       BFP part and the official change, last 12 changes
   backtest_fetch.py  - downloads CEF's historical reports for backtesting
   backtest.py        - scores candidate estimation models against that history
   release_times.py   - prints when CEF's reports tend to come out
@@ -228,6 +230,15 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   figure from 93 and its rand figure from 95). Live, it counts the estimated
   days and the rest of the period at the latest BFP and rate, like the
   forecast.
+- The **track record** (`track_record.py`, `renderTrackRecord` in both
+  `app.js`, panel after the accuracy meter) compares, for each of the last 12
+  price changes, the forecast with 10 and with 5 review days still to come
+  against CEF's final average (the BFP part) and the official change. Logged
+  forecasts (`prediction_log`, from 22 Sep 2026; the last one made with CEF's
+  report for that day) are used where they exist; earlier ones are replayed
+  with `forecast_range.replay` and shown italic with a †. The logged figures
+  are what the site showed, so they can differ from a replay (Oct 2026, 5 days
+  to go: 311.4 logged vs 330.0 replayed, from before the projection fix).
 - The **"How the forecast adds up"** panel (`renderBreakdown` in both
   `app.js`) shows the period's days (official / estimated / to come), CEF's
   latest official average in words (the figure people quote), and a waterfall

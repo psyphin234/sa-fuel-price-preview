@@ -1024,6 +1024,64 @@
       "so it moves as the period fills in.";
   }
 
+  // A miss as a size: "12c", "R1.32".
+  const fmtMiss = (c) => c < 99.5 ? `${Math.round(c)}c` : `R${(c / 100).toFixed(2)}`;
+
+  // Track record (backend/track_record.py): for each recent price change, the
+  // forecast with 10 and 5 review days to go, the final Basic Fuel Price part, the
+  // levy and other decisions, and the official change, with a summary of how close
+  // the forecasts came. Replayed forecasts are italic with a †. Hidden when there's
+  // no record for the fuel.
+  function renderTrackRecord() {
+    const tr = state.data.track_record;
+    const rows = tr && tr.fuels ? tr.fuels[state.fuel] || [] : [];
+    $("#track-panel").hidden = !rows.length;
+    if (!rows.length) return;
+    const stages = tr.stages.map(String);
+
+    const summarise = (s) => {
+      const misses = rows.filter((r) => r.stages[s]).map((r) => Math.abs(r.stages[s].value - r.final)).sort((a, b) => a - b);
+      if (!misses.length) return null;
+      const mid = misses.length / 2;
+      const median = misses.length % 2 ? misses[Math.floor(mid)] : (misses[mid - 1] + misses[mid]) / 2;
+      return { n: misses.length, within: misses.filter((m) => m <= 25).length, median };
+    };
+    const parts = stages.map((s) => ({ s, sum: summarise(s) })).filter((p) => p.sum);
+    $("#track-summary").textContent = parts.map(({ s, sum }, i) => i === 0
+      ? `With ${s} days of the review period to go, the forecast was within 25c of the final figure for ` +
+        `${sum.within} of the last ${sum.n} price changes (typical miss ${fmtMiss(sum.median)}).`
+      : `With ${s} days to go: ${sum.within} of ${sum.n} (typical miss ${fmtMiss(sum.median)}).`).join(" ");
+
+    let replayed = false;
+    const cell = (row, s) => {
+      const st = row.stages[s];
+      if (!st) return '<td class="num">—</td>';
+      const rep = st.source === "replayed";
+      replayed = replayed || rep;
+      return `<td class="num${rep ? " replayed" : ""}">${fmtRandBare(st.value)}${rep ? '<sup class="fn-mark">†</sup>' : ""}` +
+        `<span class="miss">${fmtMiss(Math.abs(st.value - row.final))} off</span></td>`;
+    };
+    $("#track-table tbody").innerHTML = rows.map((row) => `<tr>
+        <td>${fmtDate(row.effective)}</td>
+        ${stages.map((s) => cell(row, s)).join("")}
+        <td class="num">${fmtRandBare(row.final)}</td>
+        <td class="num">${fmtRandBare(row.official - row.final)}</td>
+        <td class="num">${fmtRandBare(row.official)}</td>
+      </tr>`).join("");
+
+    const notes = [];
+    if (replayed && tr.logging_since) {
+      notes.push(`<sup class="fn-mark">†</sup> Replayed: worked out afterwards from CEF's daily figures the way the site ` +
+        `forecasts, because the site only started keeping its forecasts on ${fmtDate(tr.logging_since)}. ` +
+        "The others are what it showed at the time.");
+    }
+    notes.push("Levies &amp; other is the official change minus the final Basic Fuel Price part: fuel levy and slate " +
+      "levy decisions, and rounding. It's large in months when either levy changed.");
+    if (state.fuel === "petrol93") notes.push("Petrol 93's forecast follows petrol 95, so this is petrol 95's record.");
+    else if (state.fuel !== "petrol95") notes.push(`The official change is for CEF's ${PRICE_ROW_LABEL[state.fuel].toLowerCase()}.`);
+    $("#track-notes").innerHTML = notes.map((t) => `<p>${t}</p>`).join("");
+  }
+
   // Options shared by every chart in this file. The tooltip skips empty points and,
   // on the "Our estimate" diamonds, says how far that estimate was from CEF.
   function chartOptions(grid, textSec, unit) {
@@ -1252,6 +1310,7 @@
     renderBreakdown();
     renderDrivers();
     renderAccuracy();
+    renderTrackRecord();
     renderFx();
     renderCharts();
     renderTable();

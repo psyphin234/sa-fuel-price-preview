@@ -31,6 +31,7 @@ import context_data
 import fuel_levy
 import forecast_range
 import price_drivers
+import track_record
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
@@ -342,6 +343,12 @@ def build_status_data():
     except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
         print(f"price_drivers failed (the payload still goes out): {e}")
         drivers = None
+    # How close past forecasts were (track_record.py).
+    try:
+        record = track_record.build(history, db.get_logged_forecasts(), latest.period_start, cef.FUELS, bm.FOLLOWS)
+    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
+        print(f"track_record failed (the payload still goes out): {e}")
+        record = None
     review_days = forecast_range.review_days(
         latest.period_start, period_close, latest.period_end,
         [d["date"] for d in lead.estimated_days], [d["date"] for d in lead.manual_days])
@@ -379,6 +386,7 @@ def build_status_data():
         "review_days": review_days,  # each business day of the period: official/estimated/manual/to_come
         "forecast_range": likely,  # likely range half-widths per fuel (c/l), or None
         "drivers": drivers,  # each forecast split into fuel prices abroad and the rand, or None
+        "track_record": record,  # past forecasts against what happened, per fuel, or None
         "review_period_closed": today > period_close,
         "days_until_next_price_change": (next_change - today).days,
         "context": context,

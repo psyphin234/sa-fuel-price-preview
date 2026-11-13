@@ -30,7 +30,7 @@
      the local files below are cache-busters: raise one whenever its file changes,
      so browsers fetch the new copy instead of a cached one. -->
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=Sora:wght@500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=16">
+<link rel="stylesheet" href="style.css?v=17">
 <!-- Chart.js draws every chart. The integrity hash pins this exact file: if the
      version changes, the hash must change with it, or the browser refuses the
      script and the charts disappear. -->
@@ -182,6 +182,24 @@
         </div>
       </section>
 
+      <!-- Track record (renderTrackRecord in app.js, backend/track_record.py): past
+           forecasts against what happened. -->
+      <section class="panel track-panel" id="track-panel" hidden>
+        <div class="panel-head">
+          <div class="hero-label chart-fuel">—</div>
+          <h2>Track record: how close were past forecasts?</h2>
+          <p class="muted small">Each forecast is the Basic Fuel Price part of the change, as the site showed it with 10 and with 5 of the review period's days still to come. The final figure is CEF's average for the whole period, what the forecast aims at. The official change also includes government decisions on the fuel levy and the slate levy, shown separately.</p>
+        </div>
+        <p class="track-summary" id="track-summary"></p>
+        <div class="table-wrap">
+          <table class="track-table" id="track-table">
+            <thead><tr><th>Price change</th><th class="num">Forecast, 10 days to go</th><th class="num">5 days to go</th><th class="num">Final BFP part</th><th class="num">Levies &amp; other</th><th class="num">Official change</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="table-notes" id="track-notes"></div>
+      </section>
+
       <section class="panel">
         <div class="panel-head">
           <div class="hero-label chart-fuel">—</div>
@@ -309,6 +327,6 @@
 <script src="circuit.js?v=2"></script>
 <script src="fx.js?v=3"></script>
 <script src="context.js?v=2"></script>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=17"></script>
 </body>
 </html>

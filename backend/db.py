@@ -179,6 +179,17 @@ def get_prediction_history(fuel: str = None, limit: int = 200) -> list:
     return [dict(r) for r in rows]
 
 
+def get_logged_forecasts() -> list:
+    """For each review period, each latest CEF report it was made with and each
+    fuel: the last forecast logged (BFP part, c/l), for the track record."""
+    with get_conn() as conn:
+        rows = conn.execute(
+            "SELECT period_start, period_end, fuel, predicted_change_c_per_l, MAX(recorded_at) AS recorded_at "
+            "FROM prediction_log GROUP BY period_start, period_end, fuel"
+        ).fetchall()
+    return [dict(r) for r in rows]
+
+
 def upsert_estimate(date: dt.date, fuel: str, estimated_bfp: float, keep_existing: bool = False):
     """Remembers today's estimated BFP for (date, fuel) so its accuracy can be
     checked once CEF publishes the real figure for that date. keep_existing: only

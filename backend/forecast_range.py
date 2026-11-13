@@ -50,23 +50,33 @@ def finished_periods(history: list, current_start: dt.date) -> list:
     return periods
 
 
-def replay_error(reports: list, fuel: str, remaining: int):
-    """The miss of a forecast made with `remaining` days of the period still to come:
-    projected average minus the final one, in c/l (the price change misses by the
-    same amount the other way). None if the period is too short for that stage."""
+def replay(reports: list, fuel: str, remaining: int):
+    """The period's average over/(under) recovery as the forecast would have
+    projected it with `remaining` days still to come: CEF's average to that day,
+    and the rest at that day's BFP against the reference CEF used on each. None if
+    the period is too short for that stage or a figure is missing."""
     n = len(reports)
     k = n - remaining
     if k < 1:
         return None
-    at, final = reports[k - 1], reports[-1]
+    at = reports[k - 1]
     avg, bfp = at.avg_over_under.get(fuel), at.bfp.get(fuel)
-    if avg is None or bfp is None or final.avg_over_under.get(fuel) is None:
+    if avg is None or bfp is None:
         return None
     rest = [r.reference_price.get(fuel) for r in reports[k:]]
     if any(ref is None for ref in rest):
         return None
-    projected = (avg * k + sum(ref - bfp for ref in rest)) / n
-    return projected - final.avg_over_under[fuel]
+    return (avg * k + sum(ref - bfp for ref in rest)) / n
+
+
+def replay_error(reports: list, fuel: str, remaining: int):
+    """The miss of a forecast made with `remaining` days of the period still to come:
+    projected average minus the final one, in c/l (the price change misses by the
+    same amount the other way). None if the period is too short for that stage."""
+    projected, final = replay(reports, fuel, remaining), reports[-1].avg_over_under.get(fuel)
+    if projected is None or final is None:
+        return None
+    return projected - final
 
 
 def quantile(values: list, q: float) -> float:
