@@ -1815,7 +1815,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.9184,
+  "current_exchange_rate": 16.9139,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.25,
@@ -1964,6 +1964,1138 @@
       "petrol93": 36.9
     }
   },
+  "drivers": {
+    "prev_period_start": "2026-10-02",
+    "fx_prev": 16.5529,
+    "fx_cur": 16.7029,
+    "fuels": {
+      "petrol95": {
+        "product": -363.97,
+        "rand": 13.28,
+        "total": -350.69,
+        "usd_cur": 88.518,
+        "usd_prev": 108.428
+      },
+      "diesel005": {
+        "product": -149.22,
+        "rand": 19.8,
+        "total": -129.42,
+        "usd_cur": 132.008,
+        "usd_prev": 139.761
+      },
+      "diesel0005": {
+        "product": -189.82,
+        "rand": 20.12,
+        "total": -169.7,
+        "usd_cur": 134.14,
+        "usd_prev": 143.883
+      },
+      "illpar": {
+        "product": -263.84,
+        "rand": 19.42,
+        "total": -244.43,
+        "usd_cur": 129.466,
+        "usd_prev": 144.622
+      },
+      "petrol93": {
+        "product": -363.97,
+        "rand": 13.28,
+        "total": -350.69,
+        "usd_cur": 88.518,
+        "usd_prev": 108.428,
+        "follows": "petrol95"
+      }
+    }
+  },
+  "track_record": {
+    "stages": [
+      10,
+      5
+    ],
+    "logging_since": "2026-09-22",
+    "fuels": {
+      "petrol95": [
+        {
+          "effective": "2026-11-04",
+          "period_start": "2026-10-02",
+          "period_end": "2026-10-29",
+          "stages": {
+            "10": {
+              "value": 108.0,
+              "source": "logged"
+            },
+            "5": {
+              "value": 91.0,
+              "source": "logged"
+            }
+          },
+          "final": 100.6,
+          "official": -1.0
+        },
+        {
+          "effective": "2026-10-07",
+          "period_start": "2026-08-28",
+          "period_end": "2026-10-01",
+          "stages": {
+            "10": {
+              "value": 317.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 311.4,
+              "source": "logged"
+            }
+          },
+          "final": 328.9,
+          "official": 333.0
+        },
+        {
+          "effective": "2026-09-02",
+          "period_start": "2026-07-31",
+          "period_end": "2026-08-27",
+          "stages": {
+            "10": {
+              "value": 91.2,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 107.7,
+              "source": "replayed"
+            }
+          },
+          "final": 106.7,
+          "official": 134.0
+        },
+        {
+          "effective": "2026-08-05",
+          "period_start": "2026-06-26",
+          "period_end": "2026-07-30",
+          "stages": {
+            "10": {
+              "value": -39.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 9.4,
+              "source": "replayed"
+            }
+          },
+          "final": 0.3,
+          "official": -52.0
+        },
+        {
+          "effective": "2026-07-01",
+          "period_start": "2026-05-29",
+          "period_end": "2026-06-25",
+          "stages": {
+            "10": {
+              "value": -236.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -308.3,
+              "source": "replayed"
+            }
+          },
+          "final": -303.0,
+          "official": -196.0
+        },
+        {
+          "effective": "2026-06-03",
+          "period_start": "2026-04-30",
+          "period_end": "2026-05-28",
+          "stages": {
+            "10": {
+              "value": -11.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -20.5,
+              "source": "replayed"
+            }
+          },
+          "final": -42.5,
+          "official": 143.0
+        },
+        {
+          "effective": "2026-05-06",
+          "period_start": "2026-03-27",
+          "period_end": "2026-04-29",
+          "stages": {
+            "10": {
+              "value": 174.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 195.8,
+              "source": "replayed"
+            }
+          },
+          "final": 203.9,
+          "official": 327.0
+        },
+        {
+          "effective": "2026-04-01",
+          "period_start": "2026-02-27",
+          "period_end": "2026-03-26",
+          "stages": {
+            "10": {
+              "value": 520.7,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 609.8,
+              "source": "replayed"
+            }
+          },
+          "final": 582.0,
+          "official": 306.0
+        },
+        {
+          "effective": "2026-03-04",
+          "period_start": "2026-01-30",
+          "period_end": "2026-02-26",
+          "stages": {
+            "10": {
+              "value": 7.2,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 15.7,
+              "source": "replayed"
+            }
+          },
+          "final": 20.6,
+          "official": 20.0
+        },
+        {
+          "effective": "2026-02-04",
+          "period_start": "2026-01-02",
+          "period_end": "2026-01-29",
+          "stages": {
+            "10": {
+              "value": -67.1,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -62.5,
+              "source": "replayed"
+            }
+          },
+          "final": -65.0,
+          "official": -65.0
+        },
+        {
+          "effective": "2026-01-07",
+          "period_start": "2025-11-28",
+          "period_end": "2026-01-01",
+          "stages": {
+            "10": {
+              "value": -65.0,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -64.1,
+              "source": "replayed"
+            }
+          },
+          "final": -65.8,
+          "official": -66.0
+        },
+        {
+          "effective": "2025-12-03",
+          "period_start": "2025-10-31",
+          "period_end": "2025-11-27",
+          "stages": {
+            "10": {
+              "value": 24.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 22.3,
+              "source": "replayed"
+            }
+          },
+          "final": 25.6,
+          "official": 29.0
+        }
+      ],
+      "diesel005": [
+        {
+          "effective": "2026-11-04",
+          "period_start": "2026-10-02",
+          "period_end": "2026-10-29",
+          "stages": {
+            "10": {
+              "value": 94.3,
+              "source": "logged"
+            },
+            "5": {
+              "value": 139.0,
+              "source": "logged"
+            }
+          },
+          "final": 141.8,
+          "official": -109.82
+        },
+        {
+          "effective": "2026-10-07",
+          "period_start": "2026-08-28",
+          "period_end": "2026-10-01",
+          "stages": {
+            "10": {
+              "value": 312.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 271.3,
+              "source": "logged"
+            }
+          },
+          "final": 280.0,
+          "official": 284.38
+        },
+        {
+          "effective": "2026-09-02",
+          "period_start": "2026-07-31",
+          "period_end": "2026-08-27",
+          "stages": {
+            "10": {
+              "value": 273.4,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 295.4,
+              "source": "replayed"
+            }
+          },
+          "final": 271.2,
+          "official": 293.9
+        },
+        {
+          "effective": "2026-08-05",
+          "period_start": "2026-06-26",
+          "period_end": "2026-07-30",
+          "stages": {
+            "10": {
+              "value": 128.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 198.3,
+              "source": "replayed"
+            }
+          },
+          "final": 190.8,
+          "official": 138.44
+        },
+        {
+          "effective": "2026-07-01",
+          "period_start": "2026-05-29",
+          "period_end": "2026-06-25",
+          "stages": {
+            "10": {
+              "value": -361.8,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -478.1,
+              "source": "replayed"
+            }
+          },
+          "final": -467.6,
+          "official": -313.8
+        },
+        {
+          "effective": "2026-06-03",
+          "period_start": "2026-04-30",
+          "period_end": "2026-05-28",
+          "stages": {
+            "10": {
+              "value": -557.4,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -524.5,
+              "source": "replayed"
+            }
+          },
+          "final": -556.6,
+          "official": -324.96
+        },
+        {
+          "effective": "2026-05-06",
+          "period_start": "2026-03-27",
+          "period_end": "2026-04-29",
+          "stages": {
+            "10": {
+              "value": 557.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 490.5,
+              "source": "replayed"
+            }
+          },
+          "final": 496.5,
+          "official": 526.7
+        },
+        {
+          "effective": "2026-04-01",
+          "period_start": "2026-02-27",
+          "period_end": "2026-03-26",
+          "stages": {
+            "10": {
+              "value": 870.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 1016.8,
+              "source": "replayed"
+            }
+          },
+          "final": 1012.9,
+          "official": 737.0
+        },
+        {
+          "effective": "2026-03-04",
+          "period_start": "2026-01-30",
+          "period_end": "2026-02-26",
+          "stages": {
+            "10": {
+              "value": 44.8,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 59.6,
+              "source": "replayed"
+            }
+          },
+          "final": 62.2,
+          "official": 62.0
+        },
+        {
+          "effective": "2026-02-04",
+          "period_start": "2026-01-02",
+          "period_end": "2026-01-29",
+          "stages": {
+            "10": {
+              "value": -61.1,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -48.2,
+              "source": "replayed"
+            }
+          },
+          "final": -49.6,
+          "official": -50.0
+        },
+        {
+          "effective": "2026-01-07",
+          "period_start": "2025-11-28",
+          "period_end": "2026-01-01",
+          "stages": {
+            "10": {
+              "value": -134.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -134.1,
+              "source": "replayed"
+            }
+          },
+          "final": -136.6,
+          "official": -137.0
+        },
+        {
+          "effective": "2025-12-03",
+          "period_start": "2025-10-31",
+          "period_end": "2025-11-27",
+          "stages": {
+            "10": {
+              "value": 58.4,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 81.0,
+              "source": "replayed"
+            }
+          },
+          "final": 60.3,
+          "official": 65.48
+        }
+      ],
+      "diesel0005": [
+        {
+          "effective": "2026-11-04",
+          "period_start": "2026-10-02",
+          "period_end": "2026-10-29",
+          "stages": {
+            "10": {
+              "value": 87.0,
+              "source": "logged"
+            },
+            "5": {
+              "value": 128.1,
+              "source": "logged"
+            }
+          },
+          "final": 131.7,
+          "official": -119.82
+        },
+        {
+          "effective": "2026-10-07",
+          "period_start": "2026-08-28",
+          "period_end": "2026-10-01",
+          "stages": {
+            "10": {
+              "value": 356.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 311.4,
+              "source": "logged"
+            }
+          },
+          "final": 319.4,
+          "official": 324.38
+        },
+        {
+          "effective": "2026-09-02",
+          "period_start": "2026-07-31",
+          "period_end": "2026-08-27",
+          "stages": {
+            "10": {
+              "value": 293.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 317.3,
+              "source": "replayed"
+            }
+          },
+          "final": 292.2,
+          "official": 314.9
+        },
+        {
+          "effective": "2026-08-05",
+          "period_start": "2026-06-26",
+          "period_end": "2026-07-30",
+          "stages": {
+            "10": {
+              "value": 109.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 179.6,
+              "source": "replayed"
+            }
+          },
+          "final": 175.7,
+          "official": 123.44
+        },
+        {
+          "effective": "2026-07-01",
+          "period_start": "2026-05-29",
+          "period_end": "2026-06-25",
+          "stages": {
+            "10": {
+              "value": -403.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -521.5,
+              "source": "replayed"
+            }
+          },
+          "final": -512.2,
+          "official": -358.8
+        },
+        {
+          "effective": "2026-06-03",
+          "period_start": "2026-04-30",
+          "period_end": "2026-05-28",
+          "stages": {
+            "10": {
+              "value": -460.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -460.8,
+              "source": "replayed"
+            }
+          },
+          "final": -493.5,
+          "official": -261.96
+        },
+        {
+          "effective": "2026-05-06",
+          "period_start": "2026-03-27",
+          "period_end": "2026-04-29",
+          "stages": {
+            "10": {
+              "value": 555.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 491.0,
+              "source": "replayed"
+            }
+          },
+          "final": 496.7,
+          "official": 526.7
+        },
+        {
+          "effective": "2026-04-01",
+          "period_start": "2026-02-27",
+          "period_end": "2026-03-26",
+          "stages": {
+            "10": {
+              "value": 880.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 1032.4,
+              "source": "replayed"
+            }
+          },
+          "final": 1026.8,
+          "official": 751.0
+        },
+        {
+          "effective": "2026-03-04",
+          "period_start": "2026-01-30",
+          "period_end": "2026-02-26",
+          "stages": {
+            "10": {
+              "value": 47.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 62.4,
+              "source": "replayed"
+            }
+          },
+          "final": 65.1,
+          "official": 65.0
+        },
+        {
+          "effective": "2026-02-04",
+          "period_start": "2026-01-02",
+          "period_end": "2026-01-29",
+          "stages": {
+            "10": {
+              "value": -68.1,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -55.3,
+              "source": "replayed"
+            }
+          },
+          "final": -56.2,
+          "official": -57.0
+        },
+        {
+          "effective": "2026-01-07",
+          "period_start": "2025-11-28",
+          "period_end": "2026-01-01",
+          "stages": {
+            "10": {
+              "value": -147.1,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -146.6,
+              "source": "replayed"
+            }
+          },
+          "final": -149.3,
+          "official": -150.0
+        },
+        {
+          "effective": "2025-12-03",
+          "period_start": "2025-10-31",
+          "period_end": "2025-11-27",
+          "stages": {
+            "10": {
+              "value": 75.0,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 98.5,
+              "source": "replayed"
+            }
+          },
+          "final": 77.1,
+          "official": 82.48
+        }
+      ],
+      "illpar": [
+        {
+          "effective": "2026-11-04",
+          "period_start": "2026-10-02",
+          "period_end": "2026-10-29",
+          "stages": {
+            "10": {
+              "value": 269.4,
+              "source": "logged"
+            },
+            "5": {
+              "value": 279.3,
+              "source": "logged"
+            }
+          },
+          "final": 274.5,
+          "official": 366.0
+        },
+        {
+          "effective": "2026-10-07",
+          "period_start": "2026-08-28",
+          "period_end": "2026-10-01",
+          "stages": {
+            "10": {
+              "value": 366.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 336.2,
+              "source": "logged"
+            }
+          },
+          "final": 357.0,
+          "official": 477.0
+        },
+        {
+          "effective": "2026-09-02",
+          "period_start": "2026-07-31",
+          "period_end": "2026-08-27",
+          "stages": {
+            "10": {
+              "value": 216.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 230.0,
+              "source": "replayed"
+            }
+          },
+          "final": 212.4,
+          "official": 284.0
+        },
+        {
+          "effective": "2026-08-05",
+          "period_start": "2026-06-26",
+          "period_end": "2026-07-30",
+          "stages": {
+            "10": {
+              "value": 107.8,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 167.9,
+              "source": "replayed"
+            }
+          },
+          "final": 151.2,
+          "official": 203.0
+        },
+        {
+          "effective": "2026-07-01",
+          "period_start": "2026-05-29",
+          "period_end": "2026-06-25",
+          "stages": {
+            "10": {
+              "value": -407.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -530.9,
+              "source": "replayed"
+            }
+          },
+          "final": -523.9,
+          "official": -697.0
+        },
+        {
+          "effective": "2026-06-03",
+          "period_start": "2026-04-30",
+          "period_end": "2026-05-28",
+          "stages": {
+            "10": {
+              "value": -577.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -559.5,
+              "source": "replayed"
+            }
+          },
+          "final": -596.4,
+          "official": -795.0
+        },
+        {
+          "effective": "2026-05-06",
+          "period_start": "2026-03-27",
+          "period_end": "2026-04-29",
+          "stages": {
+            "10": {
+              "value": 476.8,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 430.4,
+              "source": "replayed"
+            }
+          },
+          "final": 421.9,
+          "official": 563.0
+        },
+        {
+          "effective": "2026-04-01",
+          "period_start": "2026-02-27",
+          "period_end": "2026-03-26",
+          "stages": {
+            "10": {
+              "value": 1115.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 1218.4,
+              "source": "replayed"
+            }
+          },
+          "final": 1163.0,
+          "official": 1560.0
+        },
+        {
+          "effective": "2026-03-04",
+          "period_start": "2026-01-30",
+          "period_end": "2026-02-26",
+          "stages": {
+            "10": {
+              "value": 24.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 41.8,
+              "source": "replayed"
+            }
+          },
+          "final": 44.6,
+          "official": 58.0
+        },
+        {
+          "effective": "2026-02-04",
+          "period_start": "2026-01-02",
+          "period_end": "2026-01-29",
+          "stages": {
+            "10": {
+              "value": -56.4,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -51.6,
+              "source": "replayed"
+            }
+          },
+          "final": -53.0,
+          "official": -69.0
+        },
+        {
+          "effective": "2026-01-07",
+          "period_start": "2025-11-28",
+          "period_end": "2026-01-01",
+          "stages": {
+            "10": {
+              "value": -109.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -107.2,
+              "source": "replayed"
+            }
+          },
+          "final": -110.5,
+          "official": -148.0
+        },
+        {
+          "effective": "2025-12-03",
+          "period_start": "2025-10-31",
+          "period_end": "2025-11-27",
+          "stages": {
+            "10": {
+              "value": 64.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 88.8,
+              "source": "replayed"
+            }
+          },
+          "final": 68.3,
+          "official": 99.0
+        }
+      ],
+      "petrol93": [
+        {
+          "effective": "2026-11-04",
+          "period_start": "2026-10-02",
+          "period_end": "2026-10-29",
+          "stages": {
+            "10": {
+              "value": 108.0,
+              "source": "logged"
+            },
+            "5": {
+              "value": 91.0,
+              "source": "logged"
+            }
+          },
+          "final": 100.6,
+          "official": -1.0
+        },
+        {
+          "effective": "2026-10-07",
+          "period_start": "2026-08-28",
+          "period_end": "2026-10-01",
+          "stages": {
+            "10": {
+              "value": 317.9,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 311.4,
+              "source": "logged"
+            }
+          },
+          "final": 328.9,
+          "official": 333.0
+        },
+        {
+          "effective": "2026-09-02",
+          "period_start": "2026-07-31",
+          "period_end": "2026-08-27",
+          "stages": {
+            "10": {
+              "value": 91.2,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 107.7,
+              "source": "replayed"
+            }
+          },
+          "final": 106.7,
+          "official": 134.0
+        },
+        {
+          "effective": "2026-08-05",
+          "period_start": "2026-06-26",
+          "period_end": "2026-07-30",
+          "stages": {
+            "10": {
+              "value": -39.3,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 9.4,
+              "source": "replayed"
+            }
+          },
+          "final": 0.3,
+          "official": -52.0
+        },
+        {
+          "effective": "2026-07-01",
+          "period_start": "2026-05-29",
+          "period_end": "2026-06-25",
+          "stages": {
+            "10": {
+              "value": -236.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -308.3,
+              "source": "replayed"
+            }
+          },
+          "final": -303.0,
+          "official": -196.0
+        },
+        {
+          "effective": "2026-06-03",
+          "period_start": "2026-04-30",
+          "period_end": "2026-05-28",
+          "stages": {
+            "10": {
+              "value": -11.5,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -20.5,
+              "source": "replayed"
+            }
+          },
+          "final": -42.5,
+          "official": 143.0
+        },
+        {
+          "effective": "2026-05-06",
+          "period_start": "2026-03-27",
+          "period_end": "2026-04-29",
+          "stages": {
+            "10": {
+              "value": 174.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 195.8,
+              "source": "replayed"
+            }
+          },
+          "final": 203.9,
+          "official": 327.0
+        },
+        {
+          "effective": "2026-04-01",
+          "period_start": "2026-02-27",
+          "period_end": "2026-03-26",
+          "stages": {
+            "10": {
+              "value": 520.7,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 609.8,
+              "source": "replayed"
+            }
+          },
+          "final": 582.0,
+          "official": 306.0
+        },
+        {
+          "effective": "2026-03-04",
+          "period_start": "2026-01-30",
+          "period_end": "2026-02-26",
+          "stages": {
+            "10": {
+              "value": 7.2,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 15.7,
+              "source": "replayed"
+            }
+          },
+          "final": 20.6,
+          "official": 20.0
+        },
+        {
+          "effective": "2026-02-04",
+          "period_start": "2026-01-02",
+          "period_end": "2026-01-29",
+          "stages": {
+            "10": {
+              "value": -67.1,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -62.5,
+              "source": "replayed"
+            }
+          },
+          "final": -65.0,
+          "official": -65.0
+        },
+        {
+          "effective": "2026-01-07",
+          "period_start": "2025-11-28",
+          "period_end": "2026-01-01",
+          "stages": {
+            "10": {
+              "value": -65.0,
+              "source": "replayed"
+            },
+            "5": {
+              "value": -64.1,
+              "source": "replayed"
+            }
+          },
+          "final": -65.8,
+          "official": -66.0
+        },
+        {
+          "effective": "2025-12-03",
+          "period_start": "2025-10-31",
+          "period_end": "2025-11-27",
+          "stages": {
+            "10": {
+              "value": 24.6,
+              "source": "replayed"
+            },
+            "5": {
+              "value": 22.3,
+              "source": "replayed"
+            }
+          },
+          "final": 25.6,
+          "official": 29.0
+        }
+      ]
+    }
+  },
+  "news": [
+    {
+      "title": "Biggest petrol price cut this year on the cards for December",
+      "link": "https://businesstech.co.za/news/energy/884143/biggest-petrol-price-cut-this-year-on-the-cards-for-south-africa-in-december/",
+      "source": "BusinessTech",
+      "published": "2026-11-13T10:00:00+00:00"
+    },
+    {
+      "title": "Woolworths says high fuel prices, interest rates in SA and Australia are hurting the businesses",
+      "link": "https://www.citizen.co.za/business/woolworths-says-high-fuel-prices-interest-rates-in-sa-and-australia-are-hurting-the-businesses/",
+      "source": "The Citizen",
+      "published": "2026-11-11T11:19:53+00:00"
+    },
+    {
+      "title": "Petrol price headache? Using this rewards card at the pumps could also save you on groceries",
+      "link": "https://www.citizen.co.za/business/petrol-price-headache-using-this-rewards-card-at-the-pumps-could-also-save-you-on-groceries/",
+      "source": "The Citizen",
+      "published": "2026-11-10T11:48:20+00:00"
+    },
+    {
+      "title": "Still have errands to run? Two ways to make the fuel you need cost less",
+      "link": "https://www.citizen.co.za/business/still-have-errands-to-run-two-ways-to-make-the-fuel-you-need-cost-less/",
+      "source": "The Citizen",
+      "published": "2026-11-06T09:34:43+00:00"
+    },
+    {
+      "title": "Great news for petrol prices in South Africa",
+      "link": "https://businesstech.co.za/news/energy/882938/great-news-for-petrol-prices-in-south-africa-3/",
+      "source": "BusinessTech",
+      "published": "2026-11-06T08:22:06+00:00"
+    },
+    {
+      "title": "November petrol price: One cent decrease won\u2019t take South Africans anywhere",
+      "link": "https://www.citizen.co.za/business/personal-finance/november-petrol-price-one-cent-decrease-wont-take-south-africans-anywhere/",
+      "source": "The Citizen",
+      "published": "2026-11-05T13:21:40+00:00"
+    },
+    {
+      "title": "Brent crude plunges 10% after Trump midterm rebuke",
+      "link": "https://www.citizen.co.za/business/brent-crude-plunges-10-after-trump-midterm-rebuke/",
+      "source": "The Citizen",
+      "published": "2026-11-05T10:02:51+00:00"
+    },
+    {
+      "title": "Here is the official petrol price for November",
+      "link": "https://businesstech.co.za/news/energy/882296/here-is-the-official-petrol-price-for-november-8/",
+      "source": "BusinessTech",
+      "published": "2026-11-03T09:46:07+00:00"
+    }
+  ],
   "review_period_closed": false,
   "days_until_next_price_change": 19,
   "context": {
@@ -4980,5 +6112,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-13T23:18:51.954209"
+  "generated_at": "2026-11-13T23:52:39.051396"
 }
