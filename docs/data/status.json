@@ -1745,7 +1745,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.9089,
+  "current_exchange_rate": 16.9218,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.27,
@@ -2935,12 +2935,6 @@
   },
   "news": [
     {
-      "title": "Oil edges up as traders weigh Mideast threats and ample supply",
-      "link": "https://www.moneyweb.co.za/news-fast-news/oil-edges-up-as-traders-weigh-mideast-threats-and-ample-supply/",
-      "source": "Moneyweb",
-      "published": "2026-11-17T10:03:37+00:00"
-    },
-    {
       "title": "Here is the expected petrol price for December",
       "link": "https://businesstech.co.za/news/energy/884434/here-is-the-expected-petrol-price-for-december-9/",
       "source": "BusinessTech",
@@ -2981,6 +2975,12 @@
       "link": "https://www.citizen.co.za/business/personal-finance/november-petrol-price-one-cent-decrease-wont-take-south-africans-anywhere/",
       "source": "The Citizen",
       "published": "2026-11-05T13:21:40+00:00"
+    },
+    {
+      "title": "Brent crude plunges 10% after Trump midterm rebuke",
+      "link": "https://www.citizen.co.za/business/brent-crude-plunges-10-after-trump-midterm-rebuke/",
+      "source": "The Citizen",
+      "published": "2026-11-05T10:02:51+00:00"
     }
   ],
   "review_period_closed": false,
@@ -6034,5 +6034,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-17T19:18:49.490149"
+  "generated_at": "2026-11-17T20:18:48.421715"
 }
