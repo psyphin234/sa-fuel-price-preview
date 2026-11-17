@@ -1745,7 +1745,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 16.9218,
+  "current_exchange_rate": 16.9197,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.27,
@@ -2935,6 +2935,12 @@
   },
   "news": [
     {
+      "title": "Crew abandons gas tanker off Oman after being hit by projectile, sources say",
+      "link": "https://www.dailymaverick.co.za/article/2026-11-17-crew-abandons-gas-tanker-off-oman-after-being-hit-by-projectile-sources-say/",
+      "source": "Daily Maverick",
+      "published": "2026-11-17T21:14:43+00:00"
+    },
+    {
       "title": "Here is the expected petrol price for December",
       "link": "https://businesstech.co.za/news/energy/884434/here-is-the-expected-petrol-price-for-december-9/",
       "source": "BusinessTech",
@@ -2975,12 +2981,6 @@
       "link": "https://www.citizen.co.za/business/personal-finance/november-petrol-price-one-cent-decrease-wont-take-south-africans-anywhere/",
       "source": "The Citizen",
       "published": "2026-11-05T13:21:40+00:00"
-    },
-    {
-      "title": "Brent crude plunges 10% after Trump midterm rebuke",
-      "link": "https://www.citizen.co.za/business/brent-crude-plunges-10-after-trump-midterm-rebuke/",
-      "source": "The Citizen",
-      "published": "2026-11-05T10:02:51+00:00"
     }
   ],
   "review_period_closed": false,
@@ -3466,7 +3466,7 @@
         ],
         [
           "2026-11-17",
-          93.75
+          93.58
         ]
       ],
       "data_to": "2026-11-17"
@@ -6034,5 +6034,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-17T20:18:48.421715"
+  "generated_at": "2026-11-17T21:18:53.622597"
 }
