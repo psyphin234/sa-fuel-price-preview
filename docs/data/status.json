@@ -1815,7 +1815,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.2662,
+  "current_exchange_rate": 17.2885,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.31,
@@ -3005,6 +3005,12 @@
   },
   "news": [
     {
+      "title": "Liquidity turbulence not deterring SAA this festive season",
+      "link": "https://www.moneyweb.co.za/moneyweb-radio/safm-market-update/liquidity-turbulence-not-deterring-saa-this-festive-season/",
+      "source": "Moneyweb",
+      "published": "2026-11-18T18:42:27+00:00"
+    },
+    {
       "title": "Iran attacks US bases in Gulf countries despite diplomatic efforts",
       "link": "https://www.dailymaverick.co.za/article/2026-11-18-iran-attacks-us-bases-in-gulf-countries-despite-diplomatic-efforts/",
       "source": "Daily Maverick",
@@ -3045,12 +3051,6 @@
       "link": "https://www.citizen.co.za/business/still-have-errands-to-run-two-ways-to-make-the-fuel-you-need-cost-less/",
       "source": "The Citizen",
       "published": "2026-11-06T09:34:43+00:00"
-    },
-    {
-      "title": "Great news for petrol prices in South Africa",
-      "link": "https://businesstech.co.za/news/energy/882938/great-news-for-petrol-prices-in-south-africa-3/",
-      "source": "BusinessTech",
-      "published": "2026-11-06T08:22:06+00:00"
     }
   ],
   "review_period_closed": false,
@@ -6104,5 +6104,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-18T20:18:42.898516"
+  "generated_at": "2026-11-18T21:18:43.723383"
 }
