@@ -1815,7 +1815,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.2903,
+  "current_exchange_rate": 17.2784,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.31,
@@ -3011,12 +3011,6 @@
       "published": "2026-11-18T18:42:27+00:00"
     },
     {
-      "title": "Iran attacks US bases in Gulf countries despite diplomatic efforts",
-      "link": "https://www.dailymaverick.co.za/article/2026-11-18-iran-attacks-us-bases-in-gulf-countries-despite-diplomatic-efforts/",
-      "source": "Daily Maverick",
-      "published": "2026-11-18T09:45:35+00:00"
-    },
-    {
       "title": "Major blow to taxis in South Africa",
       "link": "https://businesstech.co.za/news/energy/884876/major-blow-to-taxis-in-south-africa/",
       "source": "BusinessTech",
@@ -3051,6 +3045,12 @@
       "link": "https://www.citizen.co.za/business/still-have-errands-to-run-two-ways-to-make-the-fuel-you-need-cost-less/",
       "source": "The Citizen",
       "published": "2026-11-06T09:34:43+00:00"
+    },
+    {
+      "title": "Great news for petrol prices in South Africa",
+      "link": "https://businesstech.co.za/news/energy/882938/great-news-for-petrol-prices-in-south-africa-3/",
+      "source": "BusinessTech",
+      "published": "2026-11-06T08:22:06+00:00"
     }
   ],
   "review_period_closed": false,
@@ -3536,29 +3536,13 @@
         ],
         [
           "2026-11-18",
-          88.08
+          88.76
         ]
       ],
       "data_to": "2026-11-18"
     },
     "brent_spot": {
       "series": [
-        [
-          "2026-05-27",
-          97.11
-        ],
-        [
-          "2026-05-28",
-          95.47
-        ],
-        [
-          "2026-05-29",
-          92.88
-        ],
-        [
-          "2026-06-01",
-          98.29
-        ],
         [
           "2026-06-02",
           98.49
@@ -4022,10 +4006,26 @@
         [
           "2026-11-11",
           92.14
+        ],
+        [
+          "2026-11-12",
+          95.42
+        ],
+        [
+          "2026-11-13",
+          95.17
+        ],
+        [
+          "2026-11-16",
+          92.9
+        ],
+        [
+          "2026-11-17",
+          92.94
         ]
       ],
-      "data_to": "2026-11-11",
-      "released": "11/12/2026"
+      "data_to": "2026-11-17",
+      "released": "11/18/2026"
     },
     "hormuz": {
       "series": [
@@ -6104,5 +6104,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-18T22:18:45.451722"
+  "generated_at": "2026-11-18T23:18:48.815086"
 }
