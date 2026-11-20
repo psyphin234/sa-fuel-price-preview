@@ -104,7 +104,8 @@ def _brent_spot() -> dict:
 def _hormuz() -> dict:
     """PortWatch's daily Hormuz crossings from a year before the conflict to the latest
     day: the series shown (from HORMUZ_FROM), the latest 7-day averages (all ships
-    and tankers) and the daily average in the year before the conflict. The feed
+    and tankers), the latest 14- and 30-day averages (all ships) and the daily
+    average in the year before the conflict. The feed
     returns at most 2000 rows a request, so it pages through."""
     rows, offset = [], 0
     while True:
@@ -139,11 +140,18 @@ def _hormuz() -> dict:
 
     shown = [d for d in days if d[0] >= HORMUZ_FROM]
     last7 = shown[-7:]
+
+    def avg(n):  # all ships, the latest n days
+        last = shown[-n:]
+        return round(sum(k for _, k, _ in last) / len(last), 1)
+
     return {
         "series": [[day.isoformat(), n, t] for day, n, t in shown],
         "data_to": shown[-1][0].isoformat(),
         "avg_7d": round(sum(n for _, n, _ in last7) / len(last7), 1),
         "tanker_avg_7d": round(sum(t for _, _, t in last7) / len(last7), 1),
+        "avg_14d": avg(14),
+        "avg_30d": avg(30),
         "normal_per_day": round(sum(before) / len(before), 1),
         "normal_from": (CONFLICT_START - dt.timedelta(days=365)).isoformat(),
         "conflict_start": CONFLICT_START.isoformat(),

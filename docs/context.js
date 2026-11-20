@@ -192,7 +192,7 @@
 
   // "Strait of Hormuz": ships crossing each day as bars, their 7-day average as a
   // line, and the pre-conflict normal as a dashed line. h: {series: [[iso date,
-  // ships, tankers]], avg_7d, normal_per_day, normal_from, conflict_start, data_to,
+  // ships, tankers]], avg_7d, avg_14d, avg_30d, normal_per_day, normal_from, conflict_start, data_to,
   // events}. The counts only include ships broadcasting on AIS, so the page's
   // caveat box explains the undercount.
   function renderHormuz(h) {
@@ -209,8 +209,18 @@
       return Math.round((sum / 7) * 10) / 10;
     });
 
+    // Latest 30-, 14- and 7-day averages of all ships. Older payloads only carry
+    // avg_7d, so the others fall back to the series.
+    const latest = (n) => {
+      const last = s.slice(-n);
+      return last.reduce((t, r) => t + r[1], 0) / last.length;
+    };
+    const shipsStat = (value, sub) =>
+      stat("Ships a day seen on tracking", value.toFixed(1), sub, value < h.normal_per_day / 2 ? "alert" : "");
     $("#ctx-hormuz-figures").replaceChildren(
-      stat("Ships a day seen on tracking", h.avg_7d.toFixed(1), `7-day average to ${fmtDay(h.data_to)}`, h.avg_7d < h.normal_per_day / 2 ? "alert" : ""),
+      shipsStat(h.avg_30d ?? latest(30), `1-month (30-day) average to ${fmtDay(h.data_to)}`),
+      shipsStat(h.avg_14d ?? latest(14), `14-day average to ${fmtDay(h.data_to)}`),
+      shipsStat(h.avg_7d, `7-day average to ${fmtDay(h.data_to)}`),
       stat("Normal before the conflict", h.normal_per_day.toFixed(0), `a day, ${fmtMonth(h.normal_from)} – ${fmtMonth(h.conflict_start)}`),
     );
 
