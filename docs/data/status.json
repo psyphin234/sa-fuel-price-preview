@@ -1815,7 +1815,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.5318,
+  "current_exchange_rate": 17.5622,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.36,
@@ -3005,12 +3005,6 @@
   },
   "news": [
     {
-      "title": "Oil set for third weekly drop as ample supply outweighs war risk",
-      "link": "https://www.moneyweb.co.za/news/markets/oil-set-for-third-weekly-drop-as-ample-supply-outweighs-war-risk/",
-      "source": "Moneyweb",
-      "published": "2026-11-20T10:34:12+00:00"
-    },
-    {
       "title": "Complete U-turn for petrol and diesel prices in South Africa",
       "link": "https://businesstech.co.za/news/energy/885362/complete-u-turn-for-petrol-and-diesel-prices-in-south-africa/",
       "source": "BusinessTech",
@@ -3536,7 +3530,7 @@
         ],
         [
           "2026-11-20",
-          88.82
+          89.7
         ]
       ],
       "data_to": "2026-11-20"
@@ -6106,5 +6100,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-20T21:18:46.497609"
+  "generated_at": "2026-11-20T22:18:49.971410"
 }
