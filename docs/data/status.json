@@ -2865,6 +2865,12 @@
   },
   "news": [
     {
+      "title": "How the Strait of Hormuz closure hit Africa in 4 ways",
+      "link": "https://www.moneyweb.co.za/news/africa/hormuz-block-hit-africa-in-4-places/",
+      "source": "Moneyweb",
+      "published": "2026-11-22T02:00:28+00:00"
+    },
+    {
       "title": "Complete U-turn for petrol and diesel prices in South Africa",
       "link": "https://businesstech.co.za/news/energy/885362/complete-u-turn-for-petrol-and-diesel-prices-in-south-africa/",
       "source": "BusinessTech",
@@ -5960,5 +5966,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-22T04:18:50.173755"
+  "generated_at": "2026-11-22T05:18:52.465128"
 }
