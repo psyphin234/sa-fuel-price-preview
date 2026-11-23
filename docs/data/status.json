@@ -1,8 +1,8 @@
 {
   "latest_official_report": {
-    "report_date": "2026-11-19",
+    "report_date": "2026-11-20",
     "period_start": "2026-10-30",
-    "period_end": "2026-11-19",
+    "period_end": "2026-11-20",
     "reference_valid_from": "2026-11-04",
     "pump_price_effective": "2026-11-04",
     "reference_price": {
@@ -13,32 +13,32 @@
       "illpar": 2448.128
     },
     "bfp": {
-      "petrol95": 1370.97,
-      "petrol93": 1354.525,
-      "diesel005": 2041.546,
-      "diesel0005": 2060.607,
-      "illpar": 1992.953
+      "petrol95": 1355.214,
+      "petrol93": 1329.726,
+      "diesel005": 2050.704,
+      "diesel0005": 2068.561,
+      "illpar": 2005.009
     },
     "unit_over_under": {
-      "petrol95": 473.36,
-      "petrol93": 452.805,
-      "diesel005": 314.084,
-      "diesel0005": 369.423,
-      "illpar": 455.175
+      "petrol95": 489.116,
+      "petrol93": 477.604,
+      "diesel005": 304.926,
+      "diesel0005": 361.469,
+      "illpar": 443.119
     },
     "avg_bfp": {
-      "petrol95": 1456.053,
-      "petrol93": 1443.01,
-      "diesel005": 2169.38,
-      "diesel0005": 2203.564,
-      "illpar": 2132.313
+      "petrol95": 1449.75,
+      "petrol93": 1435.93,
+      "diesel005": 2161.962,
+      "diesel0005": 2195.126,
+      "illpar": 2124.357
     },
     "avg_over_under": {
-      "petrol95": 368.113,
-      "petrol93": 344.156,
-      "diesel005": 157.85,
-      "diesel0005": 200.066,
-      "illpar": 260.815
+      "petrol95": 375.676,
+      "petrol93": 352.497,
+      "diesel005": 167.043,
+      "diesel0005": 210.154,
+      "illpar": 272.209
     },
     "current_price": {
       "petrol95": 3024.0,
@@ -47,7 +47,7 @@
       "diesel0005": 3160.07,
       "illpar": 3548.0
     },
-    "exchange_rate": 17.2575,
+    "exchange_rate": 17.4793,
     "source": "cef_official"
   },
   "fuels": {
@@ -61,306 +61,201 @@
     "petrol95": {
       "fuel": "petrol95",
       "label": "Petrol 95 ULP",
-      "official_avg_over_under": 368.113,
-      "official_days_count": 15,
-      "blended_avg_over_under": 380.194,
+      "official_avg_over_under": 375.676,
+      "official_days_count": 16,
+      "blended_avg_over_under": 382.269,
       "blended_days_count": 17,
       "projected_days_count": 3,
-      "projected_avg_over_under": 393.606,
+      "projected_avg_over_under": 398.093,
       "estimated_days": [
-        {
-          "date": "2026-11-20",
-          "source": "estimated",
-          "bfp": {
-            "petrol95": 1372.34,
-            "petrol93": 1355.144,
-            "diesel005": 2047.112,
-            "diesel0005": 2066.076,
-            "illpar": 1994.975
-          },
-          "unit_over_under": {
-            "petrol95": 471.99,
-            "petrol93": 452.186,
-            "diesel005": 308.518,
-            "diesel0005": 363.954,
-            "illpar": 453.153
-          },
-          "exchange_rate": 17.435,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
-          "fallback": false
-        },
         {
           "date": "2026-11-23",
           "source": "estimated",
           "bfp": {
-            "petrol95": 1374.721,
-            "petrol93": 1357.991,
-            "diesel005": 2048.05,
-            "diesel0005": 2067.162,
-            "illpar": 1997.969
+            "petrol95": 1356.57,
+            "petrol93": 1331.56,
+            "diesel005": 2048.946,
+            "diesel0005": 2066.932,
+            "illpar": 2005.582
           },
           "unit_over_under": {
-            "petrol95": 469.609,
-            "petrol93": 449.339,
-            "diesel005": 307.58,
-            "diesel0005": 362.868,
-            "illpar": 450.159
+            "petrol95": 487.76,
+            "petrol93": 475.77,
+            "diesel005": 306.684,
+            "diesel0005": 363.098,
+            "illpar": 442.546
           },
-          "exchange_rate": 17.3659,
+          "exchange_rate": 17.4093,
           "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
           "fallback": false
         }
       ],
       "manual_days": [],
-      "predicted_pump_price_change_c_per_l": -393.61,
+      "predicted_pump_price_change_c_per_l": -398.09,
       "current_price_c_per_l": 3024.0,
-      "predicted_new_price_c_per_l": 2630.39,
+      "predicted_new_price_c_per_l": 2625.91,
       "direction": "decrease",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 2 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
       "follows": null
     },
     "petrol93": {
       "fuel": "petrol93",
       "label": "Petrol 93 ULP & LRP",
-      "official_avg_over_under": 344.156,
-      "official_days_count": 15,
-      "blended_avg_over_under": 356.698,
+      "official_avg_over_under": 352.497,
+      "official_days_count": 16,
+      "blended_avg_over_under": 359.748,
       "blended_days_count": 17,
       "projected_days_count": 3,
-      "projected_avg_over_under": 370.594,
+      "projected_avg_over_under": 377.152,
       "estimated_days": [
-        {
-          "date": "2026-11-20",
-          "source": "estimated",
-          "bfp": {
-            "petrol95": 1372.34,
-            "petrol93": 1355.144,
-            "diesel005": 2047.112,
-            "diesel0005": 2066.076,
-            "illpar": 1994.975
-          },
-          "unit_over_under": {
-            "petrol95": 471.99,
-            "petrol93": 452.186,
-            "diesel005": 308.518,
-            "diesel0005": 363.954,
-            "illpar": 453.153
-          },
-          "exchange_rate": 17.435,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
-          "fallback": false
-        },
         {
           "date": "2026-11-23",
           "source": "estimated",
           "bfp": {
-            "petrol95": 1374.721,
-            "petrol93": 1357.991,
-            "diesel005": 2048.05,
-            "diesel0005": 2067.162,
-            "illpar": 1997.969
+            "petrol95": 1356.57,
+            "petrol93": 1331.56,
+            "diesel005": 2048.946,
+            "diesel0005": 2066.932,
+            "illpar": 2005.582
           },
           "unit_over_under": {
-            "petrol95": 469.609,
-            "petrol93": 449.339,
-            "diesel005": 307.58,
-            "diesel0005": 362.868,
-            "illpar": 450.159
+            "petrol95": 487.76,
+            "petrol93": 475.77,
+            "diesel005": 306.684,
+            "diesel0005": 363.098,
+            "illpar": 442.546
           },
-          "exchange_rate": 17.3659,
+          "exchange_rate": 17.4093,
           "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
           "fallback": false
         }
       ],
       "manual_days": [],
-      "predicted_pump_price_change_c_per_l": -393.61,
+      "predicted_pump_price_change_c_per_l": -398.09,
       "current_price_c_per_l": 2987.0,
-      "predicted_new_price_c_per_l": 2593.39,
+      "predicted_new_price_c_per_l": 2588.91,
       "direction": "decrease",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 2 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee. The official Petrol 93 ULP & LRP change usually matches Petrol 95 ULP's, so this forecast uses Petrol 95 ULP's rather than Petrol 93 ULP & LRP's own over/under-recovery.",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee. The official Petrol 93 ULP & LRP change usually matches Petrol 95 ULP's, so this forecast uses Petrol 95 ULP's rather than Petrol 93 ULP & LRP's own over/under-recovery.",
       "follows": "petrol95"
     },
     "diesel005": {
       "fuel": "diesel005",
       "label": "Diesel 0.05% S",
-      "official_avg_over_under": 157.85,
-      "official_days_count": 15,
-      "blended_avg_over_under": 175.52,
+      "official_avg_over_under": 167.043,
+      "official_days_count": 16,
+      "blended_avg_over_under": 175.257,
       "blended_days_count": 17,
       "projected_days_count": 3,
-      "projected_avg_over_under": 195.329,
+      "projected_avg_over_under": 194.971,
       "estimated_days": [
-        {
-          "date": "2026-11-20",
-          "source": "estimated",
-          "bfp": {
-            "petrol95": 1372.34,
-            "petrol93": 1355.144,
-            "diesel005": 2047.112,
-            "diesel0005": 2066.076,
-            "illpar": 1994.975
-          },
-          "unit_over_under": {
-            "petrol95": 471.99,
-            "petrol93": 452.186,
-            "diesel005": 308.518,
-            "diesel0005": 363.954,
-            "illpar": 453.153
-          },
-          "exchange_rate": 17.435,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
-          "fallback": false
-        },
         {
           "date": "2026-11-23",
           "source": "estimated",
           "bfp": {
-            "petrol95": 1374.721,
-            "petrol93": 1357.991,
-            "diesel005": 2048.05,
-            "diesel0005": 2067.162,
-            "illpar": 1997.969
+            "petrol95": 1356.57,
+            "petrol93": 1331.56,
+            "diesel005": 2048.946,
+            "diesel0005": 2066.932,
+            "illpar": 2005.582
           },
           "unit_over_under": {
-            "petrol95": 469.609,
-            "petrol93": 449.339,
-            "diesel005": 307.58,
-            "diesel0005": 362.868,
-            "illpar": 450.159
+            "petrol95": 487.76,
+            "petrol93": 475.77,
+            "diesel005": 306.684,
+            "diesel0005": 363.098,
+            "illpar": 442.546
           },
-          "exchange_rate": 17.3659,
+          "exchange_rate": 17.4093,
           "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
           "fallback": false
         }
       ],
       "manual_days": [],
-      "predicted_pump_price_change_c_per_l": -195.33,
+      "predicted_pump_price_change_c_per_l": -194.97,
       "current_price_c_per_l": 3085.67,
-      "predicted_new_price_c_per_l": 2890.34,
+      "predicted_new_price_c_per_l": 2890.7,
       "direction": "decrease",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 2 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
       "follows": null
     },
     "diesel0005": {
       "fuel": "diesel0005",
       "label": "Diesel 0.005% S",
-      "official_avg_over_under": 200.066,
-      "official_days_count": 15,
-      "blended_avg_over_under": 219.283,
+      "official_avg_over_under": 210.154,
+      "official_days_count": 16,
+      "blended_avg_over_under": 219.151,
       "blended_days_count": 17,
       "projected_days_count": 3,
-      "projected_avg_over_under": 240.821,
+      "projected_avg_over_under": 240.743,
       "estimated_days": [
-        {
-          "date": "2026-11-20",
-          "source": "estimated",
-          "bfp": {
-            "petrol95": 1372.34,
-            "petrol93": 1355.144,
-            "diesel005": 2047.112,
-            "diesel0005": 2066.076,
-            "illpar": 1994.975
-          },
-          "unit_over_under": {
-            "petrol95": 471.99,
-            "petrol93": 452.186,
-            "diesel005": 308.518,
-            "diesel0005": 363.954,
-            "illpar": 453.153
-          },
-          "exchange_rate": 17.435,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
-          "fallback": false
-        },
         {
           "date": "2026-11-23",
           "source": "estimated",
           "bfp": {
-            "petrol95": 1374.721,
-            "petrol93": 1357.991,
-            "diesel005": 2048.05,
-            "diesel0005": 2067.162,
-            "illpar": 1997.969
+            "petrol95": 1356.57,
+            "petrol93": 1331.56,
+            "diesel005": 2048.946,
+            "diesel0005": 2066.932,
+            "illpar": 2005.582
           },
           "unit_over_under": {
-            "petrol95": 469.609,
-            "petrol93": 449.339,
-            "diesel005": 307.58,
-            "diesel0005": 362.868,
-            "illpar": 450.159
+            "petrol95": 487.76,
+            "petrol93": 475.77,
+            "diesel005": 306.684,
+            "diesel0005": 363.098,
+            "illpar": 442.546
           },
-          "exchange_rate": 17.3659,
+          "exchange_rate": 17.4093,
           "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
           "fallback": false
         }
       ],
       "manual_days": [],
-      "predicted_pump_price_change_c_per_l": -240.82,
+      "predicted_pump_price_change_c_per_l": -240.74,
       "current_price_c_per_l": 3160.07,
-      "predicted_new_price_c_per_l": 2919.25,
+      "predicted_new_price_c_per_l": 2919.33,
       "direction": "decrease",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 2 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
       "follows": null
     },
     "illpar": {
       "fuel": "illpar",
       "label": "Illuminating Paraffin",
-      "official_avg_over_under": 260.815,
-      "official_days_count": 15,
-      "blended_avg_over_under": 283.267,
+      "official_avg_over_under": 272.209,
+      "official_days_count": 16,
+      "blended_avg_over_under": 282.229,
       "blended_days_count": 17,
       "projected_days_count": 3,
-      "projected_avg_over_under": 308.301,
+      "projected_avg_over_under": 306.276,
       "estimated_days": [
-        {
-          "date": "2026-11-20",
-          "source": "estimated",
-          "bfp": {
-            "petrol95": 1372.34,
-            "petrol93": 1355.144,
-            "diesel005": 2047.112,
-            "diesel0005": 2066.076,
-            "illpar": 1994.975
-          },
-          "unit_over_under": {
-            "petrol95": 471.99,
-            "petrol93": 452.186,
-            "diesel005": 308.518,
-            "diesel0005": 363.954,
-            "illpar": 453.153
-          },
-          "exchange_rate": 17.435,
-          "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
-          "fallback": false
-        },
         {
           "date": "2026-11-23",
           "source": "estimated",
           "bfp": {
-            "petrol95": 1374.721,
-            "petrol93": 1357.991,
-            "diesel005": 2048.05,
-            "diesel0005": 2067.162,
-            "illpar": 1997.969
+            "petrol95": 1356.57,
+            "petrol93": 1331.56,
+            "diesel005": 2048.946,
+            "diesel0005": 2066.932,
+            "illpar": 2005.582
           },
           "unit_over_under": {
-            "petrol95": 469.609,
-            "petrol93": 449.339,
-            "diesel005": 307.58,
-            "diesel0005": 362.868,
-            "illpar": 450.159
+            "petrol95": 487.76,
+            "petrol93": 475.77,
+            "diesel005": 306.684,
+            "diesel0005": 363.098,
+            "illpar": 442.546
           },
-          "exchange_rate": 17.3659,
+          "exchange_rate": 17.4093,
           "note": "Estimated from US petrol, diesel and Brent futures plus USD/ZAR, weighted by how CEF's own figures have tracked them - not the real Platts Mediterranean assessment.",
           "fallback": false
         }
       ],
       "manual_days": [],
-      "predicted_pump_price_change_c_per_l": -308.3,
+      "predicted_pump_price_change_c_per_l": -306.28,
       "current_price_c_per_l": 3548.0,
-      "predicted_new_price_c_per_l": 3239.7,
+      "predicted_new_price_c_per_l": 3241.72,
       "direction": "decrease",
-      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 2 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
+      "note": "Based on CEF's official review-period average so far, plus this tool's estimate for 1 day(s) not yet published by CEF, and 3 more day(s) to the end of the review period assuming the BFP stays where it is now. The review period closes about six days before the price change, and the final government-announced price also reflects separate slate-levy/fuel-levy decisions, so treat this as a directional estimate, not a guarantee.",
       "follows": null
     }
   },
@@ -605,16 +500,21 @@
       },
       {
         "date": "2026-11-20",
-        "bfp": 1372.34,
-        "unit_over_under": 471.99,
+        "bfp": 1355.214,
+        "unit_over_under": 489.116,
         "reference": 1844.33,
         "cycle": "2026-12-02",
-        "source": "estimated"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 1372.34,
+          "error_c_per_l": -17.126,
+          "pct_error": -1.26
+        }
       },
       {
         "date": "2026-11-23",
-        "bfp": 1374.721,
-        "unit_over_under": 469.609,
+        "bfp": 1356.57,
+        "unit_over_under": 487.76,
         "reference": 1844.33,
         "cycle": "2026-12-02",
         "source": "estimated"
@@ -860,16 +760,21 @@
       },
       {
         "date": "2026-11-20",
-        "bfp": 1355.144,
-        "unit_over_under": 452.186,
+        "bfp": 1329.726,
+        "unit_over_under": 477.604,
         "reference": 1807.33,
         "cycle": "2026-12-02",
-        "source": "estimated"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 1355.144,
+          "error_c_per_l": -25.418,
+          "pct_error": -1.91
+        }
       },
       {
         "date": "2026-11-23",
-        "bfp": 1357.991,
-        "unit_over_under": 449.339,
+        "bfp": 1331.56,
+        "unit_over_under": 475.77,
         "reference": 1807.33,
         "cycle": "2026-12-02",
         "source": "estimated"
@@ -1115,16 +1020,21 @@
       },
       {
         "date": "2026-11-20",
-        "bfp": 2047.112,
-        "unit_over_under": 308.518,
+        "bfp": 2050.704,
+        "unit_over_under": 304.926,
         "reference": 2355.63,
         "cycle": "2026-12-02",
-        "source": "estimated"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 2047.112,
+          "error_c_per_l": 3.592,
+          "pct_error": 0.18
+        }
       },
       {
         "date": "2026-11-23",
-        "bfp": 2048.05,
-        "unit_over_under": 307.58,
+        "bfp": 2048.946,
+        "unit_over_under": 306.684,
         "reference": 2355.63,
         "cycle": "2026-12-02",
         "source": "estimated"
@@ -1370,16 +1280,21 @@
       },
       {
         "date": "2026-11-20",
-        "bfp": 2066.076,
-        "unit_over_under": 363.954,
+        "bfp": 2068.561,
+        "unit_over_under": 361.469,
         "reference": 2430.03,
         "cycle": "2026-12-02",
-        "source": "estimated"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 2066.076,
+          "error_c_per_l": 2.485,
+          "pct_error": 0.12
+        }
       },
       {
         "date": "2026-11-23",
-        "bfp": 2067.162,
-        "unit_over_under": 362.868,
+        "bfp": 2066.932,
+        "unit_over_under": 363.098,
         "reference": 2430.03,
         "cycle": "2026-12-02",
         "source": "estimated"
@@ -1625,16 +1540,21 @@
       },
       {
         "date": "2026-11-20",
-        "bfp": 1994.975,
-        "unit_over_under": 453.153,
-        "reference": 2448.13,
+        "bfp": 2005.009,
+        "unit_over_under": 443.119,
+        "reference": 2448.128,
         "cycle": "2026-12-02",
-        "source": "estimated"
+        "source": "cef_official",
+        "estimate": {
+          "bfp": 1994.975,
+          "error_c_per_l": 10.034,
+          "pct_error": 0.5
+        }
       },
       {
         "date": "2026-11-23",
-        "bfp": 1997.969,
-        "unit_over_under": 450.159,
+        "bfp": 2005.582,
+        "unit_over_under": 442.546,
         "reference": 2448.13,
         "cycle": "2026-12-02",
         "source": "estimated"
@@ -1746,21 +1666,21 @@
     },
     {
       "date": "2026-11-20",
-      "rate": 17.435,
-      "source": "estimated"
+      "rate": 17.4793,
+      "source": "cef_official"
     },
     {
       "date": "2026-11-23",
-      "rate": 17.3659,
+      "rate": 17.4093,
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.4076,
+  "current_exchange_rate": 17.407,
   "accuracy": {
     "n": 90,
-    "mean_abs_pct_error": 1.36,
-    "mean_abs_error_c_per_l": 25.88,
-    "accuracy_pct": 98.6,
+    "mean_abs_pct_error": 1.3,
+    "mean_abs_error_c_per_l": 24.33,
+    "accuracy_pct": 98.7,
     "status": "ready"
   },
   "announced_change": null,
@@ -1871,7 +1791,7 @@
     },
     {
       "date": "2026-11-20",
-      "status": "estimated"
+      "status": "official"
     },
     {
       "date": "2026-11-23",
@@ -1895,13 +1815,13 @@
     "periods": 12,
     "first_period": "2025-10-31",
     "last_period": "2026-10-02",
-    "remaining_days": 5,
+    "remaining_days": 4,
     "half_width": {
-      "petrol95": 14.3,
-      "diesel005": 24.2,
-      "diesel0005": 25.0,
-      "illpar": 21.2,
-      "petrol93": 14.3
+      "petrol95": 8.1,
+      "diesel005": 10.5,
+      "diesel0005": 10.0,
+      "illpar": 16.7,
+      "petrol93": 8.1
     }
   },
   "track_record": {
@@ -2105,11 +2025,11 @@
           "period_end": "2025-11-27",
           "stages": {
             "10": {
-              "value": 24.9,
+              "value": 25.3,
               "source": "replayed"
             },
             "5": {
-              "value": 22.1,
+              "value": 22.0,
               "source": "replayed"
             }
           },
@@ -2311,11 +2231,11 @@
           "period_end": "2025-11-27",
           "stages": {
             "10": {
-              "value": 57.9,
+              "value": 57.4,
               "source": "replayed"
             },
             "5": {
-              "value": 81.3,
+              "value": 81.5,
               "source": "replayed"
             }
           },
@@ -2517,11 +2437,11 @@
           "period_end": "2025-11-27",
           "stages": {
             "10": {
-              "value": 74.6,
+              "value": 74.2,
               "source": "replayed"
             },
             "5": {
-              "value": 98.8,
+              "value": 99.2,
               "source": "replayed"
             }
           },
@@ -2723,11 +2643,11 @@
           "period_end": "2025-11-27",
           "stages": {
             "10": {
-              "value": 64.2,
+              "value": 63.7,
               "source": "replayed"
             },
             "5": {
-              "value": 89.0,
+              "value": 89.3,
               "source": "replayed"
             }
           },
@@ -2929,11 +2849,11 @@
           "period_end": "2025-11-27",
           "stages": {
             "10": {
-              "value": 24.9,
+              "value": 25.3,
               "source": "replayed"
             },
             "5": {
-              "value": 22.1,
+              "value": 22.0,
               "source": "replayed"
             }
           },
@@ -6046,5 +5966,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-23T08:45:23.162327"
+  "generated_at": "2026-11-23T09:00:25.759375"
 }
