@@ -18,11 +18,12 @@ from pathlib import Path
 
 import requests
 
+# SABC News (business) was dropped on 24 Nov 2026: its server sends an incomplete
+# certificate chain, so every fetch failed verification (don't turn verification off).
 FEEDS = [
     ("BusinessTech", "https://businesstech.co.za/news/energy/feed/"),
     ("The Citizen", "https://www.citizen.co.za/business/feed/"),
     ("Moneyweb", "https://www.moneyweb.co.za/feed/"),
-    ("SABC News", "https://www.sabcnews.com/sabcnews/category/business/feed/"),
     ("Daily Maverick", "https://www.dailymaverick.co.za/dmrss/"),
 ]
 CACHE_PATH = Path(__file__).parent.parent / "data" / "news_cache.json"
