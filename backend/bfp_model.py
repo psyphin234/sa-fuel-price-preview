@@ -157,6 +157,8 @@ class Prediction:
     changes are added by the frontends.
     direction: "increase", "decrease" or "no change".
     follows: the fuel whose forecast change this one takes (see FOLLOWS), or None.
+    pass_through: how many times the over/(under) recovery the fuel's price row
+    moves (see PASS_THROUGH_FUELS), already applied to the change; or None.
     Its own over/(under) recovery figures above are kept as they are."""
     fuel: str
     label: str
@@ -174,6 +176,7 @@ class Prediction:
     direction: str
     note: str
     follows: Optional[str] = None
+    pass_through: Optional[float] = None
 
 
 # The DMPR usually gives inland petrol 93 the same change as petrol 95 rather than
@@ -198,6 +201,33 @@ def apply_follows(predictions: dict) -> dict:
             direction=lead.direction, follows=leader,
             note=p.note + f" The official {p.label} change usually matches {lead.label}'s, so this "
                           f"forecast uses {lead.label}'s rather than {p.label}'s own over/under-recovery.")
+    return out
+
+
+# Fuels whose price row moves by more than the over/(under) recovery. CEF's paraffin
+# row is the single national maximum retail price, which carries VAT and other
+# margins: it moved by 1.33-1.34 times the over/(under) recovery in every price
+# change from Dec 2025 to Nov 2026 (Oct 2026: +R3.57 recovery, +R4.77 price), while
+# the site forecast the recovery itself. The factor is measured from CEF's history
+# on every run (track_record.pass_through) and applied by apply_pass_through.
+PASS_THROUGH_FUELS = ("illpar",)
+
+
+def apply_pass_through(predictions: dict, factors: dict) -> dict:
+    """The predictions with each fuel in `factors` moving by factor x its over/(under)
+    recovery; the new price is its current price plus that."""
+    out = dict(predictions)
+    for fuel, factor in factors.items():
+        p = predictions.get(fuel)
+        if p is None or not factor:
+            continue
+        change = round(p.predicted_pump_price_change_c_per_l * factor, 2)
+        new_price = round(p.current_price_c_per_l + change, 2) if p.current_price_c_per_l is not None else None
+        out[fuel] = replace(
+            p, predicted_pump_price_change_c_per_l=change, predicted_new_price_c_per_l=new_price,
+            pass_through=round(factor, 4),
+            note=p.note + f" Its price is a retail price that has moved by about {factor:.2f} times the "
+                          "over/under-recovery (it carries VAT and other margins), and the forecast allows for that.")
     return out
 
 

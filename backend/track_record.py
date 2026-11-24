@@ -35,10 +35,35 @@ def official_changes(history: list, fuels: list) -> dict:
             for old, new in zip(dates, dates[1:])}
 
 
-def build(history: list, logged: list, current_start, fuels: list, follows: dict = None) -> dict:
+def pass_through(history: list, current_start, fuel: str, fuels: list, min_move: float = 20.0):
+    """How many times its over/(under) recovery a fuel's price row moves: the median
+    of official change / final BFP part over the last MONTHS changes that moved at
+    least `min_move` c/l (smaller ones are mostly rounding). None if fewer than 6."""
+    changes = official_changes(history, fuels)
+    ratios = []
+    for reports in forecast_range.finished_periods(history, current_start):
+        closing = reports[-1]
+        official = changes.get(bm.next_price_change_date(closing.pump_price_effective))
+        final = closing.avg_over_under.get(fuel)
+        if official is None or final is None or abs(final) < min_move:
+            continue
+        ratios.append(official[fuel] / -final)
+    ratios = sorted(ratios[-MONTHS:])
+    if len(ratios) < 6:
+        return None
+    mid = len(ratios) // 2
+    return ratios[mid] if len(ratios) % 2 else (ratios[mid - 1] + ratios[mid]) / 2
+
+
+def build(history: list, logged: list, current_start, fuels: list, follows: dict = None,
+          factors: dict = None) -> dict:
     """The rows per fuel, newest first. A fuel in `follows` (petrol 93) gets its
-    leader's, since its forecast has been the leader's; the frontend says so."""
+    leader's, since its forecast has been the leader's; the frontend says so. For a
+    fuel in `factors` (paraffin, see bfp_model.PASS_THROUGH_FUELS) the final figure
+    and the replayed forecasts are in its price's terms (x factor); logged forecasts
+    stay as the site showed them."""
     follows = follows or {}
+    factors = factors or {}
     changes = official_changes(history, fuels)
     log = {(l["period_start"], l["period_end"], l["fuel"]): l["predicted_change_c_per_l"] for l in logged}
     periods = forecast_range.finished_periods(history, current_start)
@@ -55,6 +80,7 @@ def build(history: list, logged: list, current_start, fuels: list, follows: dict
             final = closing.avg_over_under.get(fuel)
             if final is None:
                 continue
+            scale = factors.get(fuel) or 1
             stages = {}
             for remaining in STAGES:
                 if n - remaining < 1:
@@ -65,14 +91,14 @@ def build(history: list, logged: list, current_start, fuels: list, follows: dict
                     projected = forecast_range.replay(reports, fuel, remaining)
                     if projected is None:
                         continue
-                    value, source = -projected, "replayed"
+                    value, source = -projected * scale, "replayed"
                 stages[str(remaining)] = {"value": round(value, 1), "source": source}
             out[fuel].append({
                 "effective": effective,
                 "period_start": reports[0].period_start,
                 "period_end": closing.report_date,
                 "stages": stages,
-                "final": round(-final, 1),
+                "final": round(-final * scale, 1),
                 "official": official[fuel],
             })
     for fuel in out:
@@ -80,5 +106,6 @@ def build(history: list, logged: list, current_start, fuels: list, follows: dict
     for fuel, leader in follows.items():
         if fuel in fuels and leader in out:
             out[fuel] = out[leader]
-    return {"stages": list(STAGES), "logging_since": min((l["recorded_at"][:10] for l in logged), default=None),
+    return {"stages": list(STAGES), "pass_through": {f: round(k, 4) for f, k in factors.items() if k},
+            "logging_since": min((l["recorded_at"][:10] for l in logged), default=None),
             "fuels": out}

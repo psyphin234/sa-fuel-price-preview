@@ -187,9 +187,7 @@
     }
     const noSlate = sc ? "" : " Before any slate-levy change.";
     if (!parts.length) {
-      return lc || sc
-        ? "Paraffin carries no fuel or slate levy, so the announced levy changes don't apply." + noSlate
-        : "";
+      return lc || sc ? "Paraffin carries no fuel or slate levy, so the announced levy changes don't apply." : "";
     }
     return `Includes ${parts.join(" and ")}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.` + noSlate;
   }
@@ -198,7 +196,9 @@
   // FOLLOWS in backend/bfp_model.py), the line saying so. Empty otherwise.
   const followNote = (pred) => pred.follows
     ? `Same as ${state.data.predictions[pred.follows].label}: the official change for 93 usually matches 95's.`
-    : "";
+    : pred.pass_through
+      ? `Includes VAT and margins: this retail price moves by about ${pred.pass_through.toFixed(2)}× the over/under-recovery.`
+      : "";
   const joinNotes = (...notes) => notes.filter(Boolean).join(" ");
 
   // Until an announced change takes effect it leads, and the next cycle's
@@ -693,6 +693,16 @@
           `On its own figures, 93 would be at ${fmtRandBare(own)}.`,
       });
     }
+    if (pred.pass_through) {
+      const raw = -pred.projected_avg_over_under;
+      const v = pred.predicted_pump_price_change_c_per_l - raw;
+      steps.push({
+        label: "Retail price effect", sub: `×${pred.pass_through.toFixed(2)}: VAT and margins`, value: v, kind: "estimate",
+        tip: "CEF's paraffin price is the single national maximum retail price, which carries VAT and other margins. " +
+          `Over the last year it has moved by about ${pred.pass_through.toFixed(2)} times the over/under-recovery, ` +
+          "so the forecast does too.",
+      });
+    }
     const lc = onForecastDate(state.data.levy_change), sc = onForecastDate(state.data.slate_change);
     if (lc && lc.change[fuel]) {
       const v = lc.change[fuel];
@@ -830,7 +840,8 @@
 
     $("#breakdown-title").textContent = `How the ${fmtShortDate(changeDate)} forecast adds up`;
     const avg = pred.official_avg_over_under;
-    const asChange = fmtRand(Math.abs(avg)).replace("/l", "");
+    // In the price's own terms (paraffin's retail price moves by more; see pass_through).
+    const asChange = fmtRand(Math.abs(avg) * (pred.pass_through || 1)).replace("/l", "");
     $("#cef-latest").innerHTML =
       `<strong>CEF's latest official figure</strong> (its report for ${fmtShortDate(report.report_date)}, ` +
       `${pred.official_days_count} days into the period): an average <strong>${fmtOverUnder(avg)}</strong>. ` +
@@ -940,7 +951,8 @@
     $("#breakdown-note").textContent =
       "Solid bars are CEF's official figure and announced levy changes." +
       (estimates ? " Hatched bars are this tool's estimates: days CEF hasn't published yet and the rest of the period " +
-        "held at the latest price" + (pred.follows ? ", plus matching petrol 95's change." : ".") : "") +
+        "held at the latest price" + (pred.follows ? ", plus matching petrol 95's change."
+          : pred.pass_through ? ", plus the retail price effect." : ".") : "") +
       (range ? ` The bracket on the forecast bar is the likely range. ${rangeExplainer(range.fr)}` : "") +
       (sc ? "" : " A slate-levy change, if there is one, comes on top. It's only known when the DMPR announces the prices, a day or two before the change.");
   }
@@ -999,6 +1011,12 @@
     notes.push("Levies &amp; other is the official change minus the final Basic Fuel Price part: fuel levy and slate " +
       "levy decisions, and rounding. It's large in months when either levy changed.");
     if (state.fuel === "petrol93") notes.push("Petrol 93's forecast follows petrol 95, so this is petrol 95's record.");
+    const factor = (tr.pass_through || {})[state.fuel];
+    if (factor) {
+      notes.push(`This retail price moves by about ${factor.toFixed(2)}× the over/under-recovery (VAT and margins). The ` +
+        "final figure and replayed forecasts allow for that; forecasts the site showed before 24 Nov 2026 didn't, " +
+        "which is why they fell short.");
+    }
     else if (state.fuel !== "petrol95") notes.push(`The official change is for CEF's ${PRICE_ROW_LABEL[state.fuel].toLowerCase()}.`);
     $("#track-notes").innerHTML = notes.map((t) => `<p>${t}</p>`).join("");
   }

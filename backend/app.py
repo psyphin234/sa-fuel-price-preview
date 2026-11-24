@@ -229,6 +229,15 @@ def build_status_data():
         predictions[fuel] = bm.build_prediction(fuel, latest, market, weights, manual_overrides=overrides,
                                                 today=today, next_reference=next_reference)
     predictions = bm.apply_follows(predictions)  # petrol 93 takes petrol 95's forecast change
+    # Paraffin's price row is a retail price that moves by more than its over/under
+    # recovery: measure by how much (track_record.pass_through) and scale its forecast.
+    try:
+        pass_through = {f: k for f in bm.PASS_THROUGH_FUELS
+                        if (k := track_record.pass_through(history, latest.period_start, f, cef.FUELS))}
+    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
+        print(f"pass_through failed (paraffin's forecast stays unscaled): {e}")
+        pass_through = {}
+    predictions = bm.apply_pass_through(predictions, pass_through)
     for fuel, pred in predictions.items():
         db.log_prediction(latest.period_start, latest.period_end, fuel,
                            pred.blended_avg_over_under, pred.predicted_pump_price_change_c_per_l)
@@ -334,12 +343,16 @@ def build_status_data():
     remaining = lead.blended_days_count + lead.projected_days_count - lead.official_days_count
     try:
         likely = forecast_range.likely_range(history, latest.period_start, remaining, cef.FUELS, bm.FOLLOWS)
+        for fuel, factor in pass_through.items():  # in the price's terms, like the forecast
+            if fuel in likely["half_width"]:
+                likely["half_width"][fuel] = round(likely["half_width"][fuel] * factor, 1)
     except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
         print(f"forecast_range failed (the payload still goes out): {e}")
         likely = None
     # How close past forecasts were (track_record.py).
     try:
-        record = track_record.build(history, db.get_logged_forecasts(), latest.period_start, cef.FUELS, bm.FOLLOWS)
+        record = track_record.build(history, db.get_logged_forecasts(), latest.period_start, cef.FUELS, bm.FOLLOWS,
+                                    pass_through)
     except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
         print(f"track_record failed (the payload still goes out): {e}")
         record = None

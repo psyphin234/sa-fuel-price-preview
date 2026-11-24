@@ -207,6 +207,24 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   date matches the official figure (in Nov 2026 the +48.18c slate rise was the
   whole gap between the forecast and the official change).
   `predicted_pump_price_change_c_per_l` itself stays BFP-only.
+- **Paraffin's price moves by about 1.33× its over/under-recovery.** CEF's
+  paraffin row is the single national maximum retail price, which carries VAT
+  and other margins; it moved by 1.33-1.34× the over/under-recovery in every
+  sizeable price change from Dec 2025 to Nov 2026 (the DMPR's wholesale
+  paraffin price moves one-for-one). Until 24 Nov 2026 the site forecast the
+  recovery itself, about 25% short (Oct 2026: +R3.57 forecast vs +R4.77). Now
+  `track_record.pass_through` measures the factor each run (median of official
+  change / final average over the last 12 changes that moved 20c or more) and
+  `bfp_model.apply_pass_through` applies it to paraffin's forecast; the likely
+  range and the track record are scaled the same way, and the waterfall shows
+  it as a "Retail price effect" step. Petrol and diesel show no such factor.
+- Checked 24 Nov 2026, and left as they are: holding the rest of the period at
+  the latest BFP beat a 3-day average, the recent trend and partial reversion
+  at every stage (petrol 95 mean miss 22c vs 26-43c); the estimated days run
+  about 8c high for petrol, worth under 1c on the forecast since only 1-2 days
+  are estimated; and the slate levy has no published formula (the DMPR only
+  cites its "self-adjusting slate levy mechanism"), so it still has to be
+  entered when announced.
 - Petrol 93's forecast change is petrol 95's (`FOLLOWS` in `bfp_model.py`):
   the DMPR usually gives inland 93 the same change as 95 (11 of 16 changes
   from Jul 2025 to Nov 2026), not its own over/under-recovery. 93's own
@@ -243,7 +261,8 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
 - **"In the news"** (`news.py`, `renderNews` in both `app.js`, panel before
   the oil and Hormuz background) lists up to 8 fuel stories from the last 14
   days, from the RSS feeds of BusinessTech (energy), The Citizen (business),
-  Moneyweb, SABC News (business) and Daily Maverick, kept if the headline or
+  Moneyweb and Daily Maverick (SABC News was dropped on 24 Nov 2026: its server
+  sends an incomplete certificate chain, so every fetch failed), kept if the headline or
   summary mentions petrol, diesel, the fuel or slate levy, Brent, crude, OPEC
   or Hormuz. Only the headline, source, date and link are kept, never the
   story's text. A broad filter, so the odd loosely related story gets in.
