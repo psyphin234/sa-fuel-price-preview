@@ -1745,7 +1745,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.5275,
+  "current_exchange_rate": 17.539,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.39,
@@ -2934,6 +2934,12 @@
     }
   },
   "news": [
+    {
+      "title": "Hoping for a stable rand",
+      "link": "https://www.moneyweb.co.za/moneyweb-radio/safm-market-update/hoping-for-a-stable-rand/",
+      "source": "Moneyweb",
+      "published": "2026-11-24T17:35:44+00:00"
+    },
     {
       "title": "Complete U-turn for petrol and diesel prices in South Africa",
       "link": "https://businesstech.co.za/news/energy/885362/complete-u-turn-for-petrol-and-diesel-prices-in-south-africa/",
@@ -6059,5 +6065,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-24T21:18:41.978456"
+  "generated_at": "2026-11-24T22:18:50.036077"
 }
