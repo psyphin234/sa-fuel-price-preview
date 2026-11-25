@@ -1820,7 +1820,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.5498,
+  "current_exchange_rate": 17.5397,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.44,
@@ -3077,6 +3077,12 @@
     }
   },
   "news": [
+    {
+      "title": "Resources drag JSE performance",
+      "link": "https://www.moneyweb.co.za/moneyweb-radio/safm-market-update/resources-drag-jse-performance/",
+      "source": "Moneyweb",
+      "published": "2026-11-25T17:35:23+00:00"
+    },
     {
       "title": "Single biggest petrol price cut in South Africa\u2019s history coming next week",
       "link": "https://businesstech.co.za/news/energy/886132/single-biggest-petrol-price-cut-in-south-africas-history-coming-next-week/",
@@ -6202,5 +6208,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-25T20:18:44.846527"
+  "generated_at": "2026-11-25T21:18:44.533263"
 }
