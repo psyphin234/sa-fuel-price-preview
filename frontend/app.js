@@ -128,10 +128,21 @@
   // (backend/fuel_levy.py). The model only forecasts the Basic Fuel Price part, so
   // these are added on top.
   const onForecastDate = (c) => c && c.effective === state.data.predicted_change_date ? c : null;
+  // Until the DMPR announces the slate levy, this tool's estimate of its change
+  // (backend/slate_estimate.py), or null.
+  const slateEstimate = () => onForecastDate(state.data.slate_change) ? null : onForecastDate(state.data.slate_estimate);
+  const slateEstimateFor = (fuel) => {
+    const se = slateEstimate();
+    return se && se.applies.includes(fuel) ? se : null;
+  };
   const levyFor = (fuel) => {
     const lc = onForecastDate(state.data.levy_change), sc = onForecastDate(state.data.slate_change);
-    return (lc ? lc.change[fuel] || 0 : 0) + (sc ? sc.change[fuel] || 0 : 0);
+    const se = slateEstimateFor(fuel);
+    return (lc ? lc.change[fuel] || 0 : 0) + (sc ? sc.change[fuel] || 0 : 0) + (se ? se.change[fuel] : 0);
   };
+  // The slate's balance in words: "R16.8 billion owed" or "a R2.1 billion surplus".
+  const slateBalance = (b) => b < 0 ? `R${(-b).toFixed(1)} billion owed` : `a R${b.toFixed(1)} billion surplus`;
+  const monthName = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-ZA", { month: "long" });
   // A temporary levy cut in force on a price-change date, for marking prices that
   // have it built in (they go back up when it ends).
   const reliefOn = (iso, fuel) =>
@@ -190,9 +201,16 @@
       parts.push(`the slate levy going ${slate > 0 ? "up" : "down"} by ${amount(slate)} ` +
         `(to ${amount(sc.to)}), announced by the ${sc.source} on ${fmtDate(sc.announced)}`);
     }
-    const noSlate = sc ? "" : " Before any slate-levy change.";
+    const se = slateEstimateFor(fuel);
+    const est = se ? se.change[fuel] : 0;
+    if (Math.abs(est) >= 0.5) {
+      parts.push(`an estimated ${amount(est)} ${est > 0 ? "rise" : "fall"} in the slate levy (to about ` +
+        `${amount(se.to)}), until the DMPR announces it`);
+    }
+    const noSlate = sc || se ? "" : " Before any slate-levy change.";
     if (!parts.length) {
-      return lc || sc ? "Paraffin carries no fuel or slate levy, so the announced levy changes don't apply." : "";
+      if (lc || sc) return "Paraffin carries no fuel or slate levy, so the announced levy changes don't apply.";
+      return se ? `The slate levy is estimated to stay at about ${amount(se.to)} until the DMPR announces it.` : "";
     }
     return `Includes ${parts.join(" and ")}. Basic Fuel Price alone: ${fmtRandDelta(bfpChange)}.` + noSlate;
   }
@@ -603,16 +621,27 @@
   // review periods missed, about 4 times in 5. Rounded outwards to 10c so it doesn't
   // look more exact than it is. null when there's no range (too little history, or
   // CEF has published every day of the period).
+  // While the slate levy is estimated, its own margin (past estimates' misses, see
+  // backend/slate_estimate.py) is combined with the Basic Fuel Price one, as
+  // independent errors are: the square root of the sum of their squares.
   function likelyRange(fuel, change) {
     const fr = state.data.forecast_range;
-    const h = fr && fr.half_width ? fr.half_width[fuel] : undefined;
-    if (h === undefined || h === null || h < 0.5) return null;
-    return { lo: Math.floor((change - h) / 10) * 10, hi: Math.ceil((change + h) / 10) * 10, fr };
+    const b = fr && fr.half_width ? fr.half_width[fuel] : undefined;
+    if (b === undefined || b === null) return null;
+    const se = slateEstimateFor(fuel);
+    const s = se && se.half_width ? se.half_width : 0;
+    const h = Math.hypot(b, s);
+    if (h < 0.5) return null;
+    return { lo: Math.floor((change - h) / 10) * 10, hi: Math.ceil((change + h) / 10) * 10, fr, slate: s ? se : null };
   }
-  const rangeExplainer = (fr) =>
-    `With ${plural(fr.remaining_days, "day")} of the review period still to come, forecasts in the last ` +
-    `${fr.periods} review periods landed this close to the final figure about 4 times in 5. ` +
-    "It covers the Basic Fuel Price only, not a slate-levy change.";
+  const rangeExplainer = (r) =>
+    (r.fr.remaining_days > 0
+      ? `With ${plural(r.fr.remaining_days, "day")} of the review period still to come, forecasts in the last ` +
+        `${r.fr.periods} review periods landed this close to the final figure about 4 times in 5. `
+      : "CEF has published every day of the review period, so the Basic Fuel Price part is settled. ") +
+    (r.slate ? `It also allows for the slate levy estimate: worked out the same way for the last ${r.slate.checks} ` +
+        `months, it was within ${Math.round(r.slate.half_width)}c a litre about 4 times in 5.`
+      : onForecastDate(state.data.slate_change) ? "" : "It covers the Basic Fuel Price only, not a slate-levy change.");
 
   // "Likely between −R3.50 and −R2.80" under a forecast; hidden when there's no range.
   function setRange(sel, fuel, change) {
@@ -621,7 +650,7 @@
     el.hidden = !r;
     if (!r) return;
     el.textContent = `Likely between ${fmtRandBare(r.lo)} and ${fmtRandBare(r.hi)}`;
-    el.title = rangeExplainer(r.fr);
+    el.title = rangeExplainer(r);
   }
 
   // The review period's days as a row of cells (official, estimated, by hand, to
@@ -681,6 +710,7 @@
       const v = -(pred.blended_avg_over_under - pred.official_avg_over_under);
       steps.push({
         label: "Days CEF hasn't published", sub: `${plural(extra, "day")}, estimated`, value: v, kind: "estimate",
+        what: "days CEF hasn't published yet",
         tip: `This tool's figures for ${plural(extra, "day")} CEF hasn't published yet move the average by ${fmtRandBare(v)}.`,
       });
     }
@@ -688,6 +718,7 @@
       const v = -(pred.projected_avg_over_under - pred.blended_avg_over_under);
       steps.push({
         label: "Rest of the period", sub: `${plural(pred.projected_days_count, "day")} at today's price`, value: v, kind: "estimate",
+        what: "the rest of the period held at the latest price",
         tip: `The other ${plural(pred.projected_days_count, "day")} to ${fmtShortDate(close)} are assumed to stay at the ` +
           `latest Basic Fuel Price, which moves the average by ${fmtRandBare(v)}. This is the part most likely to change.`,
       });
@@ -697,6 +728,7 @@
       const v = pred.predicted_pump_price_change_c_per_l - own;
       steps.push({
         label: "Matched to petrol 95", sub: "93 usually moves with 95", value: v, kind: "estimate",
+        what: "matching petrol 95's change",
         tip: `The official change for petrol 93 usually matches petrol 95's, so the forecast uses 95's. ` +
           `On its own figures, 93 would be at ${fmtRandBare(own)}.`,
       });
@@ -706,6 +738,7 @@
       const v = pred.predicted_pump_price_change_c_per_l - raw;
       steps.push({
         label: "Retail price effect", sub: `×${pred.pass_through.toFixed(2)}: VAT and margins`, value: v, kind: "estimate",
+        what: "the retail price effect",
         tip: "CEF's paraffin price is the single national maximum retail price, which carries VAT and other margins. " +
           `Over the last year it has moved by about ${pred.pass_through.toFixed(2)} times the over/under-recovery, ` +
           "so the forecast does too.",
@@ -726,6 +759,21 @@
         label: `Slate levy ${v > 0 ? "up" : "down"}`, sub: `announced by the ${sc.source}`, value: v, kind: "announced",
         tip: `The slate levy going ${v > 0 ? "up" : "down"} to ${fmtRand(sc.to).replace("/l", "")} a litre, announced by the ` +
           `${sc.source} on ${fmtDate(sc.announced)}.`,
+      });
+    }
+    const se = slateEstimateFor(fuel);
+    if (se && Math.abs(se.change[fuel]) >= 0.5) {
+      const v = se.change[fuel];
+      const bare = (c) => fmtRand(c).replace("/l", "");
+      steps.push({
+        label: `Slate levy ${v > 0 ? "up" : "down"}`, sub: "estimated, not yet announced", value: v, kind: "estimate",
+        what: "the slate levy change",
+        tip: `The DMPR sets the slate levy from the slate's balance at the end of ${monthName(se.balance_at)}: in its ` +
+          `recent announcements, about ${se.rate.toFixed(1)}c a litre for each R1 billion owed beyond ` +
+          `R${Math.round(se.threshold * 1000)} million. It last published ${slateBalance(se.base_balance)} at the end of ` +
+          `${monthName(se.base_at)}. CEF's daily figures since then take that to about ${slateBalance(se.balance)}, ` +
+          `which would move the levy from ${bare(se.from)} to about ${bare(se.to)} a litre. ` +
+          "The DMPR announces the real figure a day or two before the change.",
       });
     }
     return steps;
@@ -869,7 +917,7 @@
       label: "Forecast change", sub: fmtShortDate(changeDate), start: 0, end: total, value: total, kind: "total",
       tip: `The forecast change on ${fmtDate(changeDate)}: ${fmtRandBare(total)}.` +
         (range ? ` Likely between ${fmtRandBare(range.lo)} and ${fmtRandBare(range.hi)}.` : "") +
-        (onForecastDate(state.data.slate_change) ? "" : " Before any slate-levy change."),
+        (onForecastDate(state.data.slate_change) || slateEstimateFor(fuel) ? "" : " Before any slate-levy change."),
     });
 
     const up = cssVar("--status-critical"), down = cssVar("--status-good"), brand = cssVar("--brand");
@@ -955,14 +1003,16 @@
       plugins: [waterfallMarks(bars, range, narrow)],
     });
 
-    const sc = onForecastDate(state.data.slate_change);
+    const sc = onForecastDate(state.data.slate_change), se = slateEstimateFor(fuel);
+    const hatched = steps.filter((s) => s.kind === "estimate").map((s) => s.what);
+    const listed = hatched.length > 1 ? hatched.slice(0, -1).join(", ") + " and " + hatched[hatched.length - 1] : hatched[0];
     $("#breakdown-note").textContent =
       "Solid bars are CEF's official figure and announced levy changes." +
-      (estimates ? " Hatched bars are this tool's estimates: days CEF hasn't published yet and the rest of the period " +
-        "held at the latest price" + (pred.follows ? ", plus matching petrol 95's change."
-          : pred.pass_through ? ", plus the retail price effect." : ".") : "") +
-      (range ? ` The bracket on the forecast bar is the likely range. ${rangeExplainer(range.fr)}` : "") +
-      (sc ? "" : " A slate-levy change, if there is one, comes on top. It's only known when the DMPR announces the prices, a day or two before the change.");
+      (hatched.length ? ` Hatched bars are this tool's estimates: ${listed}.` : "") +
+      (range ? ` The bracket on the forecast bar is the likely range. ${rangeExplainer(range)}` : "") +
+      (sc ? "" : se ? " The slate levy is estimated from the slate's last published balance and CEF's daily figures " +
+          "since; the DMPR announces the real one a day or two before the change."
+        : " A slate-levy change, if there is one, comes on top. It's only known when the DMPR announces the prices, a day or two before the change.");
   }
 
   // A miss as a size: "12c", "R1.32".

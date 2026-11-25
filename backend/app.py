@@ -31,6 +31,7 @@ import context_data
 import fuel_levy
 import forecast_range
 import track_record
+import slate_estimate
 import news
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
@@ -368,6 +369,15 @@ def build_status_data():
         print(f"news failed (the payload still goes out): {e}")
         headlines = None
 
+    # The next slate levy change, estimated from the slate's last published balance
+    # and CEF's daily figures until the DMPR announces it (then slate_change has it).
+    try:
+        slate_est = slate_estimate.estimate(history, latest.pump_price_effective,
+                                            bm.next_price_change_date(latest.pump_price_effective), cef.FUELS)
+    except Exception as e:  # stdout, not stderr: run_publish.ps1 stops on stderr
+        print(f"slate_estimate failed (no slate estimate this run): {e}")
+        slate_est = None
+
     # Background section (Brent futures vs spot, Hormuz traffic); never allowed
     # to stop the payload, since the model doesn't use it.
     try:
@@ -396,6 +406,8 @@ def build_status_data():
         # announced slate levy change on that date, also on top of the forecast (or None)
         "slate_change": fuel_levy.slate_change(latest.pump_price_effective,
                                                bm.next_price_change_date(latest.pump_price_effective), cef.FUELS),
+        # estimated slate levy change on that date when none is announced yet (or None)
+        "slate_estimate": slate_est,
         "levy_relief": fuel_levy.schedule(cef.FUELS),  # temporary levy cuts, to mark prices that include one
         "review_period_close": period_close,
         "review_days": review_days,  # each business day of the period: official/estimated/manual/to_come

@@ -78,7 +78,11 @@ backend/
   fuel_levy.py       - announced fuel levy and slate levy changes, kept by
                        hand (e.g. the MTBPS relief of Nov 2026 - Jan 2027, the
                        slate levy rise to 135.84c of Nov 2026); added on top of
-                       the BFP forecast for the price change they fall on
+                       the BFP forecast for the price change they fall on;
+                       also every slate levy change since May 2026 and the
+                       slate balances the DMPR's statements quote
+  slate_estimate.py  - estimates the next slate levy change before it's
+                       announced (see "Limits")
   forecast_range.py  - the "likely range" around the forecast, from how far
                        the same forecast missed at the same stage of the last
                        12 review periods; and the period's days for the
@@ -202,10 +206,30 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   the site then adds it to the forecast for that price change (the hero
   shows the total and the BFP-only figure; paraffin has no fuel levy).
   The same goes for the slate levy (`SLATE` in that file): the DMPR changes it
-  in its monthly announcement, usually a day or two before the change, and the
-  model can't foresee it. Enter it once announced and the forecast for that
-  date matches the official figure (in Nov 2026 the +48.18c slate rise was the
-  whole gap between the forecast and the official change).
+  in its monthly announcement, usually a day or two before the change. Enter it
+  once announced, together with the slate balance the statement quotes
+  (`SLATE_BALANCES`), and the forecast for that date matches the official
+  figure (in Nov 2026 the +48.18c slate rise was the whole gap between the
+  forecast and the official change).
+- **Until it's announced, the slate levy is estimated** (since 25 Nov 2026,
+  `backend/slate_estimate.py` → `slate_estimate` in the payload). The DMPR's
+  formula isn't published, but every levy from May to Nov 2026 was within 3c
+  of 8.9c/l per R1 billion of negative slate balance beyond R500 million (the
+  mechanism's threshold), using the balance at the end of the month two
+  months before (end Sep for the Nov change). The rate is re-fitted from
+  `SLATE_BALANCES` each run. The balance for the coming change isn't published
+  until then, so it's rolled forward from the last published one, day by day:
+  CEF's over/(under) recovery for petrol and diesel plus the slate levy in
+  force, times about 31 million litres of petrol and 28 million of diesel a day
+  (a least-squares fit to the published balances). Checked against every
+  published balance from Nov 2025 to Sep 2026, that's within R0.5bn in calm
+  months but out by R3-4bn in the biggest swings (Mar-Jun 2026), mostly on
+  the low side of the debt; the 80% quantile of those misses in levy terms
+  (about 23c) is the estimate's margin, which both `app.js` combine with the
+  BFP range (root of the sum of squares). It shows as a hatched "Slate levy
+  up/down" waterfall step and in the note under the forecast, and the month
+  forecast page says so. It drops out as soon as the announced change is in
+  `SLATE`. The first estimate: +9c (135.84c → about 145c) for 2 Dec 2026.
   `predicted_pump_price_change_c_per_l` itself stays BFP-only.
 - **Paraffin's price moves by about 1.33× its over/under-recovery.** CEF's
   paraffin row is the single national maximum retail price, which carries VAT
@@ -222,9 +246,8 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   the latest BFP beat a 3-day average, the recent trend and partial reversion
   at every stage (petrol 95 mean miss 22c vs 26-43c); the estimated days run
   about 8c high for petrol, worth under 1c on the forecast since only 1-2 days
-  are estimated; and the slate levy has no published formula (the DMPR only
-  cites its "self-adjusting slate levy mechanism"), so it still has to be
-  entered when announced.
+  are estimated. (The slate levy, which has no published formula, is now
+  estimated from the slate balance; see above.)
 - Petrol 93's forecast change is petrol 95's (`FOLLOWS` in `bfp_model.py`):
   the DMPR usually gives inland 93 the same change as 95 (11 of 16 changes
   from Jul 2025 to Nov 2026), not its own over/under-recovery. 93's own
@@ -237,7 +260,7 @@ The site uses the custom domain **fuel.psyphin.co.za**, set up on 2026-09-27:
   side, and takes the miss 80% of them stayed within. Checked walk-forward
   (each period's range built only from earlier ones, Mar - Oct 2026), that
   caught 78% of outcomes, so the site says "about 4 in 5". It covers the BFP
-  part only, not a slate-levy change. It's widest early in a period (about
+  part, plus the slate levy estimate's own margin while there is one. It's widest early in a period (about
   ±R1 for petrol, ±R2.50 for diesel with 18 days to come) and narrows to a few
   cents in the last days.
 - Each month page's "what moved it" splits the BFP part of the change into

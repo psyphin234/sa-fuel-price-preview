@@ -185,8 +185,13 @@ def forecast_snapshot(status: dict):
     slate_change = status.get("slate_change")
     if slate_change and slate_change["effective"] != status["predicted_change_date"]:
         slate_change = None
+    # this site's estimate of the slate levy change while none is announced (slate_estimate.py)
+    slate_est = None if slate_change else status.get("slate_estimate")
+    if slate_est and slate_est["effective"] != status["predicted_change_date"]:
+        slate_est = None
     key = [status["latest_official_report"]["report_date"], status["predicted_change_date"],
-           status["review_period_closed"], levy_change] + ([slate_change] if slate_change else [])
+           status["review_period_closed"], levy_change] + ([slate_change] if slate_change else []) + \
+        ([{"slate_est": slate_est["to"]}] if slate_est else [])
     try:
         saved = json.loads(SNAPSHOT_PATH.read_text(encoding="utf-8"))
         if saved.get("key") == key:
@@ -206,6 +211,7 @@ def forecast_snapshot(status: dict):
         "change": {f: preds[f]["predicted_pump_price_change_c_per_l"] for f in FUELS},
         "levy": levy_change,  # announced fuel levy change on that date (fuel_levy.py), or None
         "slate": slate_change,  # announced slate levy change on that date (fuel_levy.py), or None
+        "slate_est": slate_est,  # else this site's estimate of it (slate_estimate.py), or None
     }
     SNAPSHOT_PATH.parent.mkdir(parents=True, exist_ok=True)
     SNAPSHOT_PATH.write_text(json.dumps(snap, indent=2), encoding="utf-8")
@@ -402,14 +408,17 @@ def drivers(m: dict) -> str:
                         f"{d_long(levy['announced'])}, {'took' if step < 0 else 'added'} {amount(step)}"
                         f"{' off' if step < 0 else ''}" + ("." if sstep else f", for {signed(expected)}."))
         if sstep:
-            verdict += (f" The slate levy, which recovers past under-recoveries, went {'up' if sstep > 0 else 'down'} "
-                        f"{amount(sstep)} to {amount(slate['to'])} a litre (announced by the {esc(slate['source'])} on "
-                        f"{d_long(slate['announced'])}), for {signed(expected)}.")
+            moved = (f"came back at {amount(slate['to'])} a litre" if not slate["from"] else
+                     "was dropped" if not slate["to"] else
+                     f"went {'up' if sstep > 0 else 'down'} {amount(sstep)} to {amount(slate['to'])} a litre")
+            verdict += (f" The slate levy, which recovers past under-recoveries, {moved} (announced by the "
+                        f"{esc(slate['source'])} on {d_long(slate['announced'])}), for {signed(expected)}.")
         if abs(diff) < 9.5:
             verdict += f" The official change, {signed(actual)}, was within a few cents of {'that' if step or sstep else 'it'}."
         elif step or sstep:
             verdict += (f" The official change was {signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: "
-                        f"the rest comes from other decisions outside the Basic Fuel Price, such as the slate levy.")
+                        f"the rest comes from other decisions outside the Basic Fuel Price, such as "
+                        f"{'fuel-levy changes' if sstep and not step else 'the slate levy' if step and not sstep else 'margins'}.")
         else:
             verdict = (f"On its own that called for a change of {signed(market)}. The official change was "
                        f"{signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: the rest comes from "
@@ -501,12 +510,19 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
                        (f"Fuel price {name}", f"/fuel-price/{slug(e)}/")])
 
 
-def table_levy_note(levy, slate, levies: str) -> str:
-    """Which levy changes the forecast table includes."""
+def bn(balance: float) -> str:
+    """A slate balance in words: "R16.8 billion owed" or "a R2.1 billion surplus"."""
+    return f"R{-balance:.1f} billion owed" if balance < 0 else f"a R{balance:.1f} billion surplus"
+
+
+def table_levy_note(levy, slate, levies: str, est: bool = False) -> str:
+    """Which levy changes the forecast table includes (`est`: the slate one is
+    this site's estimate)."""
     if levy and slate:
-        return "Includes the announced fuel levy and slate levy changes"
+        return ("Includes the announced fuel levy change and an estimated slate levy change" if est
+                else "Includes the announced fuel levy and slate levy changes")
     if slate:
-        return f"Before any {levies} (the announced slate levy change is included)"
+        return f"Before any {levies} (the {'estimated' if est else 'announced'} slate levy change is included)"
     if levy:
         return f"Before any {levies} (the announced fuel levy change is included)"
     return f"Before any {levies}"
@@ -519,7 +535,8 @@ def forecast_page(s: dict, prev_m) -> str:
     report = dt.date.fromisoformat(s["report_date"])
     start = dt.date.fromisoformat(s["period_start"])
     close = dt.date.fromisoformat(s["period_close"])
-    levy, slate = s.get("levy"), s.get("slate")
+    levy, slate = s.get("levy"), s.get("slate") or s.get("slate_est")
+    est = bool(slate) and not s.get("slate")  # the slate levy change is this site's estimate
     ch = {f: s["change"][f] + (levy["change"].get(f, 0) if levy else 0) + (slate["change"].get(f, 0) if slate else 0)
           for f in FUELS}
     cur = s["current"]
@@ -532,7 +549,11 @@ def forecast_page(s: dict, prev_m) -> str:
         f"Forecast of South Africa's fuel price change on {d_short(e)}: petrol 95 {about(p95)}, "
         f"diesel {about(d05)}, from CEF's daily data. Updated every weekday.")
     levies = " or ".join(w for w, known in (("slate-levy", slate), ("fuel-levy", levy)) if not known) + " change"
-    if s["closed"] and slate:
+    if s["closed"] and est:
+        sure = (f"The review period closed on {d_long(close)}, so CEF's figures for the whole period are in or "
+                f"nearly in. The slate levy change in it is this site's estimate, so the official change can still "
+                f"differ by a few tens of cents" + (f", and by any {levies}." if levy is None else "."))
+    elif s["closed"] and slate:
         sure = (f"The review period closed on {d_long(close)}, so CEF's figures for the whole period are in or "
                 f"nearly in, and the announced slate levy is included, so this should be close to the official change.")
     elif s["closed"]:
@@ -541,8 +562,8 @@ def forecast_page(s: dict, prev_m) -> str:
     else:
         sure = (f"The review period runs from {d_long(start)} to {d_long(close)}. CEF has published "
                 f"{s['official_days']} of its {total} days so far, and the rest assume the Basic Fuel Price stays where "
-                f"it is now, so the figure can still move a lot before the period closes. It leaves out any "
-                f"{levies}, which the official announcement adds.")
+                f"it is now, so the figure can still move a lot before the period closes." +
+                (f" It leaves out any {levies}, which the official announcement adds." if levies != " change" else ""))
     levy_p = ""
     if levy:
         lp, ld = levy["change"]["petrol95"], levy["change"]["diesel005"]
@@ -552,7 +573,19 @@ def forecast_page(s: dict, prev_m) -> str:
                   f"{esc(d_long(dt.date.fromisoformat(levy['announced'])))}. Paraffin carries no fuel levy. On the Basic Fuel "
                   f"Price alone, petrol 95 is heading for {signed(s['change']['petrol95'])} and diesel for "
                   f"{signed(s['change']['diesel005'])} a litre.</p>")
-    if slate:
+    if est:
+        sl = slate["change"]["petrol95"]
+        how = (f"The DMPR sets it from the slate's balance two months before; this site works that out from the last "
+               f"balance it published ({bn(slate['base_balance'])} at the end of "
+               f"{dt.date.fromisoformat(slate['base_at']):%B}) and CEF's daily figures since, which take it to about "
+               f"{bn(slate['balance'])} at the end of {dt.date.fromisoformat(slate['balance_at']):%B}. The DMPR announces "
+               f"the real figure a day or two before the change. Paraffin doesn't pay it.")
+        what = (f"the slate levy staying at about {amount(slate['to'])} a litre" if abs(sl) < 0.5 else
+                f"an estimated slate levy {'rise' if sl > 0 else 'fall'} of {amount(sl)} a litre on petrol and diesel, "
+                f"to about {amount(slate['to'])}")
+        levy_p += (f"\n<p>{'They also include' if levy else 'These figures include'} {what}. The slate levy recovers "
+                   f"past under-recoveries. {esc(how)}</p>")
+    elif slate:
         sl = slate["change"]["petrol95"]
         levy_p += (f"\n<p>They also include the slate levy going {'up' if sl > 0 else 'down'} by {amount(sl)} a litre on "
                    f"petrol and diesel, to {amount(slate['to'])}, announced by the {esc(slate['source'])} on "
@@ -570,7 +603,7 @@ def forecast_page(s: dict, prev_m) -> str:
 </section>
 <section class="panel">
 <div class="panel-head"><h2>All fuels, forecast for {esc(d_short(e))}</h2>
-<p class="muted small">{table_levy_note(levy, slate, levies)}. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
+<p class="muted small">{table_levy_note(levy, slate, levies, est)}. Gauteng pump prices for petrol, and CEF's wholesale and maximum retail price rows for diesel and paraffin.</p></div>
 {price_table(cur, new, ch, 'Forecast', approx=True)}
 </section>"""
     return page(f"/fuel-price/{slug(e)}/", title, desc, f"Fuel price {name}: forecast",
@@ -626,11 +659,12 @@ def price_chart(months: list) -> str:
 
 def index_forecast_note(snap) -> str:
     """What the index table's forecast row includes."""
-    levy, slate = (snap.get("levy"), snap.get("slate")) if snap else (None, None)
+    levy, slate = (snap.get("levy"), snap.get("slate") or snap.get("slate_est")) if snap else (None, None)
+    word = "an estimated" if snap and slate and not snap.get("slate") else "the announced"
     if levy and slate:
-        return "The forecast includes the announced fuel levy and slate levy changes."
+        return f"The forecast includes the announced fuel levy change and {word} slate levy change."
     if slate:
-        return "The forecast includes the announced slate levy change but leaves out any fuel-levy change."
+        return f"The forecast includes {word} slate levy change but leaves out any fuel-levy change."
     if levy:
         return "The forecast leaves out any slate-levy change but includes the announced fuel levy change."
     return "The forecast leaves out any slate-levy or fuel-levy change."
@@ -641,7 +675,7 @@ def index_page(months: list, snap) -> str:
     rows = []
     if snap:
         e = dt.date.fromisoformat(snap["effective"])
-        levy, slate = snap.get("levy"), snap.get("slate")
+        levy, slate = snap.get("levy"), snap.get("slate") or snap.get("slate_est")
         ch = {f: snap["change"][f] + (levy["change"].get(f, 0) if levy else 0) + (slate["change"].get(f, 0) if slate else 0)
               for f in FUELS}
         rows.append(

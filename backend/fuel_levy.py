@@ -21,8 +21,16 @@ announcement, usually a day or two before the change. The model can't foresee it
 so enter it once announced; the forecast for that date then matches the official
 figure. Petrol and diesel only, like the fuel levy.
 
-- DMPR, 3 Nov 2026 (reported by BusinessTech that day): slate levy up 48.18c/l,
-  from 87.66c to 135.84c, from 4 Nov 2026 (slate -R15.876bn at end Sept).
+Every slate levy change since the levy came back in May 2026 is listed, from the
+DMPR's monthly statements (gov.za; Engineering News for 2 Sep 2026, whose statement
+wasn't found). The October 2026 statement says 87.66c applied "from the 2nd of
+September", but 83.28c did and 87.66c from 7 Oct (the November statement starts
+from 87.66c): a copy error in the statement.
+
+SLATE_BALANCES are the slate's month-end balances each statement quotes, the
+figure that sets the levy two months later (slate_estimate.py uses them to
+estimate the next change before it's announced). When the DMPR announces a month's
+prices, enter both: the levy change in SLATE and the balance it quotes here.
 """
 import datetime as dt
 
@@ -42,9 +50,41 @@ RELIEF = [
 # Slate levy changes, in cents a litre on petrol and diesel, with the date the new
 # level takes effect and when and where it was announced.
 SLATE = [
-    {"effective": dt.date(2026, 11, 4), "from": 87.66, "to": 135.84,
-     "announced": dt.date(2026, 11, 3), "source": "DMPR"},
+    {"effective": dt.date(2026, 5, 6), "from": 0.0, "to": 122.70, "announced": dt.date(2026, 5, 5), "source": "DMPR"},
+    {"effective": dt.date(2026, 6, 3), "from": 122.70, "to": 157.74, "announced": dt.date(2026, 6, 2), "source": "DMPR"},
+    {"effective": dt.date(2026, 7, 1), "from": 157.74, "to": 113.94, "announced": dt.date(2026, 6, 30), "source": "DMPR"},
+    {"effective": dt.date(2026, 8, 5), "from": 113.94, "to": 61.38, "announced": dt.date(2026, 8, 3), "source": "DMPR"},
+    {"effective": dt.date(2026, 9, 2), "from": 61.38, "to": 83.28, "announced": dt.date(2026, 8, 31), "source": "DMPR"},
+    {"effective": dt.date(2026, 10, 7), "from": 83.28, "to": 87.66, "announced": dt.date(2026, 10, 5), "source": "DMPR"},
+    {"effective": dt.date(2026, 11, 4), "from": 87.66, "to": 135.84, "announced": dt.date(2026, 11, 3), "source": "DMPR"},
 ]
+
+# The cumulative petrol and diesel slate at month end, in R billion (negative: owed
+# to the industry), as quoted in the statement for the price change `sets`. The
+# levy was zero in every statement from Dec 2025 to Apr 2026 (the slate was in
+# surplus); the Feb 2026 statement (end-Dec balance) wasn't found.
+SLATE_BALANCES = [
+    {"at": dt.date(2025, 10, 31), "balance": 4.36, "sets": dt.date(2025, 12, 3)},
+    {"at": dt.date(2025, 11, 30), "balance": 3.3, "sets": dt.date(2026, 1, 7)},
+    {"at": dt.date(2026, 1, 31), "balance": 5.9, "sets": dt.date(2026, 3, 4)},
+    {"at": dt.date(2026, 2, 28), "balance": 4.93, "sets": dt.date(2026, 4, 1)},
+    {"at": dt.date(2026, 3, 31), "balance": -14.173, "sets": dt.date(2026, 5, 6)},
+    {"at": dt.date(2026, 4, 30), "balance": -18.28, "sets": dt.date(2026, 6, 3)},
+    {"at": dt.date(2026, 5, 31), "balance": -13.32, "sets": dt.date(2026, 7, 1)},
+    {"at": dt.date(2026, 6, 30), "balance": -7.418, "sets": dt.date(2026, 8, 5)},
+    {"at": dt.date(2026, 7, 31), "balance": -9.519, "sets": dt.date(2026, 9, 2)},
+    {"at": dt.date(2026, 8, 31), "balance": -10.45, "sets": dt.date(2026, 10, 7)},
+    {"at": dt.date(2026, 9, 30), "balance": -15.876, "sets": dt.date(2026, 11, 4)},
+]
+
+
+def slate_level(day: dt.date) -> float:
+    """The slate levy in force on `day`, c/l (zero before the first listed change)."""
+    level = 0.0
+    for s in sorted(SLATE, key=lambda s: s["effective"]):
+        if s["effective"] <= day:
+            level = s["to"]
+    return level
 
 
 def relief_on(day: dt.date):
