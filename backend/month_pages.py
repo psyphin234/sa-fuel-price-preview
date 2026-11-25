@@ -403,7 +403,10 @@ def drivers(m: dict) -> str:
         diff = actual - expected
         verdict = f"On its own that called for a change of {signed(market)}."
         if step:
-            what = "The temporary fuel levy cut" if step < 0 else "The fuel levy going back up as the temporary relief winds down"
+            had = fuel_levy.relief_on(m["prev_effective"])
+            what = ("A bigger temporary fuel levy cut" if step < 0 and had and had.get(fuel_levy.LEVY_FUELS.get(f))
+                    else "The temporary fuel levy cut" if step < 0
+                    else "The fuel levy going back up as the temporary relief winds down")
             verdict += (f" {what}, announced in the {esc(levy['source'])} on "
                         f"{d_long(levy['announced'])}, {'took' if step < 0 else 'added'} {amount(step)}"
                         f"{' off' if step < 0 else ''}" + ("." if sstep else f", for {signed(expected)}."))
@@ -418,7 +421,7 @@ def drivers(m: dict) -> str:
         elif step or sstep:
             verdict += (f" The official change was {signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: "
                         f"the rest comes from other decisions outside the Basic Fuel Price, such as "
-                        f"{'fuel-levy changes' if sstep and not step else 'the slate levy' if step and not sstep else 'margins'}.")
+                        f"margin adjustments or the budget's yearly levy increases.")
         else:
             verdict = (f"On its own that called for a change of {signed(market)}. The official change was "
                        f"{signed(actual)}, {amount(diff)} {'more' if diff > 0 else 'less'}: the rest comes from "
@@ -479,9 +482,11 @@ def month_page(m: dict, prev_m, next_m, today: dt.date) -> str:
         intro += " The new prices are already in CEF's daily reports ahead of the date."
     relief = fuel_levy.relief_on(e)
     if relief:
+        changed = fuel_levy.relief_on(relief["end"] + dt.timedelta(days=1))
         intro += (f" These prices include temporary fuel levy relief of {amount(relief['petrol'])} a litre on petrol and "
-                  f"{amount(relief['diesel'])} on diesel, in force until {d_long(relief['end'])}; the price goes back up "
-                  f"by that much when it ends.")
+                  f"{amount(relief['diesel'])} on diesel, in force until {d_long(relief['end'])}" +
+                  ("; it was changed for the next price period." if changed else
+                   "; the price goes back up by that much when it ends."))
     body = f"""{month_nav(prev_m, next_m)}
 {hero([
     ("Petrol 95", p95, f"New price {rand(new['petrol95'])} a litre (Gauteng)"),

@@ -76,7 +76,7 @@ backend/
                        with weights re-fitted on CEF's own history each run
   bfp_model.py       - blended-average prediction logic
   fuel_levy.py       - announced fuel levy and slate levy changes, kept by
-                       hand (e.g. the MTBPS relief of Nov 2026 - Jan 2027, the
+                       hand (e.g. the Apr - Jun 2026 relief, the MTBPS relief of Nov 2026 - Jan 2027, the
                        slate levy rise to 135.84c of Nov 2026); added on top of
                        the BFP forecast for the price change they fall on;
                        also every slate levy change since May 2026 and the

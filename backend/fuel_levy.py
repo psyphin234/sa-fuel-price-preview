@@ -7,6 +7,12 @@ falls on and says so.
 Each entry is a period of temporary relief: the levy is lower by that many cents
 a litre from `start` to `end` (inclusive). Paraffin carries no fuel levy.
 
+- Apr - Jun 2026, announced by the Minister of Finance and set out in the DMPR's
+  monthly price statements (gov.za; BusinessTech for June, whose statement page
+  couldn't be read): R3.00 petrol and diesel from 1 Apr to 5 May; R3.00 petrol and
+  R3.93 diesel from 6 May to 2 Jun; cut by R1.50 and R1.96 from 3 Jun, leaving
+  R1.50 and R1.97 to 30 Jun (derived); phased out from 1 Jul (full levies of 429c
+  and 416c reinstated, 30 Jun statement).
 - MTBPS, 21 Oct 2026 (Finance Minister Godongwana, reported by Moneyweb, SABC,
   The Citizen and others the same day): R3.00 diesel / R1.50 petrol from
   4 Nov to 1 Dec 2026, then R1.50 diesel / R1.00 petrol until 5 Jan 2027.
@@ -40,6 +46,13 @@ LEVY_FUELS = {"petrol95": "petrol", "petrol93": "petrol", "diesel005": "diesel",
 # The relief periods: cents a litre off the levy for petrol and diesel, dates
 # inclusive, with when and where it was announced.
 RELIEF = [
+    {"start": dt.date(2026, 4, 1), "end": dt.date(2026, 5, 5), "petrol": 300, "diesel": 300,
+     "announced": dt.date(2026, 3, 31), "source": "DMPR's price statement"},
+    {"start": dt.date(2026, 5, 6), "end": dt.date(2026, 6, 2), "petrol": 300, "diesel": 393,
+     "announced": dt.date(2026, 5, 5), "source": "DMPR's price statement"},
+    # end_announced: when the end was announced, if not with the start
+    {"start": dt.date(2026, 6, 3), "end": dt.date(2026, 6, 30), "petrol": 150, "diesel": 197,
+     "announced": dt.date(2026, 6, 1), "end_announced": dt.date(2026, 6, 30), "source": "DMPR's price statement"},
     {"start": dt.date(2026, 11, 4), "end": dt.date(2026, 12, 1), "petrol": 150, "diesel": 300,
      "announced": dt.date(2026, 10, 21), "source": "MTBPS"},
     {"start": dt.date(2026, 12, 2), "end": dt.date(2027, 1, 5), "petrol": 100, "diesel": 150,
@@ -51,7 +64,7 @@ RELIEF = [
 # level takes effect and when and where it was announced.
 SLATE = [
     {"effective": dt.date(2026, 5, 6), "from": 0.0, "to": 122.70, "announced": dt.date(2026, 5, 5), "source": "DMPR"},
-    {"effective": dt.date(2026, 6, 3), "from": 122.70, "to": 157.74, "announced": dt.date(2026, 6, 2), "source": "DMPR"},
+    {"effective": dt.date(2026, 6, 3), "from": 122.70, "to": 157.74, "announced": dt.date(2026, 6, 1), "source": "DMPR"},
     {"effective": dt.date(2026, 7, 1), "from": 157.74, "to": 113.94, "announced": dt.date(2026, 6, 30), "source": "DMPR"},
     {"effective": dt.date(2026, 8, 5), "from": 113.94, "to": 61.38, "announced": dt.date(2026, 8, 3), "source": "DMPR"},
     {"effective": dt.date(2026, 9, 2), "from": 61.38, "to": 83.28, "announced": dt.date(2026, 8, 31), "source": "DMPR"},
@@ -112,7 +125,7 @@ def levy_change(previous_effective: dt.date, new_effective: dt.date, fuels: list
     return {
         "effective": new_effective,
         "change": change,
-        "announced": announcer["announced"],
+        "announced": announcer["announced"] if after else before.get("end_announced", before["announced"]),
         "source": announcer["source"],
     }
 
