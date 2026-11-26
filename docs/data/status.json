@@ -1820,7 +1820,7 @@
       "source": "estimated"
     }
   ],
-  "current_exchange_rate": 17.5428,
+  "current_exchange_rate": 17.5231,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.34,
@@ -3077,12 +3077,6 @@
     }
   },
   "news": [
-    {
-      "title": "Tiger Brands lifts dividend as Oceana earnings surge",
-      "link": "https://www.moneyweb.co.za/news/companies-and-deals/tiger-brands-lifts-dividend-as-oceana-earnings-surge/",
-      "source": "Moneyweb",
-      "published": "2026-11-26T08:21:08+00:00"
-    },
     {
       "title": "Single biggest petrol price cut in South Africa\u2019s history coming next week",
       "link": "https://businesstech.co.za/news/energy/886132/single-biggest-petrol-price-cut-in-south-africas-history-coming-next-week/",
@@ -6208,5 +6202,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-26T16:18:46.928308"
+  "generated_at": "2026-11-26T17:18:47.756488"
 }
