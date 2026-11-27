@@ -1665,7 +1665,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 17.3479,
+  "current_exchange_rate": 17.3495,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.36,
@@ -2838,6 +2838,12 @@
   },
   "news": [
     {
+      "title": "US pushed Venezuela, Iraq to consider leaving OPEC, sources say",
+      "link": "https://www.dailymaverick.co.za/article/2026-11-27-us-pushed-venezuela-iraq-to-consider-leaving-opec-sources-say/",
+      "source": "Daily Maverick",
+      "published": "2026-11-27T11:19:58+00:00"
+    },
+    {
       "title": "Festive cheer as petrol set for big cut of nearly R4 per litre",
       "link": "https://www.citizen.co.za/business/festive-cheer-as-petrol-set-for-big-cut-of-nearly-r4-per-litre/",
       "source": "The Citizen",
@@ -2878,12 +2884,6 @@
       "link": "https://businesstech.co.za/news/energy/884434/here-is-the-expected-petrol-price-for-december-9/",
       "source": "BusinessTech",
       "published": "2026-11-16T08:43:44+00:00"
-    },
-    {
-      "title": "Biggest petrol price cut this year on the cards for December",
-      "link": "https://businesstech.co.za/news/energy/884143/biggest-petrol-price-cut-this-year-on-the-cards-for-south-africa-in-december/",
-      "source": "BusinessTech",
-      "published": "2026-11-13T10:00:00+00:00"
     }
   ],
   "review_period_closed": true,
@@ -5974,5 +5974,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-27T11:18:44.540105"
+  "generated_at": "2026-11-27T12:18:43.444694"
 }
