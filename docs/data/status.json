@@ -1665,7 +1665,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 17.3495,
+  "current_exchange_rate": 17.3289,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.36,
@@ -2848,12 +2848,6 @@
       "link": "https://www.citizen.co.za/business/festive-cheer-as-petrol-set-for-big-cut-of-nearly-r4-per-litre/",
       "source": "The Citizen",
       "published": "2026-11-27T08:30:28+00:00"
-    },
-    {
-      "title": "Oil set for weekly gain as Mideast attacks keep market on edge",
-      "link": "https://www.moneyweb.co.za/news/markets/oil-set-for-weekly-gain-as-mideast-attacks-keep-market-on-edge/",
-      "source": "Moneyweb",
-      "published": "2026-11-27T07:03:59+00:00"
     },
     {
       "title": "Single biggest petrol price cut in South Africa\u2019s history coming next week",
@@ -5974,5 +5968,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-27T12:18:43.444694"
+  "generated_at": "2026-11-27T13:18:44.307180"
 }
