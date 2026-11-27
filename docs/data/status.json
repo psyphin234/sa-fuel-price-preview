@@ -1665,7 +1665,7 @@
       "source": "cef_official"
     }
   ],
-  "current_exchange_rate": 17.3724,
+  "current_exchange_rate": 17.3657,
   "accuracy": {
     "n": 90,
     "mean_abs_pct_error": 1.36,
@@ -2837,6 +2837,12 @@
     }
   },
   "news": [
+    {
+      "title": "Oil set for weekly gain as Mideast attacks keep market on edge",
+      "link": "https://www.moneyweb.co.za/news/markets/oil-set-for-weekly-gain-as-mideast-attacks-keep-market-on-edge/",
+      "source": "Moneyweb",
+      "published": "2026-11-27T07:03:59+00:00"
+    },
     {
       "title": "Festive cheer as petrol set for big cut of nearly R4 per litre",
       "link": "https://www.moneyweb.co.za/news/south-africa/festive-cheer-as-petrol-set-for-big-cut-of-nearly-r4-per-litre/",
@@ -5968,5 +5974,5 @@
       ]
     }
   },
-  "generated_at": "2026-11-27T09:30:15.032584"
+  "generated_at": "2026-11-27T09:45:15.396037"
 }
